@@ -1,0 +1,10 @@
+.gradle
+*.apk
+*.aab
+output-metadata.json
+/local.properties
+/.idea
+.DS_Store
+/outputs
+*/build
+

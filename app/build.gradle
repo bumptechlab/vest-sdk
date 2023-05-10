@@ -1,0 +1,58 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace "com.example.app.test"
+    compileSdk 31
+
+    defaultConfig {
+        applicationId "com.example.app.test"
+        minSdkVersion 19
+        targetSdkVersion 31
+        versionCode 100
+        versionName "1.0.0"
+        multiDexEnabled true
+        setProperty("archivesBaseName", "vest-test")
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("./keystore/dev-func-aar.jks")
+            storePassword "dev-func-aar"
+            keyAlias "dev-func-aar"
+            keyPassword "dev-func-aar"
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+        release {
+            minifyEnabled true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
+    implementation 'com.google.code.gson:gson:2.9.0'
+
+    //OkHttp网络框架(不要随便变更版本)
+    implementation 'com.squareup.okhttp3:okhttp:3.12.2'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.2'
+    implementation 'androidx.annotation:annotation:1.5.0'
+}
