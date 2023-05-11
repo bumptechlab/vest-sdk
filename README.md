@@ -7,7 +7,7 @@
     implementation 'io.github.bumptechlab:vest-sdk:0.9.1'
     ```
 2. 工程主Application继承`code.core.MainApplication`
-  - 重写方法`getConfigAsset`返回配置文件名，该配置文件放在assets目录，配置文件来源将在第5点说明
+  - 重写方法`getConfigAsset`返回配置文件名，该配置文件放在assets目录，配置文件来源将在第4点说明
     ```
     public class AppTestApplication extends MainApplication {  
           @Override  
