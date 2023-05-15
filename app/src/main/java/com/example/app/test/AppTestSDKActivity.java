@@ -1,6 +1,7 @@
 package com.example.app.test;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -21,6 +22,9 @@ public class AppTestSDKActivity extends Activity {
             @Override
             public void onShowVestGame() {
                 Log.d(TAG, "show vest game");
+                Intent intent = new Intent(getBaseContext(), VestGameActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
             }
 
             @Override
@@ -30,4 +34,9 @@ public class AppTestSDKActivity extends Activity {
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        VestSDK.getInstance().onDestroy();
+    }
 }
