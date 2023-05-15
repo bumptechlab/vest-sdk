@@ -31,29 +31,33 @@
   - 重写方法`onShowVestGame`跳转到马甲游戏  
   - 方法`onShowOfficialGame`仅仅是一个跳转到正式游戏的回调，不需要实现  
 
-  - (2)在自己的Activity中实现`VestSDK.getInstance().inspect()`方法，参照例子`com.example.app.test.AppTestSDKActivity`  
-    ```
-    VestSDK.getInstance().inspect(this, new VestInspectCallback() {  
+- (2)在自己的Activity中实现`VestSDK.getInstance().inspect()`方法，参照例子`com.example.app.test.AppTestSDKActivity`  
+  ```
+  VestSDK.getInstance().inspect(this, new VestInspectCallback() {  
                      
-           @Override  
-           public void onShowVestGame() {  
-               Log.d(TAG, "show vest game");
-               Intent intent = new Intent(getBaseContext(), VestGameActivity.class);
-               intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-               startActivity(intent);  
-           }  
+         @Override  
+         public void onShowVestGame() {  
+             Log.d(TAG, "show vest game");
+             Intent intent = new Intent(getBaseContext(), VestGameActivity.class);
+             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+             startActivity(intent);  
+         }  
     
-           @Override  
-           public void onShowOfficialGame() {  
-               Log.d(TAG, "show official game");  
-           }  
-       });  
-    ```
+         @Override  
+         public void onShowOfficialGame() {  
+             Log.d(TAG, "show official game");  
+         }  
+     });  
+  ```
 - (3)请在Activity生命周期方法onDestroy()中调用VestSDK.getInstance().onDestroy()方法。
 
-5. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets目录。  
+4. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets目录。  
 为避免出包之间文件关联，可以更改`config`文件名，并注意修改`code.core.MainApplication`的重载方法`getConfigAsset`返回值。
-6. 至此Vest-SDK集成完毕。
+5. 至此Vest-SDK集成完毕。
+
+## 测试说明
+- 游戏切换开关由厂商后台配置，测试时请联系厂商修改配置。
+- 获取到正式游戏地址后，会一直使用缓存的正式游戏链接，后台关闭开关不会跳转回马甲游戏，清除缓存后再次进入游戏获取。
 
 ## 版本说明
 ### 0.9.1
@@ -61,5 +65,5 @@
 ### 0.9.2
 - 增加SDK日志开关：VestSDK.setLoggable()
 - 增加生命周期方法：VestSDK.getInstance().onDestroy()
-- 修复：跳转马甲游戏之前没有结束闪屏界面
+- 修复Bug：跳转马甲游戏之前没有结束闪屏界面
 - 合并最新代码
