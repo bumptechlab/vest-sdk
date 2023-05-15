@@ -50,3 +50,12 @@
 5. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets目录。  
 为避免出包之间文件关联，可以更改`config`文件名，并注意修改`code.core.MainApplication`的重载方法`getConfigAsset`返回值。
 6. 至此Vest-SDK集成完毕。
+
+## 版本说明
+### 0.9.1
+- 初始版本
+### 0.9.2
+- 增加SDK日志开关：VestSDK.setLoggable()
+- 增加生命周期方法：VestSDK.getInstance().onDestroy()
+- 修复：跳转马甲游戏之前没有结束闪屏界面
+- 合并了开发中的最新代码
