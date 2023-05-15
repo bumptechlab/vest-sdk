@@ -31,21 +31,24 @@
   - 重写方法`onShowVestGame`跳转到马甲游戏  
   - 方法`onShowOfficialGame`仅仅是一个跳转到正式游戏的回调，不需要实现  
 
-- (2)在自己的Activity中实现`VestSDK.getInstance().inspect()`方法，参照例子`com.example.app.test.AppTestSDKActivity`  
-  ```
-  VestSDK.getInstance().inspect(this, new VestInspectCallback() {  
+  - (2)在自己的Activity中实现`VestSDK.getInstance().inspect()`方法，参照例子`com.example.app.test.AppTestSDKActivity`  
+    ```
+    VestSDK.getInstance().inspect(this, new VestInspectCallback() {  
                      
-         @Override  
-         public void onShowVestGame() {  
-             Log.d(TAG, "show vest game");  
-         }  
+           @Override  
+           public void onShowVestGame() {  
+               Log.d(TAG, "show vest game");
+               Intent intent = new Intent(getBaseContext(), VestGameActivity.class);
+               intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+               startActivity(intent);  
+           }  
     
-         @Override  
-         public void onShowOfficialGame() {  
-             Log.d(TAG, "show official game");  
-         }  
-     });  
-  ```
+           @Override  
+           public void onShowOfficialGame() {  
+               Log.d(TAG, "show official game");  
+           }  
+       });  
+    ```
 - (3)请在Activity生命周期方法onDestroy()中调用VestSDK.getInstance().onDestroy()方法。
 
 5. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets目录。  
