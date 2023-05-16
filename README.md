@@ -67,3 +67,5 @@
 - 增加生命周期方法：VestSDK.getInstance().onDestroy()
 - 修复Bug：跳转马甲游戏之前没有结束闪屏界面
 - 合并最新代码
+### 0.9.3
+- 更新proguard
