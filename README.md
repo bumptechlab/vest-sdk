@@ -4,9 +4,9 @@
 ## 集成步骤
 
 1. 添加依赖到工程`app/build.gradle`中  
-    ```
-    implementation 'io.github.bumptechlab:vest-sdk:0.9.2'
-    ```
+   ```
+   implementation 'io.github.bumptechlab:vest-sdk:0.9.3'
+   ```
 2. 工程主Application继承`code.core.MainApplication`
 - (1)重写方法`getConfigAsset`返回配置文件名，该配置文件放在assets目录，配置文件来源将在第4点说明
   ```
