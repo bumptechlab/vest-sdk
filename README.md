@@ -5,7 +5,7 @@
 
 1. 添加依赖(maven依赖或者本地依赖)  
    a.maven依赖方式  
-    1)在project/build.gradle或者project/setting.gradle中添加仓库
+    1)在project根目录build.gradle或者setting.gradle中添加仓库
     ```
     repositories {
         mavenCentral()
