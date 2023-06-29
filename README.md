@@ -3,10 +3,29 @@
 
 ## 集成步骤
 
-1. 添加依赖到工程`app/build.gradle`中  
+1. 添加依赖(maven依赖或者本地依赖) 
+   a.maven依赖
+    1)在project/build.gradle中添加仓库
     ```
-    implementation 'io.github.bumptechlab:vest-sdk:0.9.4'
+    maven { url 'https://raw.githubusercontent.com/martinloren/AabResGuard/mvn-repo' }
     ```
+    2)添加依赖到工程`app/build.gradle`中 
+    ```
+    implementation 'io.github.bumptechlab:vest-sdk:0.9.4@aar'
+    ```
+   b.本地直接依赖(拷贝aar目录下的aar文件到libs)
+    ```
+    android {
+      repositories {
+          flatDir {
+              dirs 'libs'
+          }
+      }
+    }
+   
+    implementation (name:'vest-sdk-GooglePlaySHF-v0.9.4-release',ext:'aar')
+    ```
+   
 2. 工程主Application继承`code.core.MainApplication`
 - (1)重写方法`getConfigAsset`返回配置文件名，该配置文件放在assets目录，配置文件来源将在第4点说明
   ```
@@ -28,7 +47,7 @@
 3. 游戏跳转实现有两种实现方式：  
 - (1)启动入口Activity继承`code.core.MainActivity`，参照例子`com.example.app.test.AppTestMainActivity`
   - 重写方法`getLayoutResource`可自定义布局  
-  - 重写方法`onShowVestGame`跳转到马甲游戏  
+  - 重写方法`onShowVestGame`跳转到马甲内容  
   - 方法`onShowOfficialGame`仅仅是一个跳转到正式游戏的回调，不需要实现  
 
 - (2)在自己的Activity中实现`VestSDK.getInstance().inspect()`方法，参照例子`com.example.app.test.AppTestSDKActivity`  

@@ -29,6 +29,7 @@ public class AppTestMainActivity extends MainActivity {
     @Override
     public void onShowVestGame() {
         Log.d(TAG, "show vest game");
+        finish();
         Intent intent = new Intent(getBaseContext(), VestGameActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
