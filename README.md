@@ -20,6 +20,7 @@
    b.本地直接依赖方式   
     1)拷贝sdk目录下的aar文件到app/libs文件夹，然后在app/build.gradle添加如下配置：
     ```
+    //根据gradle版本决定是否需要指定libs目录（一般不需要）
     android {
       repositories {
           flatDir {
@@ -27,7 +28,8 @@
           }
       }
     }
-   
+     
+    //三方依赖必须引入
     dependencies {
         implementation (name:'vest-sdk-GooglePlaySHF-v0.9.4-release',ext:'aar')
         implementation 'androidx.multidex:multidex:2.0.1'
