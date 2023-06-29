@@ -3,17 +3,22 @@
 
 ## 集成步骤
 
-1. 添加依赖(maven依赖或者本地依赖) 
-   a.maven依赖
-    1)在project/build.gradle中添加仓库
+1. 添加依赖(maven依赖或者本地依赖)  
+   a.maven依赖方式  
+    1)在project/build.gradle或者project/setting.gradle中添加仓库
     ```
-    maven { url 'https://raw.githubusercontent.com/martinloren/AabResGuard/mvn-repo' }
+    repositories {
+        mavenCentral()
+        google()
+        maven { url 'https://raw.githubusercontent.com/martinloren/AabResGuard/mvn-repo' }
+    }
     ```
-    2)添加依赖到工程`app/build.gradle`中 
+    2)添加依赖到工程`app/build.gradle`   
     ```
-    implementation 'io.github.bumptechlab:vest-sdk:0.9.4@aar'
+    implementation 'io.github.bumptechlab:vest-sdk:0.9.4'
     ```
-   b.本地直接依赖(拷贝aar目录下的aar文件到libs)
+   b.本地直接依赖方式   
+    1)拷贝sdk目录下的aar文件到app/libs文件夹，然后在app/build.gradle添加如下配置：
     ```
     android {
       repositories {
@@ -23,7 +28,19 @@
       }
     }
    
-    implementation (name:'vest-sdk-GooglePlaySHF-v0.9.4-release',ext:'aar')
+    dependencies {
+        implementation (name:'vest-sdk-GooglePlaySHF-v0.9.4-release',ext:'aar')
+        implementation 'androidx.multidex:multidex:2.0.1'
+        implementation 'androidx.annotation:annotation:1.5.0'
+        implementation 'com.android.installreferrer:installreferrer:2.2'
+        implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
+        implementation 'com.squareup.okhttp3:okhttp:3.12.2'
+        implementation 'com.squareup.okhttp3:logging-interceptor:3.12.2'
+        implementation 'com.google.code.gson:gson:2.9.0'
+        implementation 'com.adjust.sdk:adjust-android:4.33.0'
+        implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3'
+        implementation 'cn.thinkingdata.android:TAThirdParty:1.1.0'
+    }
     ```
    
 2. 工程主Application继承`code.core.MainApplication`
@@ -70,8 +87,7 @@
   ```
 - (3)请在Activity生命周期方法onDestroy()中调用VestSDK.getInstance().onDestroy()方法。
 
-4. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets目录。  
-为避免出包之间文件关联，可以更改`config`文件名，并注意修改`code.core.MainApplication`的重载方法`getConfigAsset`返回值。
+4. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets目录。为避免出包之间文件关联，可以更改`config`文件名，并注意修改`code.core.MainApplication`的重载方法`getConfigAsset`返回值。
 5. 至此Vest-SDK集成完毕。
 
 ## 测试说明
