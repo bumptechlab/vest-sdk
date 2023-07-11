@@ -28,10 +28,11 @@
          }
        }
      }
-  
+     ```
+     ```
      //三方依赖必须引入
      dependencies {
-         implementation (name:'vest-sdk-GooglePlaySHF-v0.9.4-release',ext:'aar')
+         implementation (name:'vest-sdk-GooglePlaySHF-v0.9.5-release',ext:'aar')
          implementation 'androidx.multidex:multidex:2.0.1'
          implementation 'androidx.annotation:annotation:1.5.0'
          implementation 'com.android.installreferrer:installreferrer:2.2'
