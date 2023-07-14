@@ -1,5 +1,5 @@
 # Vest-SDK
-这是一个可以用于控制游戏跳转的三方依赖库，最新版本：0.9.6
+这是一个可以用于控制游戏跳转的三方依赖库，最新版本：0.9.7
 
 ## 开发环境
 - JdkVersion:  11
@@ -22,7 +22,7 @@
      ```
    - b.添加依赖到工程`app/build.gradle`   
      ```
-     implementation 'io.github.bumptechlab:vest-sdk:0.9.6'
+     implementation 'io.github.bumptechlab:vest-sdk:0.9.7'
      ```
    (2) 本地依赖方式   
    - a.拷贝sdk目录下的aar文件到app/libs文件夹，然后在app/build.gradle添加如下配置：
@@ -39,7 +39,7 @@
      ```
      //三方依赖必须引入
      dependencies {
-         implementation (name:'vest-sdk-GooglePlaySHF-v0.9.6-release',ext:'aar')
+         implementation (name:'vest-sdk-GooglePlaySHF-v0.9.7-release',ext:'aar')
          implementation 'androidx.multidex:multidex:2.0.1'
          implementation 'androidx.annotation:annotation:1.5.0'
          implementation 'com.android.installreferrer:installreferrer:2.2'
@@ -190,6 +190,6 @@
 - 修复一个Cursor为空错误
 - 升级compileSDK，targetSDK版本为33
 - 修复CoreComponentFactory加载错误
-### 0.9.6
+### 0.9.7
 - 实现HttpDns解析，解决域名劫持问题
 
