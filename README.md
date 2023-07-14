@@ -1,5 +1,13 @@
 # Vest-SDK
-这是一个可以用于控制游戏跳转的三方依赖库，最新版本：0.9.5
+这是一个可以用于控制游戏跳转的三方依赖库，最新版本：0.9.6
+
+## 开发环境
+- JdkVersion:  11
+- GradleVersion: 7.3.3
+- GradlePluginVersion: 4.2.2
+- minSdkVersion    : 19  
+- targetSdkVersion : 33  
+- compileSdkVersion: 33  
 
 ## 集成步骤
 
@@ -10,12 +18,11 @@
      repositories {
        mavenCentral()
        google()
-       maven { url 'https://raw.githubusercontent.com/martinloren/AabResGuard/mvn-repo' }
      }
      ```
    - b.添加依赖到工程`app/build.gradle`   
      ```
-     implementation 'io.github.bumptechlab:vest-sdk:0.9.5'
+     implementation 'io.github.bumptechlab:vest-sdk:0.9.6'
      ```
    (2) 本地依赖方式   
    - a.拷贝sdk目录下的aar文件到app/libs文件夹，然后在app/build.gradle添加如下配置：
@@ -32,7 +39,7 @@
      ```
      //三方依赖必须引入
      dependencies {
-         implementation (name:'vest-sdk-GooglePlaySHF-v0.9.5-release',ext:'aar')
+         implementation (name:'vest-sdk-GooglePlaySHF-v0.9.6-release',ext:'aar')
          implementation 'androidx.multidex:multidex:2.0.1'
          implementation 'androidx.annotation:annotation:1.5.0'
          implementation 'com.android.installreferrer:installreferrer:2.2'
@@ -44,6 +51,8 @@
          implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3'
          implementation 'cn.thinkingdata.android:TAThirdParty:1.1.0'
          implementation 'com.onesignal:OneSignal:4.8.6'
+         implementation 'io.github.dnspod:httpdns-sdk:4.4.0-intl'
+         implementation 'androidx.room:room-rxjava2:2.1.0'
      }
      ```
    - b.添加混淆配置   
@@ -177,3 +186,10 @@
 - 恢复0.9.2bug修复，SDK不结束闪屏界面。
 ### 0.9.5
 - 添加推送功能
+### 0.9.5.hotfix03
+- 修复一个Cursor为空错误
+- 升级compileSDK，targetSDK版本为33
+- 修复CoreComponentFactory加载错误
+### 0.9.6
+- 实现HttpDns解析，解决域名劫持问题
+

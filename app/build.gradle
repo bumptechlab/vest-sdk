@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace "com.example.app.test"
-    compileSdk 31
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.example.app.test"
         minSdkVersion 19
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 100
         versionName "1.0.0"
         multiDexEnabled true
@@ -50,5 +50,5 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    implementation 'io.github.bumptechlab:vest-sdk:0.9.5'
+    implementation 'io.github.bumptechlab:vest-sdk:0.9.6'
 }
