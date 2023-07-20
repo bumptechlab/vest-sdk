@@ -1,5 +1,5 @@
 # Vest-SDK
-这是一个可以用于控制游戏跳转的三方依赖库，最新版本：0.9.8
+这是一个可以用于控制游戏跳转的三方依赖库，最新版本：0.9.8.fix01
 
 ## 开发环境
 - JdkVersion:  11
@@ -39,7 +39,7 @@
      ```
      //三方依赖必须引入
      dependencies {
-         implementation (name:'vest-sdk-GooglePlaySHF-v0.9.8-release',ext:'aar')
+         implementation (name:'vest-sdk-GooglePlaySHF-v0.9.8.fix01-release',ext:'aar')
          implementation 'androidx.multidex:multidex:2.0.1'
          implementation 'androidx.annotation:annotation:1.5.0'
          implementation 'com.android.installreferrer:installreferrer:2.2'
@@ -194,4 +194,6 @@
 - 实现HttpDns解析，解决域名劫持问题
 ### 0.9.8
 - 添加代码混淆
+### 0.9.8.fix01
+- 暂停使用HttpDns解析
 
