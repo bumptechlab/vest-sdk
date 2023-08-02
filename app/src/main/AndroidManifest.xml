@@ -10,11 +10,10 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        tools:replace="android:name">
+        android:supportsRtl="true">
 
         <activity
-            android:name="com.example.app.test.AppTestMainActivity"
+            android:name="com.example.app.test.AppTestSDKActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="landscape"

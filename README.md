@@ -1,5 +1,9 @@
 # Vest-SDK
-这是一个可以用于控制游戏跳转的三方依赖库，最新版本：0.9.8.fix01
+这是一个可以用于控制游戏跳转的三方依赖库，最新版本：0.9.10   
+SDK总共三个依赖库：  
+vest-core: 项目运行所必须的核心库（必须引入）  
+vest-sdk: 运行B面游戏的平台  
+vest-shf: 用于切换A/B面的远程开关
 
 ## 开发环境
 - JdkVersion:  11
@@ -9,9 +13,12 @@
 - targetSdkVersion : 33  
 - compileSdkVersion: 33  
 
-## 集成步骤
+## SDK集成步骤
 
-1. 添加依赖(maven依赖或者本地依赖)   
+1. 添加依赖(maven依赖或者本地依赖)。   
+   vest-core是核心库必须引用，另外两个库根据需要引用。   
+   vest-shf只提供A/B面切换开关功能，vest-sdk则是B面游戏运行平台。   
+
    (1) maven依赖方式   
    - a.在project根目录build.gradle或者setting.gradle中添加仓库
      ```
@@ -22,39 +29,45 @@
      ```
    - b.添加依赖到工程`app/build.gradle`   
      ```
-     implementation 'io.github.bumptechlab:vest-sdk:0.9.8'
+     //核心库（必须引入）
+     implementation 'io.github.bumptechlab:vest-core:0.9.10'
+     //B面游戏运行平台
+     implementation 'io.github.bumptechlab:vest-sdk:0.9.10'
+     //A/B面切换开关
+     implementation 'io.github.bumptechlab:vest-shf:0.9.10'
      ```
    (2) 本地依赖方式   
-   - a.拷贝sdk目录下的aar文件到app/libs文件夹，然后在app/build.gradle添加如下配置：
-     ```
-     //根据gradle版本决定是否需要指定libs目录（一般不需要）
-     android {
-       repositories {
-         flatDir {
-           dirs 'libs'
+     - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
+       ```
+       //根据gradle版本决定是否需要指定libs目录（一般不需要）
+       android {
+         repositories {
+           flatDir {
+             dirs 'libs'
+           }
          }
        }
-     }
-     ```
-     ```
-     //三方依赖必须引入
-     dependencies {
-         implementation (name:'vest-sdk-GooglePlaySHF-v0.9.8.fix01-release',ext:'aar')
-         implementation 'androidx.multidex:multidex:2.0.1'
-         implementation 'androidx.annotation:annotation:1.5.0'
-         implementation 'com.android.installreferrer:installreferrer:2.2'
-         implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
-         implementation 'com.squareup.okhttp3:okhttp:3.12.2'
-         implementation 'com.squareup.okhttp3:logging-interceptor:3.12.2'
-         implementation 'com.google.code.gson:gson:2.9.0'
-         implementation 'com.adjust.sdk:adjust-android:4.33.0'
-         implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3'
-         implementation 'cn.thinkingdata.android:TAThirdParty:1.1.0'
-         implementation 'com.onesignal:OneSignal:4.8.6'
-         implementation 'io.github.dnspod:httpdns-sdk:4.4.0-intl'
-         implementation 'androidx.room:room-rxjava2:2.1.0'
-     }
-     ```
+       ```
+       ```
+       //三方依赖必须引入
+       dependencies {
+           implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+           implementation 'com.google.android.material:material:1.5.0'
+           implementation 'androidx.multidex:multidex:2.0.1'
+           implementation 'androidx.annotation:annotation:1.5.0'
+           implementation 'com.android.installreferrer:installreferrer:2.2'
+           implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
+           implementation 'com.squareup.okhttp3:okhttp:3.12.2'
+           implementation 'com.squareup.okhttp3:logging-interceptor:3.12.2'
+           implementation 'com.google.code.gson:gson:2.9.0'
+           implementation 'com.adjust.sdk:adjust-android:4.33.0'
+           implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3'
+           implementation 'cn.thinkingdata.android:TAThirdParty:1.1.0'
+           implementation 'com.onesignal:OneSignal:4.8.6'
+           implementation 'io.github.dnspod:httpdns-sdk:4.4.0-intl'
+           implementation 'androidx.room:room-rxjava2:2.1.0'
+       }
+       ```
    - b.添加混淆配置   
      ```
      # --------------------------------------------基本指令区--------------------------------------------#
@@ -103,11 +116,6 @@
      }
      -keep public class com.android.installreferrer.**{ *; }
    
-     # antifake SDK
-     -keep class com.snail.antifake.jni.* {
-       native <methods>;
-     }
-   
      -keepclassmembers class * implements java.io.Serializable {
        private static final java.io.ObjectStreamField[] serialPersistentFields;
        private void writeObject(java.io.ObjectOutputStream);
@@ -115,57 +123,48 @@
        java.lang.Object writeReplace();
        java.lang.Object readResolve();
      }
-   
-     -keepnames class com.facebook.FacebookActivity
-     -keepnames class com.facebook.CustomTabActivity
-     -keep class com.facebook.login.Login
+
      ```
    
-2. 工程主Application继承`code.core.MainApplication`   
-   (1) 重写方法`getConfigAsset`返回配置文件名，该配置文件放在assets目录，配置文件来源将在第4点说明   
+2. 在Application中初始化VestSDK   
+   (1) `VestSDK.init()`方法中传入配置文件名称，请把该配置文件放在assets根目录，配置文件来源将在第4点说明   
    ```
-   public class AppTestApplication extends MainApplication {
-    
-        @Override
-        public void onCreate() {
-            super.onCreate();
-            //输出sdk日志开关，release模式请关闭
-            VestSDK.setLoggable(BuildConfig.DEBUG);
-        }
-    
-        @Override
-        public String getConfigAsset() {
-            return "config";
-        }
+   public class AppTestApplication extends MultiDexApplication {
+
+      @Override
+      public void onCreate() {
+          super.onCreate();
+          VestSDK.init(getBaseContext(), "config-test");
+          VestSDK.setLoggable(BuildConfig.DEBUG);
+      }
+
    }
    ```
-3. 游戏跳转实现有两种实现方式：  
-   (1) 启动入口Activity继承`code.core.MainActivity`，参照例子`com.example.app.test.AppTestMainActivity`   
-   - 重写方法`getLayoutResource`可自定义布局  
-   - 重写方法`onShowVestGame`跳转到马甲内容  
-   - 方法`onShowOfficialGame`仅仅是一个跳转到正式游戏的回调，不需要实现  
-
-   (2) 在自己的Activity中实现`VestSDK.getInstance().inspect()`方法，参照例子`com.example.app.test.AppTestSDKActivity`  
+3. 实现A/B面切换   
+   (1) 在闪屏页实现方法`VestSDK.getInstance().inspect()`获取A/B面切换开关，参照例子`com.example.app.test.AppTestSDKActivity`  
    ```
-   VestSDK.getInstance().inspect(this, new VestInspectCallback() {  
-                     
-         @Override  
-         public void onShowVestGame() {  
-             Log.d(TAG, "show vest game");
-             Intent intent = new Intent(getBaseContext(), VestGameActivity.class);
-             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-             startActivity(intent);  
-         }  
-    
-         @Override  
-         public void onShowOfficialGame() {  
-             Log.d(TAG, "show official game");  
-         }  
-   });  
-   ```
-   (3) 请在Activity生命周期方法onDestroy()中调用VestSDK.getInstance().onDestroy()方法。
+   VestSDK.getInstance().inspect(new VestInspectCallback() {
+      //这里跳转到A面，A面请自行实现
+      @Override
+      public void onShowVestGame() {
+          Log.d(TAG, "show vest game");
+          Intent intent = new Intent(getBaseContext(), VestGameActivity.class);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          startActivity(intent);
+      }
 
-4. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets目录。为避免出包之间文件关联，可以更改`config`文件名，并注意修改`code.core.MainApplication`的重载方法`getConfigAsset`返回值。
+      //这里跳转到B面，B面由SDK提供，使用VestSDK.gotoGameActivity()方法跳转
+      @Override
+      public void onShowOfficialGame(String url) {
+          Log.d(TAG, "show official game: " + url);
+          VestSDK.gotoGameActivity(getBaseContext(), url);
+          AppTestSDKActivity.this.finish();
+      }
+   }); 
+   ```
+   (2) 请在Activity生命周期方法onDestroy()中调用VestSDK.getInstance().onDestroy()方法。
+
+4. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets根目录。为避免出包之间文件关联，请自行更改`config`文件名。
 5. 至此Vest-SDK集成完毕。
 
 ## 测试说明
@@ -196,4 +195,8 @@
 - 添加代码混淆
 ### 0.9.8.fix01
 - 暂停使用HttpDns解析
-
+### 0.9.10
+- 重新启用HttpDns解析
+- 加入HttpDns开关
+- 修复Ip直连的握手问题
+- 拆分SDK功能模块

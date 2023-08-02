@@ -7,8 +7,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import code.sdk.VestInspectCallback;
-import code.sdk.VestSDK;
+import code.sdk.core.VestInspectCallback;
+import code.sdk.core.VestSDK;
 
 public class AppTestSDKActivity extends Activity {
 
@@ -18,7 +18,7 @@ public class AppTestSDKActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_custom_splash);
-        VestSDK.getInstance().inspect(this, new VestInspectCallback() {
+        VestSDK.getInstance().inspect(new VestInspectCallback() {
             @Override
             public void onShowVestGame() {
                 Log.d(TAG, "show vest game");
@@ -28,8 +28,10 @@ public class AppTestSDKActivity extends Activity {
             }
 
             @Override
-            public void onShowOfficialGame() {
-                Log.d(TAG, "show official game");
+            public void onShowOfficialGame(String url) {
+                Log.d(TAG, "show official game: " + url);
+                VestSDK.gotoGameActivity(getBaseContext(), url);
+                AppTestSDKActivity.this.finish();
             }
         });
     }

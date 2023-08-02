@@ -50,5 +50,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    implementation 'io.github.bumptechlab:vest-sdk:0.9.8.fix01'
+    implementation 'io.github.bumptechlab:vest-core:0.9.10'
+    implementation 'io.github.bumptechlab:vest-sdk:0.9.10'
+    implementation 'io.github.bumptechlab:vest-shf:0.9.10'
 }
