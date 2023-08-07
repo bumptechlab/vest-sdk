@@ -11,7 +11,7 @@ public class AppTestApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        VestSDK.init(getBaseContext(), "config-test");
+        VestSDK.init(getBaseContext(), "config");
         VestSDK.setLoggable(BuildConfig.DEBUG);
     }
 

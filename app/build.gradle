@@ -10,8 +10,8 @@ android {
         applicationId "com.example.app.test"
         minSdkVersion 19
         targetSdkVersion 33
-        versionCode 100
-        versionName "1.0.0"
+        versionCode sdkVersionCode
+        versionName sdkVersionName
         multiDexEnabled true
         setProperty("archivesBaseName", "vest-test")
     }
@@ -45,6 +45,13 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+android.applicationVariants.all { variant ->
+    // 修改APK名称
+    variant.outputs.all { output ->
+        outputFileName = "vest-sdk-v${variant.versionName}-${variant.buildType.name}.apk"
     }
 }
 
