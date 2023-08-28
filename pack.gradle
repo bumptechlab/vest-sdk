@@ -1,0 +1,102 @@
+// common.gradle
+
+gradle.ext.dependencieInfo = []
+
+/**
+ * 获取时间 yyyyMMdd
+ * @return 时间字符串
+ */
+static String releaseTime() {
+    return new Date().format("yyyyMMddHHmm", TimeZone.getDefault())
+}
+
+/**
+ * 获取时间 yyyyMMdd
+ * @return 时间字符串
+ */
+static String getFormatDate() {
+    return new Date().format("yyyyMMdd_HHmmss", TimeZone.getDefault())
+}
+
+static def getGitHeadRefsSuffix() {
+    try {
+        // .git/HEAD描述当前目录所指向的分支信息，内容示例："ref: refs/heads/master\n"
+        def headFile = new File('.git/HEAD')
+        if (headFile.exists()) {
+            String[] strings = headFile.getText('UTF-8').split(" ")
+            if (strings.size() > 1) {
+                String refFilePath = '.git/' + strings[1]
+                // 根据HEAD读取当前指向的hash值，路径示例为：".git/refs/heads/master"
+                def refFile = new File(refFilePath.replace("\n", ""))
+                // 索引文件内容为hash值+"\n"，
+                // 示例："90312cd9157587d11779ed7be776e3220050b308\n"
+                return refFile.getText('UTF-8').substring(0, 7)
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace()
+    }
+    return ""
+}
+
+// 打包aar
+void packagingAAR(project, android, artifactId) {
+    android.libraryVariants.all { variant ->
+        // 修改aar名称
+        variant.outputs.all { output ->
+            //outputFileName = "${project.name}-V${android.defaultConfig.versionName}_${android.defaultConfig.versionCode}-${getGitHeadRefsSuffix}-${getFormatDate()}${isEmpty(variant.flavorName) ? "" : "-${variant.flavorName}"}-${variant.buildType.name}.aar"
+            outputFileName = "${artifactId}${variant.flavorName.isEmpty() ? "" : "-${variant.flavorName}"}-v${android.defaultConfig.versionName}-${variant.buildType.name}.aar"
+        }
+        // 复制aar到指定目录
+        variant.assemble.doLast {
+            variant.outputs.all { output ->
+                //只有release版本才能拷贝到sdk目录
+                if (variant.buildType.name == "release") {
+                    def sdkOutputDir = new File(project.rootDir, "sdk/${android.defaultConfig.versionName}");
+                    copy {
+                        from output.outputFile
+                        into sdkOutputDir
+                    }
+                }
+                def appLibOutputDir = new File(project.rootDir, "app/libs")
+                def appLibFiles = fileTree(dir: appLibOutputDir)
+                appLibFiles.forEach {
+                    if (it.name.startsWith(artifactId)) {
+                        it.delete()
+                    }
+                }
+                copy {
+                    from output.outputFile
+                    into appLibOutputDir
+                }
+
+                def appbLibOutputDir = new File(project.rootDir, "app-b/libs")
+                def appbLibFiles = fileTree(dir: appbLibOutputDir)
+                appbLibFiles.forEach {
+                    if (it.name.startsWith(artifactId)) {
+                        it.delete()
+                    }
+                }
+                copy {
+                    from output.outputFile
+                    into appbLibOutputDir
+                }
+
+                // 输入依赖语句
+                gradle.dependencieInfo.add("api(name: '${output.outputFile.name.replace('.aar', '')}', ext: 'aar')")
+                println("${gradle.dependencieInfo.join("\n")}")
+            }
+        }
+    }
+}
+
+ext {
+    // yyyyMMdd 时间
+    releaseTime = this.&releaseTime
+    // yyyyMMdd_HHmmss 时间
+    getFormatDate = this.&getFormatDate
+    // 获取当前git commit点
+    getGitHeadRefsSuffix = this.&getGitHeadRefsSuffix
+    // 打包AAR
+    packagingAAR = this.&packagingAAR
+}

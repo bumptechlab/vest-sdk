@@ -1,0 +1,115 @@
+plugins {
+    id 'com.android.library'
+    id 'com.kezong.fat-aar'
+}
+apply from: './publish.gradle' //aar发布脚本
+apply from: '../pack.gradle'    //aar输出脚本
+
+def androidConfig = rootProject.ext.android
+def dependenciesConfig = rootProject.ext.dependencies
+def proguardDictConfig = rootProject.ext.proguardDict
+def namespaces = rootProject.ext.namespaces
+def mavenConfig = rootProject.ext.maven
+def projectName = androidConfig.projectName
+
+fataar {
+    /**
+     * If transitive is true, local jar module and remote library's dependencies will be embed. (local aar module does not support)
+     * If transitive is false, just embed first level dependency
+     * Default value is false
+     * @since 1.3.0
+     */
+    transitive = true
+}
+
+def execCommand(command) {
+    def commandProcess = command.execute()
+    commandProcess.in.eachLine { line -> println line }
+    commandProcess.err.eachLine { line -> println line }
+    commandProcess.waitFor()
+}
+
+android {
+    namespace namespaces.appshf
+    compileSdk androidConfig.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion androidConfig.minSdkVersion
+        targetSdkVersion androidConfig.targetSdkVersion
+        versionName mavenConfig.version
+        multiDexEnabled true
+
+        consumerProguardFiles "../proguard/consumer-rules.pro"
+
+        buildConfigField 'String', 'SDK_NAME', '"' + mavenConfig.sdkName + '"'
+        buildConfigField 'String', 'SDK_VERSION', '"' + mavenConfig.version + '"'
+        buildConfigField 'String', 'BUILD_NUMBER', '"' + releaseTime() + '"'
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            jniDebuggable true
+            renderscriptDebuggable true
+            minifyEnabled false
+            shrinkResources false
+            //R8混淆开启之后解决APP打开类加载时找不到类的问题,指定文件来放置启动时需要优先加载的类
+            multiDexKeepFile file("maindexlist.txt")
+        }
+        release {
+            debuggable false
+            jniDebuggable false
+            renderscriptDebuggable false
+            minifyEnabled false
+            shrinkResources false
+            //R8混淆开启之后解决APP打开类加载时找不到类的问题,指定文件来放置启动时需要优先加载的类
+            multiDexKeepFile file("maindexlist.txt")
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', '../proguard/consumer-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingAAR(project, android, mavenConfig.artifactIdShf)
+}
+
+def taskName = getGradle().getStartParameter().getTaskNames().toString()
+
+android.libraryVariants.all { variant ->
+    variant.outputs.each { output ->
+        def capitalizedVariant = variant.name.capitalize()
+        println("> ${projectName}: Task${taskName} variant: ${capitalizedVariant}")
+        //1.在当前构建任务中生成字典
+        def shouldCreateProguardDict = taskName.contains(capitalizedVariant)
+        if (shouldCreateProguardDict) {
+            println("> ${projectName}: Task${taskName} 开始创建混淆字典")
+            def libDictJar = new File(project.projectDir, "../tools/proguard-tools/libs/lib-proguard-dict.jar")
+            def dictFiles = [
+                    new File(project.projectDir, "prog-dict-class.txt"),
+                    new File(project.projectDir, "prog-dict-package.txt"),
+                    new File(project.projectDir, "prog-dict-field-method.txt")
+            ]
+            def lines = proguardDictConfig.lines
+            def characters = proguardDictConfig.characters
+            def charsets = proguardDictConfig.charsetsAppShf
+            //打印help信息（字符集索引）
+            execCommand("java -jar ${libDictJar} -h")
+            for (i in 0..<dictFiles.size()) {
+                def curDictFile = dictFiles.get(i);
+                if (!curDictFile.exists()) {
+                    execCommand("java -jar ${libDictJar} -o ${curDictFile} -c ${characters} -l ${lines} -ch ${charsets}")
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compileOnly project(':app-core')
+    compileOnly project(':lib-util')
+    compileOnly project(':lib-okhttp')
+    implementation 'androidx.appcompat:appcompat:' + dependenciesConfig.androidxAppcompatVersion
+    implementation 'com.google.android.material:material:' + dependenciesConfig.googleMaterialVersion
+}

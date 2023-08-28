@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="test_save_success" translatable="false">Save success, restart the app please</string>
+    <string name="test_restore_success" translatable="false">Restore success</string>
+    <string name="test_install_referrer" translatable="false">Install Referrer</string>
+    <string name="test_log_enable" translatable="false">Log Enable</string>
+    <string name="test_firebase_inspected" translatable="false">Firebase Inspected</string>
+    <string name="test_btn_save" translatable="false">Save</string>
+    <string name="test_btn_restore" translatable="false">Restore</string>
+
+</resources>

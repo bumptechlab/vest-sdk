@@ -1,0 +1,107 @@
+// Copyright 2017 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+project.ext {
+    android = [
+            projectName      : 'Shell',
+            projectCode      : "vest-sdk",
+            applicationId    : 'com.example.app.test',   //package name 注意：此处key不可改动，buildSrc脚本中会使用到
+            appApplication   : "code.core.MainApplication", //主入口Application
+            proxyApplication : "ddecrypt.dex.lemon.ProxyApplication",//解密并加载Dex的代理Application
+            trickFile        : "main.index.html",   //asset目录下对应加密引擎文件的名称
+            minSdkVersion    : 19,
+            targetSdkVersion : 33,
+            compileSdkVersion: 33,
+            versionCode      : 100,
+            versionName      : '1.0.0',
+            frameVersion     : "011",   //框架版本，阶段性发布请+1（在框架功能开发｜dev分支更新，其他分支请不要更新）
+            country          : "br",    //配置TD/OneSignal/网络限制国家。in: 印度; br: 巴西; id: 印尼
+            facebookEnable   : false,   //是否启用Facebook登录
+    ]
+
+    dependencies = [
+            androidxMultidexVersion        : '2.0.1',
+            androidxAppcompatVersion       : '1.4.1',
+            androidxConstraintlayoutVersion: '2.1.3',
+            googleMaterialVersion          : '1.5.0',
+            androidxLegacyVersion          : '1.0.0',
+            androidxCardviewVersion        : '1.0.0',
+            androidxAnnotation             : '1.5.0',
+            installreferrerVersion         : '2.2',
+            googleGsonVersion              : '2.9.0',
+            okhttpVersion                  : '3.12.2',
+            googlePlayServiceVersion       : '18.0.1',
+            eventBusVersion                : '3.3.1',
+            adjustVersion                  : '4.33.0',
+            firebaseVersion                : '30.3.0',
+            facebookSdkVersion             : '15.1.0',
+            thinkingDataSdkVersion         : '2.8.3',
+            thinkingDataThirdPartyVersion  : '1.1.0',
+            jakewhartonPhoenixVersion      : '2.1.2',
+            rxJavaVersion                  : '2.1.0',
+            httpdnsVersion                 : "4.4.0-intl",
+            onesignalVersion               : "4.8.6"
+    ]
+
+    //配置各个依赖库的命名空间
+    namespaces = [
+            app       : "com.example.vest.sdk.app",
+            appb      : "com.example.app.test",
+            appsdk    : "code.sdk",
+            appshf    : "code.sdk.shf",
+            appcore   : "code.sdk.core",
+            strdecrypt: "code.str.decrypt",
+            dexdecrypt: "code.dex.decrypt",
+            engine    : "cocos2dx.engine",
+            facebook  : "code.facebook",
+            okhttp    : "code.okhttp",
+            util      : "code.util",
+            walle     : "code.walle.reader",
+            webview   : "code.webview",
+            junkcode  : "code.junkcode",
+    ]
+
+    maven = [
+            //sonatype官网上的项目参数
+            groupId          : 'io.github.bumptechlab',
+            artifactIdSdk    : 'vest-sdk',
+            artifactIdShf    : 'vest-shf',
+            artifactIdCore   : 'vest-core',
+            version          : '0.9.11',//发布到maven的版本号
+
+            //Github代码仓库参数
+            homePage         : 'https://github.com/bumptechlab/vest-sdk',//主页地址
+            branchPage       : 'https://github.com/bumptechlab/vest-sdk/tree/master',//分支地址
+            repositoriesHttps: 'https://github.com/bumptechlab/vest-sdk.git',//Https代码仓库地址
+            repositoriesSSH  : 'git@github.com:bumptechlab/vest-sdk.git',//SSH代码仓库地址
+
+            //SDK配置参数
+            sdkName          : 'Vest-SDK',//对外展示的SDK项目名称
+            email            : 'binaryp@binarywalk.com',//客服邮箱
+    ]
+
+    proguardDict = [
+            lines         : 5000,       //字典行数
+            characters    : 2,          //字典每行的字数，-1表示字数随机
+            charsetsAppSdk: "15,16,17",  //字符集对照表在Gradle build日志中有输出，或者在工程根目录下使用"java -jar ./tools/proguard-tools/libs/lib-proguard-dict.jar -h"命令查看
+            charsetsAppShf: "12,13,14,15"
+    ]
+
+    //签名秘钥配置: 新的出包流程需要自行下载Jenkins生成的签名秘钥,秘钥的密码以及相关参数在这里配置
+    jksConfig = [
+            storeFile    : "ussjohnfkennedy.jks",   //这里填写下载秘钥的名称, 需要将该下载的秘钥放在app/keystore目录下
+            storePassword: "ussjohnfkennedy",
+            keyAlias     : "ussjohnfkennedy",
+            keyPassword  : "ussjohnfkennedy",
+    ]
+}

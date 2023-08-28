@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    tools:viewBindingIgnore="true"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+
+    <View
+        android:layout_width="match_parent"
+        android:background="$color"
+        tools:background="#E71E1E"
+        android:layout_height="24dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        tools:background="#BB2323"
+        android:background="$color"
+        android:layout_height="44dp"/>
+
+    <ViewStub
+        android:id="@+id/vs_01"
+        android:inflatedId="@+id/vs_inflate_01"
+        android:layout="$layout"
+        android:visibility="visible"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"/>
+
+    <ViewStub
+        android:id="@+id/vs_02"
+        android:inflatedId="@+id/vs_inflate_02"
+        android:layout="$layout"
+        android:visibility="visible"
+        android:layout_width="match_parent"
+        android:layout_height="240dp"/>
+
+</FrameLayout>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Shell</string>
+    <string name="one_more_click_go_back" translatable="false">back one more time to exit</string>
+    <string name="refresh" translatable="false"><u>refresh</u></string>
+    <string name="loading_error_tips" translatable="false">♠️ Error connecting to server, please try again later.... ♣️</string>
+    <string name="msg_update_android_system_webview" translatable="false">Please upgrade Android System WebView for a better experience.</string>
+    <string name="btn_confirm" translatable="false">Confirm</string>
+    <string name="btn_never_ask" translatable="false">Never Ask</string>
+    <string name="btn_cancel" translatable="false">Cancel</string>
+</resources>

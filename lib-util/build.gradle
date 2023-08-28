@@ -1,0 +1,32 @@
+plugins {
+    id 'com.android.library'
+}
+
+def androidConfig = rootProject.ext.android
+def dependenciesConfig = rootProject.ext.dependencies
+def _namespace = rootProject.ext.namespaces
+
+android {
+    namespace _namespace.util
+    compileSdk androidConfig.compileSdkVersion
+
+    defaultConfig {
+        minSdk androidConfig.minSdkVersion
+        targetSdk androidConfig.targetSdkVersion
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+}

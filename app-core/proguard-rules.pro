@@ -1,0 +1,3 @@
+-dontskipnonpubliclibraryclassmembers
+-dontshrink
+-dontoptimize

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    tools:viewBindingIgnore="true"
+    android:background="$color"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/v_status_view"
+        android:layout_width="match_parent"
+        android:background="$color"
+        tools:background="#E71E1E"
+        android:layout_height="24dp"/>
+
+    <View
+        android:id="@+id/v_action_bar"
+        android:layout_width="match_parent"
+        tools:background="#BB2323"
+        tools:visibility="gone"
+        android:background="$color"
+        android:layout_height="44dp"/>
+
+    <ViewStub
+        android:id="@+id/vs_01"
+        android:inflatedId="@+id/vs_inflate_01"
+        android:layout="$layout"
+        tools:visibility="gone"
+        android:visibility="visible"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"/>
+
+    <ViewStub
+        android:id="@+id/vs_02"
+        android:inflatedId="@+id/vs_inflate_02"
+        android:layout="$layout"
+        android:visibility="visible"
+        tools:visibility="visible"
+        android:layout_width="match_parent"
+        android:layout_height="240dp"/>
+
+</RelativeLayout>

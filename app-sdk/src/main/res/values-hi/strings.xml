@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="one_more_click_go_back" translatable="false">बाहर निकलने के लिए एक बार और पीछे जाएँ</string>
+    <string name="refresh" translatable="false"><u>रिफ्रेश करें</u></string>
+    <string name="loading_error_tips" translatable="false">♠️ सर्वर से कनेक्ट करने में त्रुटि, कृपया बाद में पुन: प्रयास करें... ♣️</string>
+    <string name="msg_update_android_system_webview" translatable="false">बेहतर अनुभव के लिए कृपया एंड्रॉयड सिस्टम वेबव्यू को अपग्रेड करें।</string>
+    <string name="btn_confirm" translatable="false">पुष्टि करें</string>
+    <string name="btn_never_ask" translatable="false">मत‌ पूछें</string>
+    <string name="btn_cancel" translatable="false">रद्द करें</string>
+</resources>

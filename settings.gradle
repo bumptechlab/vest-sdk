@@ -1,17 +1,23 @@
 pluginManagement {
     repositories {
+        gradlePluginPortal()
         google()
         mavenCentral()
-        gradlePluginPortal()
-        maven { url 'https://raw.githubusercontent.com/martinloren/AabResGuard/mvn-repo' }
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+//    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
     }
 }
-rootProject.name = "VestSDK"
+rootProject.name = "Vest-SDK-Publish"
+include ':app-sdk'
+include ':lib-okhttp'
+include ':lib-webview'
+include ':lib-walle-reader'
+include ':lib-util'
+include ':app-shf'
+include ':app-core'
 include ':app'

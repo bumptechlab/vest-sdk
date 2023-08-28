@@ -1,0 +1,93 @@
+plugins {
+    id 'com.android.library'
+    id 'com.kezong.fat-aar'
+}
+apply from: './publish.gradle' //aar发布脚本
+apply from: '../pack.gradle'    //aar输出脚本
+def androidConfig = rootProject.ext.android
+def dependenciesConfig = rootProject.ext.dependencies
+def namespaces = rootProject.ext.namespaces
+def mavenConfig = rootProject.ext.maven
+
+fataar {
+    /**
+     * If transitive is true, local jar module and remote library's dependencies will be embed. (local aar module does not support)
+     * If transitive is false, just embed first level dependency
+     * Default value is false
+     * @since 1.3.0
+     */
+    transitive = true
+}
+
+
+def getBuildVersion() {
+    def commitId = ""
+    def proc = "git rev-parse --short HEAD".execute()
+    proc.in.eachLine { line -> commitId = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+    def version = "${rootProject.ext.android.projectCode}.${rootProject.ext.android.frameVersion}.${commitId}"
+    def versionBase64 = Base64.getEncoder().encodeToString(version.getBytes())
+    return versionBase64
+}
+
+android {
+    namespace namespaces.appcore
+    compileSdk androidConfig.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion androidConfig.minSdkVersion
+        targetSdkVersion androidConfig.targetSdkVersion
+        versionName mavenConfig.version
+        multiDexEnabled true
+
+        consumerProguardFiles "../proguard/consumer-rules.pro"
+        buildConfigField 'String', 'SDK_NAME', '"' + mavenConfig.sdkName + '"'
+        buildConfigField 'String', 'SDK_VERSION', '"' + mavenConfig.version + '"'
+        buildConfigField 'String', 'BUILD_NUMBER', '"' + releaseTime() + '"'
+        buildConfigField 'String', 'HOME_PAGE', '"' + mavenConfig.homePage + '"'
+        buildConfigField 'String', 'EMAIL', '"' + mavenConfig.email + '"'
+
+        manifestPlaceholders = [
+                build_version: getBuildVersion()
+        ]
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            jniDebuggable true
+            renderscriptDebuggable true
+            minifyEnabled false
+            shrinkResources false
+            //R8混淆开启之后解决APP打开类加载时找不到类的问题,指定文件来放置启动时需要优先加载的类
+            multiDexKeepFile file("maindexlist.txt")
+        }
+        release {
+            debuggable false
+            jniDebuggable false
+            renderscriptDebuggable false
+            minifyEnabled false
+            shrinkResources false
+            //R8混淆开启之后解决APP打开类加载时找不到类的问题,指定文件来放置启动时需要优先加载的类
+            multiDexKeepFile file("maindexlist.txt")
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', '../proguard/consumer-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    packagingAAR(project, android, mavenConfig.artifactIdCore)
+}
+
+dependencies {
+    embed project(path: ':lib-util', configuration: 'default')
+    embed project(path: ':lib-okhttp', configuration: 'default')
+    implementation 'androidx.appcompat:appcompat:' + dependenciesConfig.androidxAppcompatVersion
+    implementation 'com.google.android.material:material:' + dependenciesConfig.googleMaterialVersion
+    implementation 'com.android.installreferrer:installreferrer:' + dependenciesConfig.installreferrerVersion
+    implementation 'com.adjust.sdk:adjust-android:' + dependenciesConfig.adjustVersion
+    implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:' + dependenciesConfig.thinkingDataSdkVersion
+    implementation 'cn.thinkingdata.android:TAThirdParty:' + dependenciesConfig.thinkingDataThirdPartyVersion
+}
