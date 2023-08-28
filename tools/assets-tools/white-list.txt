@@ -1,0 +1,3 @@
+en_jniLibs32.rar
+en_jniLibs64.rar
+*.data

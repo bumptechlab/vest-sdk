@@ -10,5 +10,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="This is vest game"
-        android:textColor="@color/black" />
+        android:textColor="@color/black"
+        android:textSize="25sp" />
 </FrameLayout>

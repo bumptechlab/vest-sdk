@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="one_more_click_go_back" translatable="false">Kembali sekali lagi untuk keluar</string>
+    <string name="refresh" translatable="false"><u>Refresh</u></string>
+    <string name="loading_error_tips" translatable="false">♠️ Kesalahan koneksi server, tolong coba lagi nanti ♣️</string>
+    <string name="msg_update_android_system_webview" translatable="false">Tolong tingkatkan Android System WebView untuk pengalaman bermain game yang lebih baik.</string>
+    <string name="btn_confirm" translatable="false">Tentu</string>
+    <string name="btn_never_ask" translatable="false">Tidak tanya</string>
+    <string name="btn_cancel" translatable="false">Batal</string>
+</resources>

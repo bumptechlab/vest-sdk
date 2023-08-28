@@ -1,0 +1,221 @@
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+    id 'com.kezong.fat-aar'
+}
+apply from: './publish.gradle' //aar发布脚本
+apply from: '../pack.gradle'    //aar输出脚本
+
+def androidConfig = rootProject.ext.android
+def dependenciesConfig = rootProject.ext.dependencies
+def proguardDictConfig = rootProject.ext.proguardDict
+def namespaces = rootProject.ext.namespaces
+def mavenConfig = rootProject.ext.maven
+def projectName = androidConfig.projectName
+def jksConfig = rootProject.ext.jksConfig
+
+def gitBranch() {
+    if (hasProperty("branch")) {
+        // 通过传参解决 Jenkins 获取异常的问题
+        return String.valueOf(getProperty('branch'))
+    }
+    def branch = ""
+    def proc = "git rev-parse --abbrev-ref HEAD".execute()
+    proc.in.eachLine { line -> branch = line }
+    proc.err.eachLine { line -> println line }
+    proc.waitFor()
+    return branch
+}
+
+def releaseTime() {
+    return new Date().format("MMddHHmm")
+}
+
+
+def execCommand(command) {
+    def commandProcess = command.execute()
+    commandProcess.in.eachLine { line -> println line }
+    commandProcess.err.eachLine { line -> println line }
+    commandProcess.waitFor()
+}
+
+println("> ${jks()}")
+//获取秘钥配置信息
+def jks() {
+    def info = "\n============签名信息============\n"
+    info += "storeFile: ${jksConfig.storeFile}\n"
+    info += "storePassword: ${jksConfig.storePassword}\n"
+    info += "keyAlias: ${jksConfig.keyAlias}\n"
+    info += "keyPassword: ${jksConfig.keyPassword}\n"
+    info += "===========END============\n"
+    info
+}
+
+//ShellPlugin插件需要每次Build之前clean
+project.afterEvaluate {
+    println("> ${projectName}: project afterEvaluate")
+    android.libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            def capitalizedVariant = variant.name.capitalize()
+            def assembleVariantTask = project.tasks."assemble${capitalizedVariant}"
+            assembleVariantTask.dependsOn clean
+            println("> ${projectName}: ${assembleVariantTask} dependsOn clean")
+        }
+    }
+}
+
+fataar {
+    /**
+     * If transitive is true, local jar module and remote library's dependencies will be embed. (local aar module does not support)
+     * If transitive is false, just embed first level dependency
+     * Default value is false
+     * @since 1.3.0
+     */
+    transitive = true
+}
+
+android {
+    namespace namespaces.appsdk
+    compileSdk androidConfig.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion androidConfig.minSdkVersion
+        targetSdkVersion androidConfig.targetSdkVersion
+        versionName mavenConfig.version
+        multiDexEnabled true
+        setProperty("archivesBaseName", "${gitBranch()}_${releaseTime()}")
+        consumerProguardFiles "../proguard/consumer-rules.pro"
+
+        buildConfigField "boolean", "FACEBOOK_ENABLE", "${androidConfig.facebookEnable}"
+        // 国际化资源配置, 只打包以下国家的资源
+        resConfigs 'en', 'hi', 'in', 'pt'
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("keystore/${jksConfig.storeFile}")
+            storePassword jksConfig.storePassword
+            keyAlias jksConfig.keyAlias
+            keyPassword jksConfig.keyPassword
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
+
+    sourceSets {
+        main {
+            setRoot 'src/main/'
+            assets.srcDir 'assets'
+            java.srcDir 'java'
+            res.srcDir 'res'
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+        }
+        sourceSets.all { sourceSet ->
+            //println("> ${projectName}: sourceSet[${sourceSet.name}]")
+            def dirs = ['src/SHF/java']
+            sourceSet.java.srcDirs += dirs
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            jniDebuggable true
+            renderscriptDebuggable true
+            minifyEnabled false
+            shrinkResources false
+            //R8混淆开启之后解决APP打开类加载时找不到类的问题,指定文件来放置启动时需要优先加载的类
+            multiDexKeepFile file("maindexlist.txt")
+            signingConfig signingConfigs.release
+        }
+        release {
+            debuggable false
+            jniDebuggable false
+            renderscriptDebuggable false
+            minifyEnabled false
+            shrinkResources false
+            //R8混淆开启之后解决APP打开类加载时找不到类的问题,指定文件来放置启动时需要优先加载的类
+            multiDexKeepFile file("maindexlist.txt")
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', '../proguard/consumer-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingAAR(project, android, mavenConfig.artifactIdSdk)
+}
+
+def taskName = getGradle().getStartParameter().getTaskNames().toString()
+
+android.libraryVariants.all { variant ->
+    variant.outputs.each { output ->
+        def capitalizedVariant = variant.name.capitalize()
+        println("> ${projectName}: Task${taskName} variant: ${capitalizedVariant}")
+        //1.在当前构建任务中生成字典
+        def shouldCreateProguardDict = taskName.contains(capitalizedVariant)
+        if (shouldCreateProguardDict) {
+            println("> ${projectName}: Task${taskName} 开始创建混淆字典")
+            def libDictJar = new File(project.projectDir, "../tools/proguard-tools/libs/lib-proguard-dict.jar")
+            def dictFiles = [
+                    new File(project.projectDir, "prog-dict-class.txt"),
+                    new File(project.projectDir, "prog-dict-package.txt"),
+                    new File(project.projectDir, "prog-dict-field-method.txt")
+            ]
+            def lines = proguardDictConfig.lines
+            def characters = proguardDictConfig.characters
+            def charsets = proguardDictConfig.charsetsAppSdk
+            //打印help信息（字符集索引）
+            execCommand("java -jar ${libDictJar} -h")
+            for (i in 0..<dictFiles.size()) {
+                def curDictFile = dictFiles.get(i);
+                if (!curDictFile.exists()) {
+                    execCommand("java -jar ${libDictJar} -o ${curDictFile} -c ${characters} -l ${lines} -ch ${charsets}")
+                }
+            }
+        }
+    }
+}
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    implementation 'com.google.android.material:material:' + dependenciesConfig.googleMaterialVersion
+    implementation 'androidx.multidex:multidex:' + dependenciesConfig.androidxMultidexVersion
+    implementation 'androidx.annotation:annotation:' + dependenciesConfig.androidxAnnotation
+    implementation 'com.android.installreferrer:installreferrer:' + dependenciesConfig.installreferrerVersion
+    implementation 'com.google.android.gms:play-services-ads-identifier:' + dependenciesConfig.googlePlayServiceVersion
+    implementation 'com.squareup.okhttp3:okhttp:' + dependenciesConfig.okhttpVersion
+    implementation 'com.squareup.okhttp3:logging-interceptor:' + dependenciesConfig.okhttpVersion
+    implementation 'com.onesignal:OneSignal:' + dependenciesConfig.onesignalVersion
+    //HttpDNS
+    implementation 'io.github.dnspod:httpdns-sdk:' + dependenciesConfig.httpdnsVersion
+    implementation 'androidx.room:room-rxjava2:' + dependenciesConfig.rxJavaVersion
+    compileOnly project(':app-core')
+    compileOnly project(':lib-util')
+    compileOnly project(':lib-okhttp')
+    embed project(path: ':lib-webview', configuration: 'default')
+    embed project(path: ':lib-walle-reader', configuration: 'default')
+}
+
+
+//apply plugin: "com.vanniktech.maven.publish"
+//// Kotlin Javadoc，非必须。如果有这个插件，发布时会生成 Javadoc，会延长发布时间。建议在 snapshot 阶段关闭
+//apply plugin: "org.jetbrains.dokka"
+
+//生成签名密钥，需要python3+faker库
+task genateSignJks(type: Exec) {
+    //生成签名密钥&相关文件
+    //br巴西使用葡语
+    //in印度使用印地语
+    //id印尼，faker没有印尼语使用默认的英语
+    def locale = "en_US"
+    if (androidConfig.country == "br") {
+        locale = "pt_BR" //br巴西
+    } else if (androidConfig.country == "in") {
+        locale = "hi_IN" //in印度
+    }
+    commandLine "python3", "../tools/keystore-tools/GenkeyJks.py", locale
+}

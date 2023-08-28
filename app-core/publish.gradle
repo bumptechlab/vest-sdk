@@ -1,0 +1,125 @@
+//这里是MavenCentral库的上传脚本
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+def mavenConfig = rootProject.ext.maven
+def mavenArtifactId = mavenConfig.artifactIdCore
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.source
+
+    //exclude "**/R.class"
+    //exclude "**/BuildConfig.class"
+}
+
+//以下属性动态从local.properties中读取
+ext["signing.keyId"] = ''
+ext["signing.password"] = ''
+ext["signing.secretKeyRingFile"] = ''
+
+ext["ossrhUsername"] = ''
+ext["ossrhName"] = ''
+ext["ossrhEmail"] = ''
+ext["ossrhPassword"] = ''
+
+File secretPropsFile = project.rootProject.file('maven.properties')
+if (secretPropsFile.exists()) {
+    println "Found secret props file, loading props"
+    Properties p = new Properties()
+    p.load(new FileInputStream(secretPropsFile))
+    p.each { name, value ->
+        ext[name] = value
+    }
+} else {
+    println "No props file, loading env vars"
+}
+publishing {
+    publications {
+        release(MavenPublication) {
+            // The coordinates of the library, being set from variables that
+            // we'll set up in a moment
+            groupId mavenConfig.groupId
+            artifactId mavenArtifactId
+            version mavenConfig.version
+
+            // Two artifacts, the `aar` and the sources
+            //artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+            def aarFilePath = "${rootDir}/sdk/${mavenConfig.version}/${mavenArtifactId}-v${mavenConfig.version}-release.aar"
+            artifact(aarFilePath)
+            artifact androidSourcesJar
+
+            // Self-explanatory metadata for the most part
+            pom {
+                name = mavenArtifactId
+                description = 'This is vest-core library'
+                // If your project has a dedicated site, use its URL here
+                url = mavenConfig.homePage
+                licenses {
+                    license {
+                        //协议类型，一般默认Apache License2.0的话不用改：
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = ossrhUsername
+                        name = ossrhName
+                        email = ossrhEmail
+                    }
+                }
+                // Version control info, if you're using GitHub, follow the format as seen here
+                scm {
+                    //修改成你的Git地址：
+                    connection = 'scm:' + mavenConfig.repositoriesSSH
+                    developerConnection = 'scm:' + mavenConfig.repositoriesSSH
+                    //分支地址：
+                    url = mavenConfig.branchPage
+                }
+                // A slightly hacky fix so that your POM will include any transitive dependencies
+                // that your library builds upon
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    project.configurations.implementation.allDependencies.each {
+                        if ((it.group != null && it.group != "unspecified")
+                                && (it.name != null && it.name != "unspecified")
+                                && (it.version != null && it.version != "unspecified")) {
+                            // 过滤项目内library引用
+                            println "[pom] append dependency=${it.toString()}"
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', it.group)
+                            dependencyNode.appendNode('artifactId', it.name)
+                            dependencyNode.appendNode('version', it.version)
+                        } else {
+                            println("[pom] found unspecified dependencies")
+                        }
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        // The repository to publish to, Sonatype/MavenCentral
+        maven {
+            // This is an arbitrary name, you may also use "mavencentral" or
+            // any other name that's descriptive for you
+            name = "mavenCentral"
+
+            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+            // You only need this if you want to publish snapshots, otherwise just set the URL
+            // to the release repo directly
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            // The username and password we've fetched earlier
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }
+}
+signing {
+    sign publishing.publications
+}

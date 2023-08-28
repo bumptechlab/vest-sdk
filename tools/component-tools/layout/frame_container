@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="$color"
+    android:orientation="vertical"
+    tools:viewBindingIgnore="true">
+
+    <View
+        android:id="@+id/v_status_view"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:background="$color"
+        tools:background="#E71E1E" />
+
+    <View
+        android:id="@+id/v_action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="$color"
+        tools:background="#BB2323" />
+
+
+    <FrameLayout
+        android:id="@+id/v_fragments_container"
+        android:background="$color"
+        tools:background="#2196F3"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>
