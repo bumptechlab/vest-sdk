@@ -59,8 +59,6 @@ import code.sdk.core.util.FileUtil;
 import code.sdk.core.util.IOUtil;
 import code.sdk.core.util.PreferenceUtil;
 import code.sdk.core.util.UIUtil;
-import code.sdk.httpdns.HttpDnsMgr;
-import code.sdk.manager.OneSignalManager;
 import code.sdk.network.download.DownloadTask;
 import code.sdk.receiver.NetworkReceiver;
 import code.sdk.util.AndroidBug5497Workaround;
@@ -502,7 +500,7 @@ public class WebViewActivity extends BaseActivity {
             finish();
             return;
         }
-        HttpDnsMgr.init(AppGlobal.getApplication());
+//        HttpDnsMgr.init(AppGlobal.getApplication());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_webview);
         initParameters();
@@ -529,9 +527,9 @@ public class WebViewActivity extends BaseActivity {
 
         if (isGame) {
             AdjustManager.trackEventAccess(null);
-            OneSignalManager.init(this);
-            OneSignalManager.showPrompt();
-            OneSignalManager.setup();
+//            OneSignalManager.init(this);
+//            OneSignalManager.showPrompt();
+//            OneSignalManager.setup();
         }
     }
 

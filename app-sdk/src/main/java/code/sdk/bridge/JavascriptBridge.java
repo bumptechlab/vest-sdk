@@ -7,41 +7,33 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
 import android.text.TextUtils;
-import android.util.Pair;
 import android.webkit.JavascriptInterface;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityManagerCompat;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import cocos.creator.walle.ExtraInfo;
 import cocos.creator.walle.ExtraInfoReader;
 import code.sdk.BuildConfig;
+import code.sdk.core.manager.AdjustManager;
+import code.sdk.core.manager.ThinkingDataManager;
+import code.sdk.core.util.CocosPreferenceUtil;
 import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.EmulatorChecker;
 import code.sdk.core.util.FileUtil;
 import code.sdk.core.util.PackageUtil;
 import code.sdk.core.util.PreferenceUtil;
-import code.sdk.httpdns.HttpDnsHttpListener;
-import code.sdk.httpdns.HttpDnsMgr;
-import code.sdk.httpdns.HttpDnsWsListener;
-import code.sdk.core.manager.AdjustManager;
-import code.sdk.manager.OneSignalManager;
-import code.sdk.core.manager.ThinkingDataManager;
 import code.sdk.network.download.DownloadTask;
-import code.sdk.core.util.CocosPreferenceUtil;
 import code.sdk.util.KeyChainUtil;
 import code.util.AppGlobal;
 import code.util.LogUtil;
@@ -53,7 +45,7 @@ public class JavascriptBridge {
     /**
      * 6: 支持HttpDns
      */
-    private static final int BRIDGE_VERSION = 6;
+    private static final int BRIDGE_VERSION = 5;
     public static final String DIR_IMAGES = "images";
     public static final String PROMOTION_MATERIAL_FILENAME = "promotion_material_%s_%s";
     public static final String PROMOTION_IMAGE_FILENAME = "promotion_%d.jpg";
@@ -282,9 +274,9 @@ public class JavascriptBridge {
 
         if (CocosPreferenceUtil.KEY_USER_ID.equals(key)) {
             ThinkingDataManager.getInstance().loginAccount();
-            OneSignalManager.setup();
+//            OneSignalManager.setup();
         } else if (key.endsWith("_cur_month_lv") || key.endsWith("_last_month_lv") || key.endsWith("_latest_recharge")) {
-            OneSignalManager.setup();
+//            OneSignalManager.setup();
         }
     }
 
@@ -530,136 +522,141 @@ public class JavascriptBridge {
 
     @JavascriptInterface
     public boolean isHttpDnsEnable() {
-        return HttpDnsMgr.isHttpDnsEnable();
+//        return HttpDnsMgr.isHttpDnsEnable();
+        return false;
     }
 
     @JavascriptInterface
     public String httpdns(String host) {
-        Pair<Integer, String> ipPair = HttpDnsMgr.getAddrByName(host);
-        return ipPair.second;
+//        Pair<Integer, String> ipPair = HttpDnsMgr.getAddrByName(host);
+//        return ipPair.second;
+        return "";
     }
 
     @JavascriptInterface
     public void httpdnsInit(String hosts) {
-        LogUtil.d(TAG, "[HttpDns] init: %s", hosts);
-        try {
-            JSONArray hostsJson = new JSONArray(hosts);
-            List<String> hostsList = new ArrayList<String>();
-            for (int i = 0; i < hostsJson.length(); i++) {
-                hostsList.add(hostsJson.optString(i));
-            }
-            HttpDnsMgr.init(AppGlobal.getApplication(), hostsList.toArray(new String[]{}));
-        } catch (Exception e) {
-            LogUtil.e(TAG, e, "[HttpDns] init fail");
-            //ObfuscationStub7.inject();
-        }
+//        LogUtil.d(TAG, "[HttpDns] init: %s", hosts);
+//        try {
+//            JSONArray hostsJson = new JSONArray(hosts);
+//            List<String> hostsList = new ArrayList<String>();
+//            for (int i = 0; i < hostsJson.length(); i++) {
+//                hostsList.add(hostsJson.optString(i));
+//            }
+//            HttpDnsMgr.init(AppGlobal.getApplication(), hostsList.toArray(new String[]{}));
+//        } catch (Exception e) {
+//            LogUtil.e(TAG, e, "[HttpDns] init fail");
+//            //ObfuscationStub7.inject();
+//        }
     }
 
     @JavascriptInterface
     public String httpdnsRequestSync(String req, byte[] body) {
-        LogUtil.w(TAG, "[HttpDns] httpdnsRequestSync: %s", req);
-        String responseJson = "";
-        try {
-            JSONObject reqJson = new JSONObject(req);
-            String url = reqJson.optString("url");
-            String method = reqJson.optString("method");
-            JSONObject headerJson = reqJson.optJSONObject("header");
-            responseJson = HttpDnsMgr.doHttpRequestSync(url, method, body, headerJson).toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            //ObfuscationStub3.inject();
-        }
-        return responseJson;
+//        LogUtil.w(TAG, "[HttpDns] httpdnsRequestSync: %s", req);
+//        String responseJson = "";
+//        try {
+//            JSONObject reqJson = new JSONObject(req);
+//            String url = reqJson.optString("url");
+//            String method = reqJson.optString("method");
+//            JSONObject headerJson = reqJson.optJSONObject("header");
+//            responseJson = HttpDnsMgr.doHttpRequestSync(url, method, body, headerJson).toString();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            //ObfuscationStub3.inject();
+//        }
+//        return responseJson;
+        return "";
     }
 
     @JavascriptInterface
     public void httpdnsRequestAsync(String req, byte[] body) {
-        LogUtil.w(TAG, "[HttpDns] httpdnsRequestAsync: %s", req);
-        try {
-            JSONObject reqJson = new JSONObject(req);
-            String id = reqJson.optString("id");
-            String url = reqJson.optString("url");
-            String method = reqJson.optString("method");
-            JSONObject headerJson = reqJson.optJSONObject("header");
-            HttpDnsMgr.doHttpRequestAsync(id, url, method, body, headerJson, new HttpDnsHttpListener() {
-                        @Override
-                        public void onResponse(String requestId, JSONObject response) {
-                            if (mCallback != null) {
-                                mCallback.onHttpDnsHttpResponse(requestId, response.toString());
-                            }
-                        }
-                    }
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            //ObfuscationStub8.inject();
-        }
+//        LogUtil.w(TAG, "[HttpDns] httpdnsRequestAsync: %s", req);
+//        try {
+//            JSONObject reqJson = new JSONObject(req);
+//            String id = reqJson.optString("id");
+//            String url = reqJson.optString("url");
+//            String method = reqJson.optString("method");
+//            JSONObject headerJson = reqJson.optJSONObject("header");
+//            HttpDnsMgr.doHttpRequestAsync(id, url, method, body, headerJson, new HttpDnsHttpListener() {
+//                        @Override
+//                        public void onResponse(String requestId, JSONObject response) {
+//                            if (mCallback != null) {
+//                                mCallback.onHttpDnsHttpResponse(requestId, response.toString());
+//                            }
+//                        }
+//                    }
+//            );
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            //ObfuscationStub8.inject();
+//        }
     }
 
 
     @JavascriptInterface
     public void httpdnsWsOpen(String req) {
-        LogUtil.w(TAG, "[HttpDns] httpdnsWsOpen: %s", req);
-        try {
-            JSONObject reqJson = new JSONObject(req);
-            String id = reqJson.optString("id");
-            String url = reqJson.optString("url");
-            JSONObject headerJson = reqJson.optJSONObject("header");
-            HttpDnsMgr.doWsOpen(id, url, headerJson, new HttpDnsWsListener() {
-                @Override
-                public void onResponse(String requestId, JSONObject response) {
-                    if (mCallback != null) {
-                        mCallback.onHttpDnsWsResponse(requestId, response.toString());
-                    }
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            //ObfuscationStub2.inject();
-        }
+//        LogUtil.w(TAG, "[HttpDns] httpdnsWsOpen: %s", req);
+//        try {
+//            JSONObject reqJson = new JSONObject(req);
+//            String id = reqJson.optString("id");
+//            String url = reqJson.optString("url");
+//            JSONObject headerJson = reqJson.optJSONObject("header");
+//            HttpDnsMgr.doWsOpen(id, url, headerJson, new HttpDnsWsListener() {
+//                @Override
+//                public void onResponse(String requestId, JSONObject response) {
+//                    if (mCallback != null) {
+//                        mCallback.onHttpDnsWsResponse(requestId, response.toString());
+//                    }
+//                }
+//            });
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            //ObfuscationStub2.inject();
+//        }
     }
 
     @JavascriptInterface
     public String httpdnsWsSend(String req, byte[] body) {
-        LogUtil.w(TAG, "[HttpDns] httpdnsWsSend: %s", req);
-        String responseJson = "";
-        try {
-            JSONObject reqJson = new JSONObject(req);
-            String id = reqJson.optString("id");
-            responseJson = HttpDnsMgr.doWsSend(id, body).toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            //ObfuscationStub1.inject();
-        }
-        return responseJson;
+//        LogUtil.w(TAG, "[HttpDns] httpdnsWsSend: %s", req);
+//        String responseJson = "";
+//        try {
+//            JSONObject reqJson = new JSONObject(req);
+//            String id = reqJson.optString("id");
+//            responseJson = HttpDnsMgr.doWsSend(id, body).toString();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            //ObfuscationStub1.inject();
+//        }
+//        return responseJson;
+        return "";
     }
 
     @JavascriptInterface
     public void httpdnsWsClose(String req) {
-        LogUtil.w(TAG, "[HttpDns] httpdnsWsClose: %s", req);
-        try {
-            JSONObject reqJson = new JSONObject(req);
-            String id = reqJson.optString("id");
-            HttpDnsMgr.doWsClose(id);
-        } catch (Exception e) {
-            e.printStackTrace();
-            //ObfuscationStub1.inject();
-        }
+//        LogUtil.w(TAG, "[HttpDns] httpdnsWsClose: %s", req);
+//        try {
+//            JSONObject reqJson = new JSONObject(req);
+//            String id = reqJson.optString("id");
+//            HttpDnsMgr.doWsClose(id);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            //ObfuscationStub1.inject();
+//        }
     }
 
     @JavascriptInterface
     public String httpdnsWsConnected(String req) {
-        LogUtil.w(TAG, "[HttpDns] httpdnsWsConnected: %s", req);
-        String responseJson = "";
-        try {
-            JSONObject reqJson = new JSONObject(req);
-            String id = reqJson.optString("id");
-            responseJson = HttpDnsMgr.isWsConnected(id).toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            //ObfuscationStub5.inject();
-        }
-        return responseJson;
+//        LogUtil.w(TAG, "[HttpDns] httpdnsWsConnected: %s", req);
+//        String responseJson = "";
+//        try {
+//            JSONObject reqJson = new JSONObject(req);
+//            String id = reqJson.optString("id");
+//            responseJson = HttpDnsMgr.isWsConnected(id).toString();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            //ObfuscationStub5.inject();
+//        }
+//        return responseJson;
+        return "";
     }
 
     @JavascriptInterface

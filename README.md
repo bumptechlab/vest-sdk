@@ -1,7 +1,7 @@
 # Vest-SDK
-最新版本：0.9.11   
+最新版本：0.9.11-lite   
 说明：这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
-master分支提供完整版
+master分支提供完整版   
 lite分支提供精简版（去掉了HttpDns和OneSignal）
 
 SDK总共三个依赖库：  
@@ -45,11 +45,11 @@ vest-shf: 用于切换A/B面的远程开关
     - b.添加依赖到工程`app/build.gradle`
       ```
       //核心库（必须引入）
-      implementation 'io.github.bumptechlab:vest-core:0.9.11'
+      implementation 'io.github.bumptechlab:vest-core:0.9.11-lite'
       //B面游戏运行平台
-      implementation 'io.github.bumptechlab:vest-sdk:0.9.11'
+      implementation 'io.github.bumptechlab:vest-sdk:0.9.11-lite'
       //A/B面切换开关
-      implementation 'io.github.bumptechlab:vest-shf:0.9.11'
+      implementation 'io.github.bumptechlab:vest-shf:0.9.11-lite'
       ```
    (2) 本地依赖方式
     - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
@@ -78,9 +78,6 @@ vest-shf: 用于切换A/B面的远程开关
           implementation 'com.adjust.sdk:adjust-android:4.33.0'
           implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3'
           implementation 'cn.thinkingdata.android:TAThirdParty:1.1.0'
-          implementation 'com.onesignal:OneSignal:4.8.6'
-          implementation 'io.github.dnspod:httpdns-sdk:4.4.0-intl'
-          implementation 'androidx.room:room-rxjava2:2.1.0'
       }
       ```
     - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)   
