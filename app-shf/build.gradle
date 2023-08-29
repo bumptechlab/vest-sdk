@@ -38,9 +38,7 @@ android {
         targetSdkVersion androidConfig.targetSdkVersion
         versionName mavenConfig.version
         multiDexEnabled true
-
         consumerProguardFiles "../proguard/consumer-rules.pro"
-
         buildConfigField 'String', 'SDK_NAME', '"' + mavenConfig.sdkName + '"'
         buildConfigField 'String', 'SDK_VERSION', '"' + mavenConfig.version + '"'
         buildConfigField 'String', 'BUILD_NUMBER', '"' + releaseTime() + '"'

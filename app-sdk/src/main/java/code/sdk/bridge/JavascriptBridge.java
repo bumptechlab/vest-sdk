@@ -321,9 +321,7 @@ public class JavascriptBridge {
 
     @JavascriptInterface
     public boolean isFacebookEnable() {
-        return BuildConfig.FACEBOOK_ENABLE
-                && !TextUtils.isEmpty(ConfigPreference.readFacebookAppId())
-                && !TextUtils.isEmpty(ConfigPreference.readFacebookClientToken());
+        return false;
     }
 
     @JavascriptInterface

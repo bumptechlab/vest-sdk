@@ -1,7 +1,7 @@
 # Vest-SDK
 最新版本：0.9.11   
 说明：这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
-main分支提供完整版
+main分支提供完整版   
 lite分支提供精简版（去掉了HttpDns和OneSignal）
 
 SDK总共三个依赖库：  
@@ -21,7 +21,7 @@ vest-shf: 用于切换A/B面的远程开关
 - app-core是app-sdk、app-shf的核心库
 - app-sdk用于构建游戏运行的平台
 - app-shf用于构建审核服开关功能，用于切换A/B面
-- app是一个demo工程，展示如何使用vest-sdk
+- app是用于测试sdk的测试工程
 - 开源sdk使用者可以使用以下构建命令构建出aar，再自行导入自己的工程。（总共三个aar文件，分别输出到sdk目录和app/libs目录）
   ```
   ./gradlew clean app-core:assembleRelease app-sdk:assembleRelease app-shf:assembleRelease
@@ -54,16 +54,6 @@ vest-shf: 用于切换A/B面的远程开关
    (2) 本地依赖方式
     - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
       ```
-      //根据gradle版本决定是否需要指定libs目录（一般不需要）
-      android {
-        repositories {
-          flatDir {
-            dirs 'libs'
-          }
-        }
-      }
-      ```
-      ```
       //三方依赖必须引入
       dependencies {
           implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
@@ -84,6 +74,7 @@ vest-shf: 用于切换A/B面的远程开关
       }
       ```
     - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)   
+   
    (3) 源码依赖方式（适用于使用开源工程的开发者）
     - a.把模块app-core, app-sdk, app-shf导入到你的工程中（注意还有其他依赖模块，统一以lib-开头）
     - b.在你的app模块build.gradle中添加如下依赖：

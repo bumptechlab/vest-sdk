@@ -752,18 +752,10 @@ public class WebViewActivity extends BaseActivity {
 
     /* Facebook Login START */
     private void loginFacebook() {
-        if (!BuildConfig.FACEBOOK_ENABLE) {
-            LogUtil.w(TAG, "Facebook login disable...");
-            return;
-        }
         launchFacebookSDK(true);
     }
 
     private void logoutFacebook() {
-        if (!BuildConfig.FACEBOOK_ENABLE) {
-            LogUtil.w(TAG, "Facebook logout disable...");
-            return;
-        }
         launchFacebookSDK(false);
     }
 
