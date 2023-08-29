@@ -21,15 +21,15 @@ vest-shf: 用于切换A/B面的远程开关
 - app-core是app-sdk、app-shf的核心库
 - app-sdk用于构建游戏运行的平台
 - app-shf用于构建审核服开关功能，用于切换A/B面
-- app是用于测试sdk的测试工程
+- app是一个demo工程，展示如何使用vest-sdk
 - 开源sdk使用者可以使用以下构建命令构建出aar，再自行导入自己的工程。（总共三个aar文件，分别输出到sdk目录和app/libs目录）
-    ```
-    ./gradlew clean app-core:assembleRelease app-sdk:assembleRelease app-shf:assembleRelease
-    ```
+  ```
+  ./gradlew clean app-core:assembleRelease app-sdk:assembleRelease app-shf:assembleRelease
+  ```
 
 ## SDK集成步骤
 
-1. 添加依赖(maven依赖或者本地依赖)。   
+1. 添加依赖，总共有三种依赖方式：maven依赖、本地libs依赖、源码依赖   
    vest-core是核心库必须引用，另外两个库根据需要引用。   
    vest-shf只提供A/B面切换开关功能。   
    vest-sdk则是B面游戏运行平台。
@@ -85,7 +85,7 @@ vest-shf: 用于切换A/B面的远程开关
       ```
     - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)   
    (3) 源码依赖方式（适用于使用开源工程的开发者）
-    - a.把模块app-core, app-sdk, app-shf导入到你的工程中
+    - a.把模块app-core, app-sdk, app-shf导入到你的工程中（注意还有其他依赖模块，统一以lib-开头）
     - b.在你的app模块build.gradle中添加如下依赖：
       ```
       implementation project(":app-core")
