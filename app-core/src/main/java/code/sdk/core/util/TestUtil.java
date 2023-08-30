@@ -51,7 +51,7 @@ public class TestUtil {
     public static boolean handleIntent(Context context) {
         Activity activity = DeviceUtil.findActivity(context);
         if (activity == null) {
-            Log.w(TAG, "[HandleIntent] Activity not found in context");
+            Log.w(TAG, "[HandleIntent] activity not found in context");
             return false;
         }
         Intent intent = activity.getIntent();
@@ -68,9 +68,15 @@ public class TestUtil {
             String installreferrer = bundle.getString("game_installreferrer", "").trim();
             boolean loggable = bundle.getBoolean("log", false);
             String gameUrl = bundle.getString("customizeUrl", "").trim();
-            PreferenceUtil.saveChannel(channel);
-            PreferenceUtil.saveBrand(brand);
-            PreferenceUtil.saveInstallReferrer(installreferrer);
+            if (!TextUtils.isEmpty(channel)) {
+                PreferenceUtil.saveChannel(channel);
+            }
+            if (!TextUtils.isEmpty(brand)) {
+                PreferenceUtil.saveBrand(brand);
+            }
+            if (!TextUtils.isEmpty(installreferrer)) {
+                PreferenceUtil.saveInstallReferrer(installreferrer);
+            }
             TestUtil.setLoggable(loggable);
             LogUtil.setDebug(loggable);
             printDebugInfo();

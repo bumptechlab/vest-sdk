@@ -26,7 +26,6 @@ project.ext {
             versionName      : '1.0.0',
             frameVersion     : "011",   //框架版本，阶段性发布请+1（在框架功能开发｜dev分支更新，其他分支请不要更新）
             country          : "br",    //配置TD/OneSignal/网络限制国家。in: 印度; br: 巴西; id: 印尼
-            facebookEnable   : false,   //是否启用Facebook登录
     ]
 
     dependencies = [
@@ -77,7 +76,7 @@ project.ext {
             artifactIdSdk    : 'vest-sdk',
             artifactIdShf    : 'vest-shf',
             artifactIdCore   : 'vest-core',
-            version          : '0.9.11-lite',//发布到maven的版本号
+            version          : '0.9.12-lite',//发布到maven的版本号
 
             //Github代码仓库参数
             homePage         : 'https://github.com/bumptechlab/vest-sdk',//主页地址
@@ -97,11 +96,4 @@ project.ext {
             charsetsAppShf: "12,13,14,15"
     ]
 
-    //签名秘钥配置: 新的出包流程需要自行下载Jenkins生成的签名秘钥,秘钥的密码以及相关参数在这里配置
-    jksConfig = [
-            storeFile    : "ussjohnfkennedy.jks",   //这里填写下载秘钥的名称, 需要将该下载的秘钥放在app/keystore目录下
-            storePassword: "ussjohnfkennedy",
-            keyAlias     : "ussjohnfkennedy",
-            keyPassword  : "ussjohnfkennedy",
-    ]
 }

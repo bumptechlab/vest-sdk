@@ -77,14 +77,16 @@ public class VestSHF {
         remoteSource.setCallback((success, remoteConfig) -> {
             mLaunchConfig.setConfigLoaded(true);
             if (success && remoteConfig != null) {
-                AdjustManager.trackEventGreeting(null);
                 PreferenceUtil.saveHttpDnsEnable(remoteConfig.isHttpDns());
                 PreferenceUtil.saveTargetCountry(remoteConfig.getCountry());
             } else {
                 PreferenceUtil.saveHttpDnsEnable(false);
             }
-            checkRemoteConfig(remoteConfig);
             VestCore.initThirdSDK();
+            if (success && remoteConfig != null) {
+                AdjustManager.trackEventGreeting(null);
+            }
+            checkRemoteConfig(remoteConfig);
             LogUtil.d(TAG, "[HttpDns] isHttpDnsEnable: " + PreferenceUtil.readHttpDnsEnable());
         });
         remoteSource.fetch();
