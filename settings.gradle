@@ -12,7 +12,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Vest-SDK-Publish"
+rootProject.name = "Vest-SDK"
 include ':app-sdk'
 include ':lib-okhttp'
 include ':lib-webview'

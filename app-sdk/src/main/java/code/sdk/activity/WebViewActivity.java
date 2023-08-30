@@ -258,7 +258,7 @@ public class WebViewActivity extends BaseActivity {
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
             LogUtil.e(TAG, "onReceivedSslError: %s", error.getUrl());
-            handler.proceed();
+            //handler.proceed();
         }
 
 

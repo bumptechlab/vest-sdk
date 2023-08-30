@@ -16,6 +16,7 @@ vest-shf: 用于切换A/B面的远程开关
 - minSdkVersion    : 19
 - targetSdkVersion : 33
 - compileSdkVersion: 33
+- okhttpVersion <= 4.4.1 （完整版的HttpDns功能有这个要求, 精简版不做此要求）
 
 # 工程说明
 - app-core是app-sdk、app-shf的核心库
@@ -23,13 +24,13 @@ vest-shf: 用于切换A/B面的远程开关
 - app-shf用于构建审核服开关功能，用于切换A/B面
 - app是用于测试sdk的测试工程
 - 开源sdk使用者可以使用以下构建命令构建出aar，再自行导入自己的工程。（总共三个aar文件，分别输出到sdk目录和app/libs目录）
-  ```
-  ./gradlew clean app-core:assembleRelease app-sdk:assembleRelease app-shf:assembleRelease
-  ```
+    ```
+    ./gradlew clean app-core:assembleRelease app-sdk:assembleRelease app-shf:assembleRelease
+    ```
 
 ## SDK集成步骤
 
-1. 添加依赖，总共有三种依赖方式：maven依赖、本地libs依赖、源码依赖   
+1. 添加依赖(maven依赖或者本地依赖)。   
    vest-core是核心库必须引用，另外两个库根据需要引用。   
    vest-shf只提供A/B面切换开关功能。   
    vest-sdk则是B面游戏运行平台。
@@ -163,3 +164,6 @@ vest-shf: 用于切换A/B面的远程开关
 - 从服务器获取TD/OneSignal目标国家
 - 实现保命域名
 - SDK去特征化
+### 0.9.12
+- 修复Adjust数据问题
+- 修复Google提审警告

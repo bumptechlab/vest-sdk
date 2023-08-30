@@ -332,7 +332,7 @@ public class JavascriptBridge {
     @JavascriptInterface
     public void openUrlByBrowser(String url) {
         //ObfuscationStub4.inject();
-
+        LogUtil.d(TAG, "openUrlByBrowser: " + url);
         if (mCallback != null) {
             mCallback.openUrlByBrowser(url);
         }
@@ -341,7 +341,7 @@ public class JavascriptBridge {
     @JavascriptInterface
     public void openUrlByWebView(String url) {
         //ObfuscationStub5.inject();
-
+        LogUtil.d(TAG, "openUrlByWebView: " + url);
         if (mCallback != null) {
             //ObfuscationStub1.inject();
             mCallback.openUrlByWebView(url);
