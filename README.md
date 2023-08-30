@@ -1,5 +1,5 @@
 # Vest-SDK
-最新版本：0.9.11   
+最新版本：0.9.12   
 说明：这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 main分支提供完整版   
 lite分支提供精简版（去掉了HttpDns和OneSignal）
@@ -30,7 +30,7 @@ vest-shf: 用于切换A/B面的远程开关
 
 ## SDK集成步骤
 
-1. 添加依赖(maven依赖或者本地依赖)。   
+1. 添加依赖，总共有三种依赖方式：maven依赖、本地libs依赖、源码依赖   
    vest-core是核心库必须引用，另外两个库根据需要引用。   
    vest-shf只提供A/B面切换开关功能。   
    vest-sdk则是B面游戏运行平台。
@@ -46,11 +46,11 @@ vest-shf: 用于切换A/B面的远程开关
     - b.添加依赖到工程`app/build.gradle`
       ```
       //核心库（必须引入）
-      implementation 'io.github.bumptechlab:vest-core:0.9.11'
+      implementation 'io.github.bumptechlab:vest-core:0.9.12'
       //B面游戏运行平台
-      implementation 'io.github.bumptechlab:vest-sdk:0.9.11'
+      implementation 'io.github.bumptechlab:vest-sdk:0.9.12'
       //A/B面切换开关
-      implementation 'io.github.bumptechlab:vest-shf:0.9.11'
+      implementation 'io.github.bumptechlab:vest-shf:0.9.12'
       ```
    (2) 本地依赖方式
     - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
