@@ -278,7 +278,7 @@ public class JavascriptBridge {
         CocosPreferenceUtil.putString(key, value);
 
         if (CocosPreferenceUtil.KEY_USER_ID.equals(key)) {
-            ThinkingDataManager.getInstance().loginAccount();
+            ThinkingDataManager.loginAccount();
 //            OneSignalManager.setup();
         } else if (key.endsWith("_cur_month_lv") || key.endsWith("_last_month_lv") || key.endsWith("_latest_recharge")) {
 //            OneSignalManager.setup();

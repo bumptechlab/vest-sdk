@@ -18,25 +18,13 @@ import code.util.LogUtil;
 
 public class ThinkingDataManager {
     public static final String TAG = ThinkingDataManager.class.getSimpleName();
-    private static ThinkingDataManager sInstance;
-    private ThinkingAnalyticsSDK mTDSdk;
+    private static ThinkingAnalyticsSDK mTDSdk;
 
-    public static ThinkingDataManager init(Context context) {
-        if (sInstance == null) {
-            sInstance = new ThinkingDataManager(context);
-        }
-        return sInstance;
-    }
-
-    private ThinkingDataManager(Context context) {
+    public static void init(Context context) {
         initTDSdk(context);
     }
 
-    public static ThinkingDataManager getInstance() {
-        return sInstance;
-    }
-
-    private void initTDSdk(Context context) {
+    private static void initTDSdk(Context context) {
         String appId = ConfigPreference.readThinkingDataAppId();
         String serverUrl = ConfigPreference.readThinkingDataHost();
         LogUtil.w(TAG, "[ThinkingData] init, appId = %s, serverUrl = %s", appId, serverUrl);
@@ -54,7 +42,7 @@ public class ThinkingDataManager {
         loginAccount();
     }
 
-    private void initTDEvents() {
+    private static void initTDEvents() {
         // add Adjust session callback params
         // mTDSdk.enableThirdPartySharing(TDThirdPartyShareType.TD_ADJUST);
         // enable auto track
@@ -73,7 +61,7 @@ public class ThinkingDataManager {
         mTDSdk.enableAutoTrack(eventTypeList, extraProperties);
     }
 
-    public void loginAccount() {
+    public static void loginAccount() {
         if (mTDSdk == null) {
             //ObfuscationStub7.inject();
             LogUtil.w(TAG, "[ThinkingData] not inited!");
@@ -94,7 +82,7 @@ public class ThinkingDataManager {
     /**
      * logout will clear #account_id
      */
-    public void logoutAccount() {
+    public static void logoutAccount() {
         if (mTDSdk == null) {
             //ObfuscationStub7.inject();
             LogUtil.w(TAG, "[ThinkingData] not inited!");
@@ -106,7 +94,7 @@ public class ThinkingDataManager {
     /**
      * upload data immediately
      */
-    public void flush() {
+    public static void flush() {
         if (mTDSdk == null) {
             //ObfuscationStub7.inject();
             LogUtil.w(TAG, "[ThinkingData] not inited!");
@@ -127,7 +115,7 @@ public class ThinkingDataManager {
         return VestCore.getTargetCountry().toUpperCase();
     }
 
-    public String getTDDistinctId() {
+    public static String getTDDistinctId() {
         if (mTDSdk == null) {
             //ObfuscationStub7.inject();
             LogUtil.w(TAG, "[ThinkingData] not inited!");
@@ -136,7 +124,7 @@ public class ThinkingDataManager {
         return mTDSdk.getDistinctId();
     }
 
-    public String getTDDeviceId() {
+    public static String getTDDeviceId() {
         if (mTDSdk == null) {
             //ObfuscationStub7.inject();
             LogUtil.w(TAG, "[ThinkingData] not inited!");
@@ -145,7 +133,7 @@ public class ThinkingDataManager {
         return mTDSdk.getDeviceId();
     }
 
-    public void trackEvent(String event, JSONObject properties) {
+    public static void trackEvent(String event, JSONObject properties) {
         if (mTDSdk == null) {
             //ObfuscationStub7.inject();
             LogUtil.w(TAG, "[ThinkingData] not inited!");

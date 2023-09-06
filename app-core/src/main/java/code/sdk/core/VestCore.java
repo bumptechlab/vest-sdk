@@ -109,7 +109,7 @@ public class VestCore {
     }
 
     public static void onDestroy() {
-        ThinkingDataManager.getInstance().flush();
+        ThinkingDataManager.flush();
     }
 
 
@@ -134,10 +134,8 @@ public class VestCore {
                     json.put("crash_msg", e.getLocalizedMessage());
                     json.put("crash_cause", e.getCause());
                     LogUtil.i(TAG, "setUncaughtException json: %s", json);
-                    if (ThinkingDataManager.getInstance() != null) {
-                        ThinkingDataManager.getInstance().trackEvent("td_crash", json);
-                        ThinkingDataManager.getInstance().flush();
-                    }
+                    ThinkingDataManager.trackEvent("td_crash", json);
+                    ThinkingDataManager.flush();
                 } catch (Throwable exception) {
                     LogUtil.e(TAG, exception, "setUncaughtException errorInLogging: ");
                 } finally {
