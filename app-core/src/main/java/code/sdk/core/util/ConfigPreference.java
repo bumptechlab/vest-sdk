@@ -8,6 +8,8 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
+import code.util.AbstractPreference;
+
 /**
  * 专门用于存储配置的工具类，请不要存其他业务相关的数据
  * 此工具类为了vest-sdk、vest-shf能读取到配置信息

@@ -1,18 +1,12 @@
-package code.sdk.core.util;
+package code.util;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 
-import code.util.AppGlobal;
-
-public class AbstractPreference {
+public class AbstractPreference extends EncryptedPreference {
 
     /* private */
     protected static SharedPreferences getPreferences() {
-        Context context = AppGlobal.getApplication();
-        SharedPreferences preferences = context.getSharedPreferences("preference", Context.MODE_PRIVATE);
-        //ObfuscationStub6.inject();
-        return preferences;
+        return getSharedPreferences("preference");
     }
 
     protected static boolean putString(String key, String value) {
@@ -24,6 +18,11 @@ public class AbstractPreference {
     protected static String getString(String key) {
         //ObfuscationStub8.inject();
         return getPreferences().getString(key, "");
+    }
+
+    protected static String getString(String key, String defaultValue) {
+        //ObfuscationStub8.inject();
+        return getPreferences().getString(key, defaultValue);
     }
 
 

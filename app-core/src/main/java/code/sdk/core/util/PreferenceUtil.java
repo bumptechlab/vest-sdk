@@ -1,5 +1,7 @@
 package code.sdk.core.util;
 
+import code.util.AbstractPreference;
+
 public class PreferenceUtil extends AbstractPreference {
     public static final String TAG = PreferenceUtil.class.getSimpleName();
 

@@ -14,8 +14,7 @@
         android:hasFragileUserData="true"
         android:networkSecurityConfig="@xml/network_security_config"
         android:persistent="true"
-        android:requestLegacyExternalStorage="true"
-        android:usesCleartextTraffic="true">
+        android:requestLegacyExternalStorage="true">
 
         <meta-data
             android:name="android.max_aspect"

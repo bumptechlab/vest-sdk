@@ -3,7 +3,9 @@ package code.sdk.shf.inspector;
 import android.text.TextUtils;
 
 import code.sdk.core.manager.InstallReferrerManager;
+import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.GoogleAdIdInitializer;
+import code.sdk.core.util.PreferenceUtil;
 import code.util.LogUtil;
 
 public class InitInspector extends AbstractChainedInspector {
@@ -26,6 +28,9 @@ public class InitInspector extends AbstractChainedInspector {
             } catch (InterruptedException e) {
                 //ObfuscationStub7.inject();
             }
+        }
+        if (GoogleAdIdInitializer.needUpdateGoogleAdId()) {
+            PreferenceUtil.saveGoogleADID(DeviceUtil.getDeviceID());
         }
         if (TextUtils.isEmpty(installReferrer)) {
             LogUtil.d(TAG, "[InitInspector] install referrer empty!");

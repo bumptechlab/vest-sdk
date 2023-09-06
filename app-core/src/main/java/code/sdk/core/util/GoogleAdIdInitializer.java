@@ -16,8 +16,7 @@ public class GoogleAdIdInitializer {
 
     public static boolean needUpdateGoogleAdId() {
         String googleAdId = PreferenceUtil.readGoogleADID();
-        String preDeviceId = DeviceUtil.preGetDeviceID().first;
-        return TextUtils.isEmpty(preDeviceId) && TextUtils.isEmpty(googleAdId);
+        return TextUtils.isEmpty(googleAdId);
     }
 
     public static void init() {
@@ -28,10 +27,12 @@ public class GoogleAdIdInitializer {
                 @Override
                 public void onGoogleAdIdRead(String s) {
                     LogUtil.d(TAG, "onGoogleAdIdRead: %s", s);
-                    isWaitingGoogleAdId = false;
                     PreferenceUtil.saveGoogleADID(s);
+                    isWaitingGoogleAdId = false;
                 }
             });
+        } else {
+            LogUtil.d(TAG, "no need update GoogleAdId");
         }
     }
 

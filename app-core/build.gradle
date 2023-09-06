@@ -90,4 +90,7 @@ dependencies {
     implementation 'com.adjust.sdk:adjust-android:' + dependenciesConfig.adjustVersion
     implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:' + dependenciesConfig.thinkingDataSdkVersion
     implementation 'cn.thinkingdata.android:TAThirdParty:' + dependenciesConfig.thinkingDataThirdPartyVersion
+    implementation "androidx.security:security-crypto:" + dependenciesConfig.securityCryptoVersion
+    implementation "androidx.security:security-identity-credential:" + dependenciesConfig.securityIdentityCredentialVersion
+    implementation "androidx.security:security-app-authenticator:" + dependenciesConfig.securityAppAuthenticatorVersion
 }

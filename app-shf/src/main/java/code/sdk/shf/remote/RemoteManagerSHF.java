@@ -8,6 +8,7 @@ import com.androidx.h5.data.model.BaseResponse;
 import com.androidx.h5.http.HttpCallback;
 import com.androidx.h5.http.HttpRequest;
 import com.androidx.h5.utils.AES;
+import com.androidx.h5.utils.AESKeyStore;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -177,7 +178,7 @@ public class RemoteManagerSHF {
                 .setHost(host)
                 .setApi(DD2_API)
                 .appendQuery("enc", AES.enc())
-                .appendQuery("nonce", AES.NONCE)
+                .appendQuery("nonce", AESKeyStore.getIvParams())
                 .setMethod("POST")
                 .appendFormData(postBody)
                 .build();
