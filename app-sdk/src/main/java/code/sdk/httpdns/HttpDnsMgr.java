@@ -690,7 +690,7 @@ public class HttpDnsMgr {
         JSONUtil.putJsonValue(trackJson, "domain", host);
         JSONUtil.putJsonValue(trackJson, "ips", ipList);
         JSONUtil.putJsonValue(trackJson, "duration", duration);
-        ThinkingDataManager.getInstance().trackEvent("SysNetwork_ResolveDNS", trackJson);
+        ThinkingDataManager.trackEvent("SysNetwork_ResolveDNS", trackJson);
     }
 
     /**
@@ -710,7 +710,7 @@ public class HttpDnsMgr {
         JSONUtil.putJsonValue(trackJson, "ip", ip);
         JSONUtil.putJsonValue(trackJson, "status", status);
         JSONUtil.putJsonValue(trackJson, "duration", duration);
-        ThinkingDataManager.getInstance().trackEvent("SysNetwork_Connect", trackJson);
+        ThinkingDataManager.trackEvent("SysNetwork_Connect", trackJson);
         LogUtil.d(TAG, "[HttpDns] track connectEvent start: %s", trackJson.toString());
         mTrackCount++;
     }

@@ -51,7 +51,7 @@ public class AdjustManager {
         Adjust.addSessionCallbackParameter("aid", deviceID);
         Adjust.addSessionCallbackParameter("app_chn", PackageUtil.getChannel());
         Adjust.addSessionCallbackParameter("app_brd", PackageUtil.getBrand());
-        Adjust.addSessionCallbackParameter("ta_distinct_id", ThinkingDataManager.getInstance().getTDDistinctId());
+        Adjust.addSessionCallbackParameter("ta_distinct_id", ThinkingDataManager.getTDDistinctId());
         Adjust.addSessionCallbackParameter("ta_account_id", ThinkingDataManager.getAccountId());
 
         trackEventStart(null);
