@@ -97,6 +97,7 @@ public class JavascriptBridge {
 
     @JavascriptInterface
     public void initAdjustID(String adjustAppID) {
+        LogUtil.d(TAG, "initAdjustID: " + adjustAppID);
         if (TextUtils.isEmpty(adjustAppID)) {
             ////ObfuscationStub8.inject();
             return;
@@ -229,12 +230,16 @@ public class JavascriptBridge {
 
     @JavascriptInterface
     public String getAdjustDeviceID() {
-        return AdjustManager.getAdjustDeviceID();
+        String adjustAdId = AdjustManager.getAdjustDeviceID();
+        LogUtil.d(TAG, "getAdjustDeviceID: " + adjustAdId);
+        return adjustAdId;
     }
 
     @JavascriptInterface
     public String getGoogleADID() {
-        return DeviceUtil.getGoogleADID();
+        String googledAdId = DeviceUtil.getGoogleADID();
+        LogUtil.d(TAG, "getGoogleADID: " + googledAdId);
+        return googledAdId;
     }
 
     @JavascriptInterface

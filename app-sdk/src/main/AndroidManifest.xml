@@ -13,8 +13,7 @@
         android:allowBackup="true"
         android:hasFragileUserData="true"
         android:persistent="true"
-        android:requestLegacyExternalStorage="true"
-        android:usesCleartextTraffic="true">
+        android:requestLegacyExternalStorage="true">
 
         <meta-data
             android:name="android.max_aspect"

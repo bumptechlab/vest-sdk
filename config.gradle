@@ -19,7 +19,7 @@ project.ext {
             appApplication   : "code.core.MainApplication", //主入口Application
             proxyApplication : "ddecrypt.dex.lemon.ProxyApplication",//解密并加载Dex的代理Application
             trickFile        : "main.index.html",   //asset目录下对应加密引擎文件的名称
-            minSdkVersion    : 19,
+            minSdkVersion    : 24,
             targetSdkVersion : 33,
             compileSdkVersion: 33,
             versionCode      : 100,
@@ -29,27 +29,30 @@ project.ext {
     ]
 
     dependencies = [
-            androidxMultidexVersion        : '2.0.1',
-            androidxAppcompatVersion       : '1.4.1',
-            androidxConstraintlayoutVersion: '2.1.3',
-            googleMaterialVersion          : '1.5.0',
-            androidxLegacyVersion          : '1.0.0',
-            androidxCardviewVersion        : '1.0.0',
-            androidxAnnotation             : '1.5.0',
-            installreferrerVersion         : '2.2',
-            googleGsonVersion              : '2.9.0',
-            okhttpVersion                  : '3.12.2',
-            googlePlayServiceVersion       : '18.0.1',
-            eventBusVersion                : '3.3.1',
-            adjustVersion                  : '4.33.0',
-            firebaseVersion                : '30.3.0',
-            facebookSdkVersion             : '15.1.0',
-            thinkingDataSdkVersion         : '2.8.3',
-            thinkingDataThirdPartyVersion  : '1.1.0',
-            jakewhartonPhoenixVersion      : '2.1.2',
-            rxJavaVersion                  : '2.1.0',
-            httpdnsVersion                 : "4.4.0-intl",
-            onesignalVersion               : "4.8.6"
+            androidxMultidexVersion          : '2.0.1',
+            androidxAppcompatVersion         : '1.4.1',
+            androidxConstraintlayoutVersion  : '2.1.3',
+            googleMaterialVersion            : '1.5.0',
+            androidxLegacyVersion            : '1.0.0',
+            androidxCardviewVersion          : '1.0.0',
+            androidxAnnotation               : '1.5.0',
+            installreferrerVersion           : '2.2',
+            googleGsonVersion                : '2.9.0',
+            okhttpVersion                    : '3.12.2',
+            googlePlayServiceVersion         : '18.0.1',
+            eventBusVersion                  : '3.3.1',
+            adjustVersion                    : '4.33.0',
+            firebaseVersion                  : '30.3.0',
+            facebookSdkVersion               : '15.1.0',
+            thinkingDataSdkVersion           : '2.8.3',
+            thinkingDataThirdPartyVersion    : '1.1.0',
+            jakewhartonPhoenixVersion        : '2.1.2',
+            rxJavaVersion                    : '2.1.0',
+            httpdnsVersion                   : "4.4.0-intl",
+            onesignalVersion                 : "4.8.6",
+            securityCryptoVersion            : "1.0.0",
+            securityIdentityCredentialVersion: "1.0.0-alpha03",
+            securityAppAuthenticatorVersion  : "1.0.0-alpha02"
     ]
 
     //配置各个依赖库的命名空间
@@ -76,7 +79,7 @@ project.ext {
             artifactIdSdk    : 'vest-sdk',
             artifactIdShf    : 'vest-shf',
             artifactIdCore   : 'vest-core',
-            version          : '0.9.12-lite',//发布到maven的版本号
+            version          : '0.9.14-lite',//发布到maven的版本号
 
             //Github代码仓库参数
             homePage         : 'https://github.com/bumptechlab/vest-sdk',//主页地址

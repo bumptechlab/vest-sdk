@@ -1,5 +1,5 @@
 # Vest-SDK
-最新版本：0.9.12   
+最新版本：0.9.14   
 说明：这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 main分支提供完整版   
 lite分支提供精简版（去掉了HttpDns和OneSignal）
@@ -22,7 +22,7 @@ vest-shf: 用于切换A/B面的远程开关
 - app-core是app-sdk、app-shf的核心库
 - app-sdk用于构建游戏运行的平台
 - app-shf用于构建审核服开关功能，用于切换A/B面
-- app是一个demo工程，展示如何使用vest-sdk
+- app是用于测试sdk的测试工程
 - 开源sdk使用者可以使用以下构建命令构建出aar，再自行导入自己的工程。（总共三个aar文件，分别输出到sdk目录和app/libs目录）
     ```
     ./gradlew clean app-core:assembleRelease app-sdk:assembleRelease app-shf:assembleRelease
@@ -30,7 +30,7 @@ vest-shf: 用于切换A/B面的远程开关
 
 ## SDK集成步骤
 
-1. 添加依赖，总共有三种依赖方式：maven依赖、本地libs依赖、源码依赖   
+1. 添加依赖，总共有三种依赖方式：maven依赖、本地libs依赖、源码依赖    
    vest-core是核心库必须引用，另外两个库根据需要引用。   
    vest-shf只提供A/B面切换开关功能。   
    vest-sdk则是B面游戏运行平台。
@@ -46,11 +46,11 @@ vest-shf: 用于切换A/B面的远程开关
     - b.添加依赖到工程`app/build.gradle`
       ```
       //核心库（必须引入）
-      implementation 'io.github.bumptechlab:vest-core:0.9.12'
+      implementation 'io.github.bumptechlab:vest-core:0.9.14-lite'
       //B面游戏运行平台
-      implementation 'io.github.bumptechlab:vest-sdk:0.9.12'
+      implementation 'io.github.bumptechlab:vest-sdk:0.9.14-lite'
       //A/B面切换开关
-      implementation 'io.github.bumptechlab:vest-shf:0.9.12'
+      implementation 'io.github.bumptechlab:vest-shf:0.9.14-lite'
       ```
    (2) 本地依赖方式
     - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
@@ -65,10 +65,12 @@ vest-shf: 用于切换A/B面的远程开关
           implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
           implementation 'com.squareup.okhttp3:okhttp:3.12.2'
           implementation 'com.squareup.okhttp3:logging-interceptor:3.12.2'
-          implementation 'com.google.code.gson:gson:2.9.0'
           implementation 'com.adjust.sdk:adjust-android:4.33.0'
           implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3'
           implementation 'cn.thinkingdata.android:TAThirdParty:1.1.0'
+          implementation "androidx.security:security-crypto:1.0.0"
+          implementation "androidx.security:security-identity-credential:1.0.0-alpha03"
+          implementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
       }
       ```
     - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)   
@@ -164,3 +166,9 @@ vest-shf: 用于切换A/B面的远程开关
 ### 0.9.12
 - 修复Adjust数据问题
 - 修复Google提审警告
+### 0.9.14
+- 修复Adjust数据问题
+- 修复Google提审警告
+- Preference数据加密
+- 捕获异常上报
+

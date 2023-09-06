@@ -5,10 +5,16 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Process;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.androidx.h5.utils.AESKeyStore;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.Set;
 
@@ -30,6 +36,8 @@ public class VestCore {
 
     public static void init(Context context, String configAssets) {
         mContext = context;
+        setUncaughtException();
+        AESKeyStore.init();
         LogUtil.setDebug(TestUtil.isLoggable());
         ConfigurationManager.init(context, configAssets);
         registerActivityLifecycleCallbacks();
@@ -102,5 +110,47 @@ public class VestCore {
 
     public static void onDestroy() {
         ThinkingDataManager.getInstance().flush();
+    }
+
+
+    /**
+     * 捕获异常上报
+     */
+    private static void setUncaughtException() {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(@NonNull Thread t, @NonNull Throwable e) {
+                LogUtil.e(TAG, e, "on uncaughtException: ");
+                try {
+                    JSONObject json = new JSONObject();
+                    JSONArray stackArray = new JSONArray();
+                    StackTraceElement[] stackTrace = e.getStackTrace();
+                    if (stackTrace != null) {
+                        for (int i = 0; i < stackTrace.length; i++) {
+                            stackArray.put(stackTrace[i]);
+                        }
+                    }
+                    json.put("crash_stack", stackArray);
+                    json.put("crash_msg", e.getLocalizedMessage());
+                    json.put("crash_cause", e.getCause());
+                    LogUtil.i(TAG, "setUncaughtException json: %s", json);
+                    if (ThinkingDataManager.getInstance() != null) {
+                        ThinkingDataManager.getInstance().trackEvent("td_crash", json);
+                        ThinkingDataManager.getInstance().flush();
+                    }
+                } catch (Throwable exception) {
+                    LogUtil.e(TAG, exception, "setUncaughtException errorInLogging: ");
+                } finally {
+                    try {
+                        Thread.sleep(1000);
+                        ActivityManager.getInstance().finishAll();
+                        System.exit(1);
+                        Process.killProcess(Process.myPid());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 }

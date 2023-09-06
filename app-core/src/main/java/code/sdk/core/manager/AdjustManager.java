@@ -37,7 +37,7 @@ public class AdjustManager {
             adjustAppID = ConfigPreference.readAdjustAppId();
             PreferenceUtil.saveAdjustAppID(adjustAppID);
         }
-
+        LogUtil.d(TAG, "init Adjust with appId: " + adjustAppID);
         initConfig(application, adjustAppID);
         application.registerActivityLifecycleCallbacks(new AdjustLifecycleCallbacks());
         configParams();
