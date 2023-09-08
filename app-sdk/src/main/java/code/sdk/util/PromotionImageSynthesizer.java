@@ -24,10 +24,13 @@ public class PromotionImageSynthesizer extends AsyncTask<Void, Void, String> {
     public static final String TAG = PromotionImageSynthesizer.class.getSimpleName();
 
     private String mQrCodeUrl;
-    private int mSize=0, mX=0, mY=0;
+    private int mSize = 0, mX = 0, mY = 0;
     private JavascriptBridge.Callback mCallback;
 
-    public PromotionImageSynthesizer(String qrCodeUrl, int size, int x, int y, JavascriptBridge.Callback callback) {
+    private Context context;
+
+    public PromotionImageSynthesizer(Context context, String qrCodeUrl, int size, int x, int y, JavascriptBridge.Callback callback) {
+        this.context = context;
         mQrCodeUrl = qrCodeUrl;
         mSize = size;
         mX = x;
@@ -87,15 +90,13 @@ public class PromotionImageSynthesizer extends AsyncTask<Void, Void, String> {
 
     private String savePromotionImage(Bitmap bitmap) {
         //ObfuscationStub3.inject();
-
-        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        String fileName = String.format(JavascriptBridge.PROMOTION_IMAGE_FILENAME,
-                System.currentTimeMillis());
+        File dir = context.getExternalFilesDir(Environment.DIRECTORY_DCIM);
+        String fileName = String.format(JavascriptBridge.PROMOTION_IMAGE_FILENAME, System.currentTimeMillis());
         String promotionImagePath = dir + File.separator + fileName;
         FileUtil.saveBitmap(promotionImagePath, bitmap);
 
         LogUtil.d(TAG, "synthesized image path = " + promotionImagePath);
-        ImageUtil.triggerScanning(promotionImagePath);
+        QFileExtKt.saveToAlbum(promotionImagePath, null);
         return promotionImagePath;
     }
 }

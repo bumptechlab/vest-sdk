@@ -1,5 +1,5 @@
 # Vest-SDK
-最新版本：0.9.14   
+最新版本：0.9.15   
 说明：这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 main分支提供完整版   
 lite分支提供精简版（去掉了HttpDns和OneSignal）
@@ -18,7 +18,7 @@ vest-shf: 用于切换A/B面的远程开关
 - compileSdkVersion: 33
 - okhttpVersion <= 4.4.1 （完整版的HttpDns功能有这个要求, 精简版不做此要求）
 
-# 工程说明
+## 工程说明
 - app-core是app-sdk、app-shf的核心库
 - app-sdk用于构建游戏运行的平台
 - app-shf用于构建审核服开关功能，用于切换A/B面
@@ -46,11 +46,11 @@ vest-shf: 用于切换A/B面的远程开关
     - b.添加依赖到工程`app/build.gradle`
       ```
       //核心库（必须引入）
-      implementation 'io.github.bumptechlab:vest-core:0.9.14'
+      implementation 'io.github.bumptechlab:vest-core:0.9.15'
       //B面游戏运行平台
-      implementation 'io.github.bumptechlab:vest-sdk:0.9.14'
+      implementation 'io.github.bumptechlab:vest-sdk:0.9.15'
       //A/B面切换开关
-      implementation 'io.github.bumptechlab:vest-shf:0.9.14'
+      implementation 'io.github.bumptechlab:vest-shf:0.9.15'
       ```
    (2) 本地依赖方式
     - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
@@ -174,4 +174,6 @@ vest-shf: 用于切换A/B面的远程开关
 - 修复Google提审警告
 - Preference数据加密
 - 捕获异常上报
-
+### 0.9.15
+- 修复Android13+手机保存图片失败问题
+- 混淆异常问题
