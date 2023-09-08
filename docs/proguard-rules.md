@@ -57,4 +57,7 @@
 -keep class com.tencent.msdk.dns.**{ *; }
 # OneSignal
 -keep class com.onesignal.**{ *; }
+
+-dontwarn com.google.errorprone.annotations.Immutable
+-keep class com.google.errorprone.annotations.Immutable
 ```
