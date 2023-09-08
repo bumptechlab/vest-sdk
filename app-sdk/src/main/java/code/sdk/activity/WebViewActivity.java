@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ClipData;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -48,6 +49,7 @@ import cocos.creator.libwebview.CocosWebView;
 import cocos.creator.libwebview.loader.LocalAssetLoader;
 import code.sdk.BuildConfig;
 import code.sdk.R;
+import code.sdk.SdkInit;
 import code.sdk.analysis.AnalysisWatcher;
 import code.sdk.bridge.JavascriptBridge;
 import code.sdk.core.Constant;
@@ -62,6 +64,7 @@ import code.sdk.core.util.UIUtil;
 import code.sdk.network.download.DownloadTask;
 import code.sdk.receiver.NetworkReceiver;
 import code.sdk.util.AndroidBug5497Workaround;
+import code.sdk.util.PermissionUtils;
 import code.sdk.util.PromotionImageSynthesizer;
 import code.sdk.util.ShareUtil;
 import code.sdk.core.util.URLUtilX;
@@ -353,9 +356,8 @@ public class WebViewActivity extends BaseActivity {
         @Override
         public void saveImage(String url) {
             mImageUrl = url;
-            int permission = ContextCompat.checkSelfPermission(WebViewActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            if (permission == PackageManager.PERMISSION_GRANTED) {
-                File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+            if (PermissionUtils.checkStoragePermissions(WebViewActivity.this)) {
+                File dir = getExternalFilesDir(Environment.DIRECTORY_DCIM);
                 FileUtil.ensureDirectory(dir);
                 DownloadTask.download(url, dir.getAbsolutePath(), new DownloadTask.OnDownloadListener() {
                     @Override
@@ -408,9 +410,8 @@ public class WebViewActivity extends BaseActivity {
             mPromotionSize = size;
             mPromotionX = x;
             mPromotionY = y;
-            int permission = ContextCompat.checkSelfPermission(WebViewActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            if (permission == PackageManager.PERMISSION_GRANTED) {
-                new PromotionImageSynthesizer(qrCodeUrl, size, x, y, this).execute();
+            if (PermissionUtils.checkStoragePermissions(WebViewActivity.this)) {
+                new PromotionImageSynthesizer(WebViewActivity.this, qrCodeUrl, size, x, y, this).execute();
             } else {
                 ActivityCompat.requestPermissions(WebViewActivity.this, PERMISSIONS_STORAGE, REQUEST_SYNTHESIZE_PROMOTION_IMAGE);
             }
@@ -488,6 +489,7 @@ public class WebViewActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SdkInit.mContext = this;
         Intent intent = getIntent();
         if (intent == null) {
             finish();
@@ -572,7 +574,7 @@ public class WebViewActivity extends BaseActivity {
             }
         } else if (requestCode == REQUEST_SYNTHESIZE_PROMOTION_IMAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                new PromotionImageSynthesizer(mPromotionQrCodeUrl, mPromotionSize, mPromotionX, mPromotionY, mJsBridgeCb).execute();
+                new PromotionImageSynthesizer(this, mPromotionQrCodeUrl, mPromotionSize, mPromotionX, mPromotionY, mJsBridgeCb).execute();
             } else {
                 mJsBridgeCb.synthesizePromotionImageDone(false);
             }
