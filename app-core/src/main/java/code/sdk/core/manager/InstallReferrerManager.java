@@ -21,6 +21,10 @@ public class InstallReferrerManager {
         sInitStartTime = System.currentTimeMillis();
         Context context = AppGlobal.getApplication();
         InstallReferrerClient referrerClient = InstallReferrerClient.newBuilder(context).build();
+        startConnection(referrerClient);
+    }
+
+    private static void startConnection(InstallReferrerClient referrerClient){
         referrerClient.startConnection(new InstallReferrerStateListener() {
             @Override
             public void onInstallReferrerSetupFinished(int responseCode) {

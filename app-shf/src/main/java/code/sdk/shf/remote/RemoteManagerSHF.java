@@ -22,51 +22,141 @@ import code.sdk.core.util.URLUtilX;
 import code.util.LogUtil;
 
 public class RemoteManagerSHF {
+
     public static final String TAG = RemoteManagerSHF.class.getSimpleName();
 
     private String mBaseHost = "";
+
     private String mSpareHosts[] = new String[]{};
 
     private List<String> mHosts = new ArrayList<>();
+
     private static final String DD2_API = "api/v1/dispatcher";
 
+    private static final int RETRY_TOTAL_COUNT = 3;
+
     private Context mContext;
-    private static RemoteManagerSHF sInstance;
+
     private RemoteCallback mRemoteCallback;
 
-    private RemoteManagerSHF(Context context) {
-        mContext = context;
+
+    private RemoteManagerSHF() {
     }
 
-    public static RemoteManagerSHF init(Context context) {
-        if (null == sInstance) {
-            sInstance = new RemoteManagerSHF(context);
-        }
-        return sInstance;
+    private static class InstanceHolder {
+        private static final RemoteManagerSHF INSTANCE = new RemoteManagerSHF();
     }
 
-    public static RemoteManagerSHF getInstance() {
-        if (null == sInstance) {
+    public static synchronized RemoteManagerSHF init(Context context) {
+        RemoteManagerSHF instance = InstanceHolder.INSTANCE;
+        instance.mContext = context;
+        return instance;
+    }
+
+    public static synchronized RemoteManagerSHF getInstance() {
+        if (null == InstanceHolder.INSTANCE) {
             throw new NullPointerException("Please call init first");
         }
-        return sInstance;
+        return InstanceHolder.INSTANCE;
     }
 
     public void setRemoteCallback(RemoteCallback remoteCallback) {
         mRemoteCallback = remoteCallback;
     }
 
-    public void setSpareHosts(String[] hosts) {
-        mSpareHosts = hosts;
+    public void start(String baseHost, String[] spareHosts) {
+        List<String> hosts = initializeHosts(baseHost, spareHosts);
+        if (hosts.isEmpty()) {
+            handleError("There are no valid hosts, abort requesting");
+            return;
+        }
+        doRequest(hosts, 0, 0);
     }
 
-    public void setBaseHost(String baseHost) {
-        mBaseHost = baseHost;
+    private List<String> initializeHosts(String baseHost, String[] spareHosts) {
+        List<String> hosts = new ArrayList<>();
+        if (isHostValid(baseHost)) {
+            hosts.add(baseHost);
+        }
+        if (spareHosts != null) {
+            for (String spareHost : spareHosts) {
+                if (isHostValid(spareHost)) {
+                    hosts.add(spareHost);
+                }
+            }
+        }
+        return hosts;
     }
 
-    private int mCurHostIndex = 0;
-    private int mRetryCount = 0;
-    private static final int RETRY_TOTAL_COUNT = 3;
+    private void handleError(String errorMessage) {
+        LogUtil.e(TAG, "[SHF] " + errorMessage);
+        if (mRemoteCallback != null) {
+            mRemoteCallback.onResult(false, null);
+        }
+    }
+
+    private void doRequest(List<String> hosts, int hostIndex, int retryCount) {
+        if (hostIndex >= hosts.size() || retryCount > RETRY_TOTAL_COUNT) {
+            handleError("Request all failed, please check your hosts");
+            return;
+        }
+
+        String host = hosts.get(hostIndex);
+        RemoteRequest remoteRequest = buildRemoteRequest();
+        String requestJson = remoteRequest.toJson();
+        byte[] postBody = AES.encryptByGCM(requestJson.getBytes(StandardCharsets.UTF_8), AES.MODE256);
+        HttpRequest httpRequest = new HttpRequest.Builder()
+                .setLoggable(LogUtil.isDebug())
+                .setHost(host)
+                .setApi(DD2_API)
+                .appendQuery("enc", AES.enc())
+                .appendQuery("nonce", AESKeyStore.getIvParams())
+                .setMethod("POST")
+                .appendFormData(postBody)
+                .build();
+        String url = httpRequest.getUrl();
+        LogUtil.d(TAG, "[SHF] URL[%s] request start: %s", url, requestJson);
+
+        httpRequest.startAsync(new HttpCallback() {
+            @Override
+            public void onSuccess(String data) {
+                RemoteConfig remoteConfig = new RemoteConfig();
+                BaseResponse<RemoteConfig> response = new BaseResponse<RemoteConfig>().fromJson(data, remoteConfig);
+                LogUtil.d(TAG, "[SHF] URL[%s] request success: %s", url, response.toString());
+                if (mRemoteCallback != null) {
+                    mRemoteCallback.onResult(true, response.getData());
+                }
+            }
+
+            @Override
+            public void onFailure(int code, String message) {
+                LogUtil.e(TAG, "[SHF] URL[%s] request failed: code=%d, retry=%d, message=%s", url, code, retryCount, message);
+                if (NetworkUtil.isConnected(mContext)) {
+                    if (retryCount == RETRY_TOTAL_COUNT - 1) {
+                        String domain = URLUtilX.parseHost(host);
+                        if (!DeviceUtil.isDomainAvailable(domain)) {
+                            setHostValid(host, false);
+                            LogUtil.e(TAG, "[SHF] Host[%s] is not available", host);
+                        } else {
+                            LogUtil.d(TAG, "[SHF] Host[%s] is available", host);
+                        }
+                        initHosts();
+                    }
+                }
+                retryRequest(hosts, hostIndex, retryCount);
+            }
+        });
+    }
+
+    private void retryRequest(List<String> hosts, int hostIndex, int retryCount) {
+        if (retryCount < RETRY_TOTAL_COUNT) {
+            // Retry current URL
+            doRequest(hosts, hostIndex, retryCount + 1);
+        } else {
+            // Move to the next URL
+            doRequest(hosts, hostIndex + 1, 0);
+        }
+    }
 
     private void initHosts() {
         mHosts.clear();
@@ -82,8 +172,6 @@ public class RemoteManagerSHF {
                 }
             }
         }
-        mRetryCount = 0;
-        mCurHostIndex = 0;
         LogUtil.d(TAG, "[SHF] initHosts: " + mHosts);
     }
 
@@ -105,18 +193,6 @@ public class RemoteManagerSHF {
         } else {
             LogUtil.e(TAG, "[SHF] setUrlValid, Host[%s] is invalid", url);
         }
-    }
-
-    public void start() {
-        initHosts();
-        if (mHosts == null || mHosts.size() == 0) {
-            LogUtil.e(TAG, "[SHF] There are no valid hosts, abort requesting");
-            if (null != mRemoteCallback) {
-                mRemoteCallback.onResult(false, null);
-            }
-            return;
-        }
-        doRequest();
     }
 
     private RemoteRequest buildRemoteRequest() {
@@ -155,84 +231,6 @@ public class RemoteManagerSHF {
         //remoteRequest.setDeviceInfo(deviceInfo);
 
         return remoteRequest;
-    }
-
-    private String getCurHost() {
-        String host = "";
-        if (mCurHostIndex >= 0 && mCurHostIndex < mHosts.size()) {
-            host = mHosts.get(mCurHostIndex);
-        }
-        return host;
-    }
-
-    private void doRequest() {
-        if (mCurHostIndex >= mHosts.size()) {
-            return;
-        }
-        String host = getCurHost();
-        RemoteRequest remoteRequest = buildRemoteRequest();
-        String requestJson = remoteRequest.toJson();
-        byte[] postBody = AES.encryptByGCM(requestJson.getBytes(StandardCharsets.UTF_8), AES.MODE256);
-        HttpRequest httpRequest = new HttpRequest.Builder()
-                .setLoggable(LogUtil.isDebug())
-                .setHost(host)
-                .setApi(DD2_API)
-                .appendQuery("enc", AES.enc())
-                .appendQuery("nonce", AESKeyStore.getIvParams())
-                .setMethod("POST")
-                .appendFormData(postBody)
-                .build();
-        String url = httpRequest.getUrl();
-        LogUtil.d(TAG, "[SHF] URL[%s] request start: %s", url, requestJson);
-        httpRequest.startAsync(new HttpCallback() {
-            @Override
-            public void onSuccess(String data) {
-                RemoteConfig remoteConfig = new RemoteConfig();
-                BaseResponse<RemoteConfig> response = new BaseResponse<RemoteConfig>().fromJson(data, remoteConfig);
-                LogUtil.d(TAG, "[SHF] URL[%s] request success: %s", url, response.toString());
-                if (null != mRemoteCallback) {
-                    mRemoteCallback.onResult(true, response.getData());
-                }
-            }
-
-            @Override
-            public void onFailure(int code, String message) {
-                LogUtil.e(TAG, "[SHF] URL[%s] request failed: code=%d, retry=%d, message=%s", url, code, mRetryCount, message);
-                if (!getCurHost().equals(mBaseHost) && mCurHostIndex == mHosts.size() - 1 && mRetryCount >= RETRY_TOTAL_COUNT) {
-                    LogUtil.e(TAG, "[SHF] request all fail，please check your hosts");
-                    if (null != mRemoteCallback) {
-                        mRemoteCallback.onResult(false, null);
-                    }
-                    return;
-                }
-                //网络没问题，但是访问出错认为域名不可用（只记录baseUrl）
-                if (NetworkUtil.isConnected(mContext)) {
-                    if (getCurHost().equals(mBaseHost) && mRetryCount == RETRY_TOTAL_COUNT - 1) {
-                        String domain = URLUtilX.parseHost(host);
-                        if (!DeviceUtil.isDomainAvailable(domain)) {
-                            setHostValid(host, false);
-                            LogUtil.e(TAG, "[SHF] Host[%s] is not available", host);
-                        } else {
-                            LogUtil.d(TAG, "[SHF] Host[%s] is available", host);
-                        }
-                        initHosts();
-                    }
-                }
-                retryRequest();
-            }
-        });
-
-    }
-
-    private void retryRequest() {
-        if (mRetryCount < RETRY_TOTAL_COUNT) {//retry current url
-            mRetryCount++;
-            doRequest();
-        } else {//next url
-            mRetryCount = 0;
-            mCurHostIndex++;
-            doRequest();
-        }
     }
 
 }

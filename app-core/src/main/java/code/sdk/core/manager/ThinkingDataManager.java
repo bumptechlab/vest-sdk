@@ -14,6 +14,7 @@ import code.sdk.core.util.CocosPreferenceUtil;
 import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.PackageUtil;
+import code.util.JSONUtil;
 import code.util.LogUtil;
 
 public class ThinkingDataManager {
@@ -50,14 +51,13 @@ public class ThinkingDataManager {
         eventTypeList.add(ThinkingAnalyticsSDK.AutoTrackEventType.APP_INSTALL);
         eventTypeList.add(ThinkingAnalyticsSDK.AutoTrackEventType.APP_START);
         eventTypeList.add(ThinkingAnalyticsSDK.AutoTrackEventType.APP_END);
+        trackInitTrackEvent(eventTypeList);
+    }
+
+    private static void trackInitTrackEvent(List<ThinkingAnalyticsSDK.AutoTrackEventType> eventTypeList) {
         JSONObject extraProperties = new JSONObject();
-        try {
-            extraProperties.put("region", getTargetCountry());
-            extraProperties.put("build_version", PackageUtil.getBuildVersion());
-        } catch (Exception e) {
-            //ObfuscationStub2.inject();
-            LogUtil.e(TAG, e, "ThinkingData Format Error");
-        }
+        JSONUtil.putJsonValue(extraProperties, "region", getTargetCountry());
+        JSONUtil.putJsonValue(extraProperties, "build_version", PackageUtil.getBuildVersion());
         mTDSdk.enableAutoTrack(eventTypeList, extraProperties);
     }
 

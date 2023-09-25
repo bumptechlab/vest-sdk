@@ -129,13 +129,12 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads-identifier:' + dependenciesConfig.googlePlayServiceVersion
     implementation 'com.squareup.okhttp3:okhttp:' + dependenciesConfig.okhttpVersion
     implementation 'com.squareup.okhttp3:logging-interceptor:' + dependenciesConfig.okhttpVersion
-    implementation 'com.onesignal:OneSignal:' + dependenciesConfig.onesignalVersion
+    //OneSignal
+    compileOnly 'com.onesignal:OneSignal:' + dependenciesConfig.onesignalVersion
     //HttpDNS
-    implementation 'io.github.dnspod:httpdns-sdk:' + dependenciesConfig.httpdnsVersion
-    implementation 'androidx.room:room-rxjava2:' + dependenciesConfig.rxJavaVersion
+    compileOnly 'io.github.dnspod:httpdns-sdk:' + dependenciesConfig.httpdnsVersion
+    compileOnly 'androidx.room:room-rxjava2:' + dependenciesConfig.rxJavaVersion
     compileOnly project(':app-core')
     compileOnly project(':lib-util')
     compileOnly project(':lib-okhttp')
-    embed project(path: ':lib-webview', configuration: 'default')
-    embed project(path: ':lib-walle-reader', configuration: 'default')
 }

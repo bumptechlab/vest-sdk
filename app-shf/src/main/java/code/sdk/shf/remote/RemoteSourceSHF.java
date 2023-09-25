@@ -5,24 +5,21 @@ import android.content.Context;
 import code.sdk.core.util.ConfigPreference;
 
 public class RemoteSourceSHF {
-    public static final String TAG = RemoteSourceSHF.class.getSimpleName();
+
+    private RemoteManagerSHF mRemoteManager;
 
     public RemoteSourceSHF(Context context) {
-        RemoteManagerSHF.init(context);
+        mRemoteManager = RemoteManagerSHF.init(context);
     }
 
-    protected RemoteCallback mRemoteCallback;
-
     public void setCallback(RemoteCallback remoteCallback) {
-        mRemoteCallback = remoteCallback;
+        mRemoteManager.setRemoteCallback(remoteCallback);
     }
 
     public void fetch() {
-        RemoteManagerSHF remoteManager = RemoteManagerSHF.getInstance();
-        remoteManager.setBaseHost(ConfigPreference.readSHFBaseHost());
-        remoteManager.setSpareHosts(ConfigPreference.readSHFSpareHosts());
-        remoteManager.setRemoteCallback(mRemoteCallback);
-        remoteManager.start();
+        String baseHost = ConfigPreference.readSHFBaseHost();
+        String[] spareHosts = ConfigPreference.readSHFSpareHosts();
+        mRemoteManager.start(baseHost, spareHosts);
     }
-
 }
+

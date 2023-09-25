@@ -36,6 +36,6 @@ public class InitInspector extends AbstractChainedInspector {
             LogUtil.d(TAG, "[InitInspector] install referrer empty!");
             return false;
         }
-        return inspectNext();
+        return true;
     }
 }

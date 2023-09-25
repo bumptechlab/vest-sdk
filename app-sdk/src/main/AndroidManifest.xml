@@ -17,11 +17,14 @@
         android:requestLegacyExternalStorage="true">
 
         <meta-data
+            android:name="com.onesignal.NotificationServiceExtension"
+            android:value="code.sdk.command.NotificationServiceExtension" />
+        <meta-data
             android:name="android.max_aspect"
             android:value="2.4" />
 
         <activity
-            android:name="code.sdk.activity.WebViewActivity"
+            android:name="code.sdk.ui.WebActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
             android:launchMode="standard"

@@ -1,30 +1,29 @@
 package code.sdk.shf.inspector;
 
-public class AbstractChainedInspector implements IChainedInspector {
-    public static final String TAG = AbstractChainedInspector.class.getSimpleName();
+public abstract class AbstractChainedInspector {
 
     private AbstractChainedInspector mNext;
 
-    public static AbstractChainedInspector makeChain(AbstractChainedInspector head,
-                                                     AbstractChainedInspector...rest) {
-        AbstractChainedInspector p = head;
-        for (AbstractChainedInspector next : rest) {
-            p.mNext = next;
-            p = next;
+    public static AbstractChainedInspector makeChain(AbstractChainedInspector... inspectors) {
+        if (inspectors.length == 0) {
+            return null;
         }
-        return head;
+        for (int i = 0; i < inspectors.length - 1; i++) {
+            inspectors[i].mNext = inspectors[i + 1];
+        }
+        return inspectors[0];
     }
 
-    @Override
-    public boolean inspect() {
-        return false;
+    public boolean verify() {
+        if (!inspect()) {
+            return false;
+        }
+        if (mNext != null) {
+            return mNext.verify();
+        }
+        return true;
     }
 
-    @Override
-    public boolean inspectNext() {
-        if (mNext == null) {
-            return true;
-        }
-        return mNext.inspect();
-    }
+    protected abstract boolean inspect();
 }
+

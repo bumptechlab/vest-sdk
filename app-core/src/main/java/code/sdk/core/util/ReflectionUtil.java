@@ -34,30 +34,6 @@ public class ReflectionUtil {
     /**
      * get filed
      *
-     * @param src       the instance
-     * @param clzName   the class name
-     * @param filedName the filed name
-     * @param defObj    the default val
-     * @return the filed of the instance
-     */
-    @NonNull
-    public static Object getFiledObj(@NonNull Object src, @NonNull String clzName,
-                                     @NonNull String filedName, @NonNull Object defObj) {
-        Object result = defObj;
-        try {
-            Field field = getFiled(clzName, filedName);
-            if (field != null) {
-                result = field.get(src);
-            }
-        } catch (Throwable t) {
-        }
-
-        return result;
-    }
-
-    /**
-     * get filed
-     *
      * @param clzName   the class name
      * @param filedName the filed name
      * @return the class filed

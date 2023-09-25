@@ -39,7 +39,7 @@ public class VestCore {
         setUncaughtException();
         AESKeyStore.init();
         LogUtil.setDebug(TestUtil.isLoggable());
-        ConfigurationManager.init(context, configAssets);
+        ConfigurationManager.getInstance().init(context, configAssets);
         registerActivityLifecycleCallbacks();
         GoogleAdIdInitializer.init();
     }

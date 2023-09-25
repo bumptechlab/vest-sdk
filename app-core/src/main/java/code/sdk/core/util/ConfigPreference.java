@@ -15,22 +15,22 @@ import code.util.AbstractPreference;
  * 此工具类为了vest-sdk、vest-shf能读取到配置信息
  */
 public class ConfigPreference extends AbstractPreference {
-    private static final String CONFIG_CHN = "CONFIG_CHN";
-    private static final String CONFIG_BRD = "CONFIG_BRD";
-    private static final String CONFIG_TARGET_COUNTRY = "CONFIG_TARGET_COUNTRY";//目标国家sim卡/目标国家网络/ThinkingData/OneSignal
-    private static final String CONFIG_LIGHTER_HOST = "CONFIG_LIGHTER_HOST";
+    private static final String CONFIG_CHN = "CONFIG_BEAN_CHN";
+    private static final String CONFIG_BRD = "CONFIG_BEAN_BRD";
+    private static final String CONFIG_TARGET_COUNTRY = "CONFIG_BEAN_TARGET_COUNTRY";//目标国家sim卡/目标国家网络/ThinkingData/OneSignal
+    private static final String CONFIG_LIGHTER_HOST = "CONFIG_BEAN_LIGHTER_HOST";
 
-    private static final String CONFIG_SHF_BASE_HOST = "CONFIG_SHF_BASE_HOST";
-    private static final String CONFIG_SHF_SPARE_HOSTS = "CONFIG_SHF_SPARE_HOSTS";
-    private static final String CONFIG_ADJUST_APP_ID = "CONFIG_ADJUST_APP_ID";
-    private static final String CONFIG_ADJUST_EVENT_START = "CONFIG_ADJUST_EVENT_START";
-    private static final String CONFIG_ADJUST_EVENT_GREETING = "CONFIG_ADJUST_EVENT_GREETING";
-    private static final String CONFIG_ADJUST_EVENT_ACCESS = "CONFIG_ADJUST_EVENT_ACCESS";
-    private static final String CONFIG_ADJUST_EVENT_UPDATED = "CONFIG_ADJUST_EVENT_UPDATED";
-    private static final String CONFIG_FACEBOOK_APP_ID = "CONFIG_FACEBOOK_APP_ID";
-    private static final String CONFIG_FACEBOOK_CLIENT_TOKEN = "CONFIG_FACEBOOK_CLIENT_TOKEN";
-    private static final String CONFIG_THINKING_DATA_APP_ID = "CONFIG_THINKING_DATA_APP_ID";
-    private static final String CONFIG_THINKING_DATA_HOST = "CONFIG_THINKING_DATA_HOST";
+    private static final String CONFIG_SHF_BASE_HOST = "CONFIG_BEAN_SHF_BASE_HOST";
+    private static final String CONFIG_SHF_SPARE_HOSTS = "CONFIG_BEAN_SHF_SPARE_HOSTS";
+    private static final String CONFIG_ADJUST_APP_ID = "CONFIG_BEAN_ADJUST_APP_ID";
+    private static final String CONFIG_ADJUST_EVENT_START = "CONFIG_BEAN_ADJUST_EVENT_START";
+    private static final String CONFIG_ADJUST_EVENT_GREETING = "CONFIG_BEAN_ADJUST_EVENT_GREETING";
+    private static final String CONFIG_ADJUST_EVENT_ACCESS = "CONFIG_BEAN_ADJUST_EVENT_ACCESS";
+    private static final String CONFIG_ADJUST_EVENT_UPDATED = "CONFIG_BEAN_ADJUST_EVENT_UPDATED";
+    private static final String CONFIG_FACEBOOK_APP_ID = "CONFIG_BEAN_FACEBOOK_APP_ID";
+    private static final String CONFIG_FACEBOOK_CLIENT_TOKEN = "CONFIG_BEAN_FACEBOOK_CLIENT_TOKEN";
+    private static final String CONFIG_THINKING_DATA_APP_ID = "CONFIG_BEAN_THINKING_DATA_APP_ID";
+    private static final String CONFIG_THINKING_DATA_HOST = "CONFIG_BEAN_THINKING_DATA_HOST";
     private static final String CONFIG_HTTPDNS_AUTH_ID = "95244";
 
     private static final String CONFIG_HTTPDNS_APP_ID = "ADHPTGT49H4T8CJ6";

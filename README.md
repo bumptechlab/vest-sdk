@@ -1,8 +1,8 @@
 # Vest-SDK
-最新版本：0.9.15   
+最新版本：0.10.1   
 说明：这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
-main分支提供完整版   
-lite分支提供精简版（去掉了HttpDns和OneSignal）
+dev分支提供完整版   
+~~lite分支提供精简版（去掉了HttpDns和OneSignal）~~
 
 SDK总共三个依赖库：  
 vest-core: 项目运行所必须的核心库（必须引入）  
@@ -46,11 +46,15 @@ vest-shf: 用于切换A/B面的远程开关
     - b.添加依赖到工程`app/build.gradle`
       ```
       //核心库（必须引入）
-      implementation 'io.github.bumptechlab:vest-core:0.9.15'
+      implementation 'io.github.bumptechlab:vest-core:0.10.0'
       //B面游戏运行平台
-      implementation 'io.github.bumptechlab:vest-sdk:0.9.15'
+      implementation 'io.github.bumptechlab:vest-sdk:0.10.0'
       //A/B面切换开关
-      implementation 'io.github.bumptechlab:vest-shf:0.9.15'
+      implementation 'io.github.bumptechlab:vest-shf:0.10.0'
+      //标准版需要加上OneSignal&httpdns&room-rxjava2；精简版不需要，sdk内部自动断言
+      implementation 'com.onesignal:OneSignal:4.8.6'
+      implementation 'io.github.dnspod:httpdns-sdk:4.4.0-intl'
+      implementation 'androidx.room:room-rxjava2:2.1.0'
       ```
    (2) 本地依赖方式
     - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
@@ -71,6 +75,7 @@ vest-shf: 用于切换A/B面的远程开关
           implementation "androidx.security:security-crypto:1.0.0"
           implementation "androidx.security:security-identity-credential:1.0.0-alpha03"
           implementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
+          //标准版需要加上OneSignal&httpdns&room-rxjava2；精简版不需要，sdk内部自动断言
           implementation 'com.onesignal:OneSignal:4.8.6'
           implementation 'io.github.dnspod:httpdns-sdk:4.4.0-intl'
           implementation 'androidx.room:room-rxjava2:2.1.0'
@@ -86,7 +91,24 @@ vest-shf: 用于切换A/B面的远程开关
       implementation project(":app-sdk")
       implementation project(":app-shf")
       ```
-2. 在Application中初始化VestSDK   
+
+2. 0.9.15+版本开始，项目需要支持Kotlin。
+   (1)AndroidStudio项目根目录build.gradle
+   ```groovy
+   plugins {
+       //kotlin
+       id 'org.jetbrains.kotlin.android' version '1.8.10' apply false
+   }
+   ```
+   (2)app目录下的build.gradle
+   ```groovy
+   plugins {
+       //kotlin
+       id 'org.jetbrains.kotlin.android'
+   }
+   ```
+
+3. 在Application中初始化VestSDK   
    (1) `VestSDK.init()`方法中传入配置文件名称，请把该配置文件放在assets根目录，配置文件来源将在第4点说明
    ```
    public class AppTestApplication extends MultiDexApplication {
@@ -100,7 +122,7 @@ vest-shf: 用于切换A/B面的远程开关
 
    }
    ```
-3. 实现A/B面切换   
+4. 实现A/B面切换   
    (1) 在闪屏页实现方法`VestSHF.getInstance().inspect()`获取A/B面切换开关，参照例子`com.example.app.test.AppTestSDKActivity`
    ```
    VestSHF.getInstance().inspect(this, new VestInspectCallback() {
@@ -125,8 +147,8 @@ vest-shf: 用于切换A/B面的远程开关
    ```
    (2) 请在Activity生命周期方法onDestroy()中调用VestSDK.getInstance().onDestroy()方法。
 
-4. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets根目录。为避免出包之间文件关联，请自行更改`config`文件名。
-5. 至此Vest-SDK集成完毕。
+5. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets根目录。为避免出包之间文件关联，请自行更改`config`文件名。
+6. 至此Vest-SDK集成完毕。
 
 ## 测试说明
 - 游戏切换开关由厂商后台配置，测试时请联系厂商修改配置。
@@ -177,3 +199,9 @@ vest-shf: 用于切换A/B面的远程开关
 ### 0.9.15
 - 修复Android13+手机保存图片失败问题
 - 混淆异常问题
+### 0.10.0
+- 通过反射断言自动区分精简版
+- 项目需要兼容kotlin
+### 0.10.1
+- 升级app-core，app-sdk,app-shf模块
+- 去除相关lib

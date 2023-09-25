@@ -14,24 +14,13 @@ import java.nio.charset.StandardCharsets;
 public class IOUtil {
     public static final int BUFFER_SIZE = 4 * 1024;
 
-    public static String readAssetContent(Context context, String file) {
-        try {
-            AssetManager assets = context.getAssets();
-            InputStream inputStream = assets.open(file);
-            return readInputStream(inputStream);
-        } catch (Exception e) {
-            //ObfuscationStub0.inject();
-        }
-        return null;
-    }
-
     public static String readRawContent(Context context, int resId) {
         Resources resource = context.getResources();
         InputStream inputStream = resource.openRawResource(resId);
         return readInputStream(inputStream);
     }
 
-    public static String readInputStream(InputStream inputStream) {
+    private static String readInputStream(InputStream inputStream) {
         InputStreamReader streamReader = null;
         try {
             streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);

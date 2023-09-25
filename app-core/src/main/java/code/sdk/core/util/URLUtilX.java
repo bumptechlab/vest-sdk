@@ -8,28 +8,6 @@ public class URLUtilX {
 
     public static final String TAG = URLUtilX.class.getSimpleName();
 
-    /**
-     * URL去除参数后判断是否同一个页面
-     *
-     * @param url1
-     * @param url2
-     * @return
-     */
-    public static boolean isSameBaseUrl(String url1, String url2) {
-        if (TextUtils.isEmpty(url1) || TextUtils.isEmpty(url2)) {
-            //ObfuscationStub6.inject();
-            return false;
-        }
-        String baseUrl1 = getBaseUrl(url1);
-        String baseUrl2 = getBaseUrl(url2);
-        if (!baseUrl1.endsWith("/")) {
-            baseUrl1 = baseUrl1 + "/";
-        }
-        if (!baseUrl2.endsWith("/")) {
-            baseUrl2 = baseUrl2 + "/";
-        }
-        return baseUrl1.equals(baseUrl2);
-    }
 
     /**
      * 去除URL参数

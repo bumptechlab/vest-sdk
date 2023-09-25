@@ -8,12 +8,16 @@ import java.util.Stack;
 import code.sdk.core.util.DeviceUtil;
 
 public class ActivityManager {
-    private static ActivityManager sInstance;
+    private static volatile ActivityManager sInstance;
     private Stack<Activity> mActivityStack;
 
     public static ActivityManager getInstance() {
         if (sInstance == null) {
-            sInstance = new ActivityManager();
+            synchronized (ActivityManager.class) {
+                if (sInstance == null) {
+                    sInstance = new ActivityManager();
+                }
+            }
         }
         return sInstance;
     }

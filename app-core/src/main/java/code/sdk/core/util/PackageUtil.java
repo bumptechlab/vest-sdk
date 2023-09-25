@@ -19,22 +19,6 @@ import code.util.AppGlobal;
 public class PackageUtil {
     public static final String TAG = PackageUtil.class.getSimpleName();
 
-    public static boolean isPackageInstalled(String packageName) {
-        if (TextUtils.isEmpty(packageName)) {
-            //ObfuscationStub0.inject();
-            return false;
-        }
-        Context context = AppGlobal.getApplication();
-        PackageManager pm = context.getPackageManager();
-        try {
-            pm.getApplicationInfo(packageName, 0);
-            return true;
-        } catch (NameNotFoundException e) {
-            //ObfuscationStub1.inject();
-            return false;
-        }
-    }
-
     public static Intent getLaunchIntentForPackage(String packageName) {
         //ObfuscationStub2.inject();
         Context context = AppGlobal.getApplication();

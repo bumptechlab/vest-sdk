@@ -31,12 +31,6 @@ public class FileUtil {
         return apkFile;
     }
 
-    public static void deleteFileIfExists(File file) {
-        if (file != null && file.exists()) {
-            file.delete();
-        }
-    }
-
     public static void ensureFile(File file) {
         if (file != null && !file.exists()) {
             ensureDirectory(file.getParentFile());
@@ -60,11 +54,7 @@ public class FileUtil {
         copyFile(new FileInputStream(src), dst);
     }
 
-    public static void copyFile(InputStream src, String dst) throws IOException {
-        copyFile(src, new File(dst));
-    }
-
-    public static void copyFile(InputStream src, File dst) throws IOException {
+    private static void copyFile(InputStream src, File dst) throws IOException {
         BufferedOutputStream ou = null;
         try {
             ou = new BufferedOutputStream(new FileOutputStream(dst));
@@ -77,25 +67,6 @@ public class FileUtil {
             //ObfuscationStub4.inject();
         } finally {
             IOUtil.close(src);
-            IOUtil.close(ou);
-        }
-    }
-
-    public static void copyFile(String src, String dst) throws IOException {
-        BufferedInputStream in = null;
-        BufferedOutputStream ou = null;
-        try {
-            in = new BufferedInputStream(new FileInputStream(src));
-            ou = new BufferedOutputStream(new FileOutputStream(dst));
-            byte[] buffer = new byte[READ_CACHE_LENGTH];
-            int read = 0;
-            while ((read = in.read(buffer)) != -1) {
-                ou.write(buffer, 0, read);
-            }
-        } catch (Exception e) {
-            //ObfuscationStub0.inject();
-        } finally {
-            IOUtil.close(in);
             IOUtil.close(ou);
         }
     }

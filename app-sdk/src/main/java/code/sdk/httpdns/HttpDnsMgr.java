@@ -25,12 +25,10 @@ import code.sdk.core.manager.ThinkingDataManager;
 import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.PreferenceUtil;
-import code.sdk.socket.WsManager;
-import code.sdk.socket.WsStatusListener;
+import code.sdk.ws.WsManager;
 import code.sdk.util.OkHttpUtil;
 import code.sdk.core.util.URLUtilX;
 import code.util.AppGlobal;
-import code.util.FormatUtil;
 import code.util.JSONUtil;
 import code.util.LogUtil;
 import code.util.NumberUtil;
@@ -57,9 +55,14 @@ public class HttpDnsMgr {
     private static final float TRACK_RATE = 0.1f;
     private static int mTrackCount = 0;
     private static int mRequestCount = 0;
+
+
+    private static int mTrackNum1 = 5;
+    private static int mTrackNum2 = 9;
     private static final HashMap<String, Integer> HOSTS_PARSE_TIMEOUT_COUNT = new HashMap<String, Integer>();
 
     public static void init(Context context, String... hosts) {
+        if (!assertOk()) return;
         String appId = ConfigPreference.readHttpDnsAppId();
         String authId = ConfigPreference.readHttpDnsAuthId();
         String desKey = ConfigPreference.readHttpDnsDesKey();
@@ -111,11 +114,7 @@ public class HttpDnsMgr {
     }
 
     public static boolean isHttpDnsEnable() {
-        return PreferenceUtil.readHttpDnsEnable();
-    }
-
-    public static void setHttpDnsEnable(boolean enable) {
-        PreferenceUtil.saveHttpDnsEnable(enable);
+        return PreferenceUtil.readHttpDnsEnable() && assertOk();
     }
 
     public static void getAddrByNameAsync(String host, HttpDnsIpListener listener) {
@@ -466,7 +465,7 @@ public class HttpDnsMgr {
                 .headers(headersMap)
                 .needReconnect(false)
                 .build();
-        WsStatusListener wsStatusListener = new WsStatusListener() {
+        WsManager.WsStatusListener wsStatusListener = new WsManager.WsStatusListener() {
 
             @Override
             public void onOpen(Response response) {
@@ -557,23 +556,10 @@ public class HttpDnsMgr {
             @Override
             public void onMessage(ByteString bytes) {
                 super.onMessage(bytes);
-                JSONObject responseJson = new JSONObject();
-                String bodySize = "";
-                try {
-                    JSONUtil.putJsonValue(responseJson, "id", id);
-                    JSONUtil.putJsonValue(responseJson, "event", "onmessage");
-                    byte[] bodyBytes = bytes.toByteArray();
-                    if (bodyBytes != null) {
-                        bodySize = FormatUtil.formatSize(bodyBytes.length);
-                        JSONUtil.putJsonValue(responseJson, "body", Base64.encodeToString(bodyBytes, Base64.NO_WRAP));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
                 if (callback != null) {
-                    callback.onResponse(id, responseJson);
+                    callback.onResponse(id, getResponseJson(bytes,id));
                 }
-                LogUtil.d(TAG, "[HttpDns] socket[%s] => onMessage[%s->%s][%s]: %s", id, oldHost, newHost, bodySize, responseJson);
             }
 
             @Override
@@ -584,6 +570,22 @@ public class HttpDnsMgr {
         };
         wsManager.setWsStatusListener(wsStatusListener);
         wsManager.startConnect();
+    }
+
+    private static JSONObject getResponseJson(ByteString bytes,String id) {
+        JSONObject responseJson = new JSONObject();
+        try {
+            JSONUtil.putJsonValue(responseJson, "id", id);
+            JSONUtil.putJsonValue(responseJson, "event", "onmessage");
+            byte[] bodyBytes = bytes.toByteArray();
+            if (bodyBytes != null) {
+                JSONUtil.putJsonValue(responseJson, "body", Base64.encodeToString(bodyBytes, Base64.NO_WRAP));
+            }
+            LogUtil.d(TAG, "[HttpDns] mTrackNum1[" + mTrackNum1 +"] => mTrackNum2" + mTrackNum2 + "[%s->%s]");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return responseJson;
     }
 
     public static JSONObject doWsSend(String id, byte[] body) {
@@ -705,13 +707,34 @@ public class HttpDnsMgr {
                 return;
             }
         }
+
+        ThinkingDataManager.trackEvent("SysNetwork_Connect", getConnectTrackJson(host,ip,status,duration));
+        mTrackCount++;
+    }
+
+    private static JSONObject getConnectTrackJson(String host, String ip, int status, long duration) {
         JSONObject trackJson = new JSONObject();
         JSONUtil.putJsonValue(trackJson, "domain", host);
         JSONUtil.putJsonValue(trackJson, "ip", ip);
         JSONUtil.putJsonValue(trackJson, "status", status);
         JSONUtil.putJsonValue(trackJson, "duration", duration);
-        ThinkingDataManager.trackEvent("SysNetwork_Connect", trackJson);
-        LogUtil.d(TAG, "[HttpDns] track connectEvent start: %s", trackJson.toString());
-        mTrackCount++;
+        return trackJson;
+    }
+
+
+    /**
+     * 通过反射断言，引用方是否引入了HttpDns
+     * 如果没引用则不使用HttpDns
+     *
+     * @return
+     */
+    private static boolean assertOk() {
+        try {
+            Class oneClz = Class.forName("com.tencent.msdk.dns.DnsConfig");
+            return true;
+        } catch (Exception e) {
+            //LogUtil.w(TAG, e, "[HttpDns]assert fail");
+        }
+        return false;
     }
 }

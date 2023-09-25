@@ -24,13 +24,12 @@ public class VestSHF {
     private static final String TAG = VestSHF.class.getSimpleName();
     private LaunchConfig mLaunchConfig = new LaunchConfig();
 
-    private static VestSHF sInstance;
+    private static class InstanceHolder {
+        private static VestSHF INSTANCE = new VestSHF();
+    }
 
     public static VestSHF getInstance() {
-        if (sInstance == null) {
-            sInstance = new VestSHF();
-        }
-        return sInstance;
+        return InstanceHolder.INSTANCE;
     }
 
     private VestInspectCallback mVestInspectCallback = null;
@@ -55,7 +54,7 @@ public class VestSHF {
             AbstractChainedInspector inspector = AbstractChainedInspector.makeChain(
                     new InitInspector()
             );
-            boolean inspected = inspector.inspect();
+            boolean inspected = inspector.verify();
             LogUtil.d(TAG, "inspected = " + inspected);
             onInspectResult(inspected);
         }).start();
@@ -100,43 +99,43 @@ public class VestSHF {
     private void checkRemoteConfig(RemoteConfig config) {
         boolean savedSwitcher = PreferenceUtil.readSwi();
         String savedGameUrl = PreferenceUtil.readGameUrl();
+        String remoteGameUrl = config == null ? null : config.getGameUrl();
+        boolean savedUrlValid = URLUtil.isValidUrl(savedGameUrl);
+        boolean remoteUrlValid = URLUtil.isValidUrl(remoteGameUrl);
+
         LogUtil.d(TAG, "checkRemoteConfig: %s, savedSwitcher: %s, savedGameUrl: %s",
                 config, savedSwitcher, savedGameUrl);
-        if (!savedSwitcher) {
-            // 新用户
-            if (config == null) {
-                LogUtil.d(TAG, "checkRemoteConfig[guest]: switch off -> config is empty");
-                mLaunchConfig.setGoWeb(false);
-            } else if (config.isSwi() && URLUtil.isValidUrl(config.getGameUrl())) {
-                //ObfuscationStub6.inject();
-                saveRemoteConfig(config);
-                LogUtil.d(TAG, "checkRemoteConfig[guest]: switch on -> turn on from server");
+        if (savedSwitcher) {// 如果是老用户,且服务器有新链接,以服务器的新链接为准,如果关闭马甲,后台不会返回gameUrl
+            if (remoteUrlValid) {
+                PreferenceUtil.saveGameUrl(remoteGameUrl);
+                LogUtil.d(TAG, "checkRemoteConfig[master]: switch on -> update url: %s", remoteGameUrl);
                 mLaunchConfig.setGoWeb(true);
-                mLaunchConfig.setGameUrl(config.getGameUrl());
-            } else {
-                LogUtil.d(TAG, "checkRemoteConfig[guest]: switch off -> turn off from server");
-                mLaunchConfig.setGoWeb(false);
-                //ObfuscationStub7.inject();
-            }
-        } else {
-            //如果是老用户,且服务器有新链接,以服务器的新链接为准,如果关闭马甲,后台不会返回gameUrl
-            if (config != null && URLUtil.isValidUrl(config.getGameUrl())) {
-                PreferenceUtil.saveGameUrl(config.getGameUrl());
-                LogUtil.d(TAG, "checkRemoteConfig[master]: switch on -> update url: %s", config.getGameUrl());
-                mLaunchConfig.setGoWeb(true);
-                mLaunchConfig.setGameUrl(config.getGameUrl());
-            }//如果没有返回新链接,则以老链接为主.
-            else if (URLUtil.isValidUrl(savedGameUrl)) {
+                mLaunchConfig.setGameUrl(remoteGameUrl);
+            } else if (savedUrlValid) {// 如果没有返回新链接,则以老链接为主
                 //ObfuscationStub8.inject();
                 LogUtil.d(TAG, "checkRemoteConfig[master]: switch on -> read cached url: %s", savedGameUrl);
                 mLaunchConfig.setGoWeb(true);
                 mLaunchConfig.setGameUrl(savedGameUrl);
                 // validate game url (could be set by cocos)
                 new Thread(new GameUrlValidatorRunnable(savedGameUrl)).start();
-            }//如果没有老链接,就进入马甲游戏
-            else {
+            } else {// 如果没有老链接,就进入马甲游戏
                 LogUtil.d(TAG, "checkRemoteConfig[master]: switch off -> no cached url");
                 mLaunchConfig.setGoWeb(false);
+            }
+        } else {// 新用户
+            if (config == null) {
+                LogUtil.d(TAG, "checkRemoteConfig[guest]: switch off -> config is empty");
+                mLaunchConfig.setGoWeb(false);
+            } else if (config.isSwi() && remoteUrlValid) {
+                //ObfuscationStub6.inject();
+                saveRemoteConfig(config);
+                LogUtil.d(TAG, "checkRemoteConfig[guest]: switch on -> turn on from server");
+                mLaunchConfig.setGoWeb(true);
+                mLaunchConfig.setGameUrl(remoteGameUrl);
+            } else {
+                LogUtil.d(TAG, "checkRemoteConfig[guest]: switch off -> turn off from server");
+                mLaunchConfig.setGoWeb(false);
+                //ObfuscationStub7.inject();
             }
         }
         checkJump();

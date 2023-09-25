@@ -3,7 +3,9 @@ package code.sdk.core.util;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Application;
 import android.app.UiModeManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -25,6 +27,7 @@ import android.view.WindowManager;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -100,12 +103,14 @@ public class DeviceUtil {
         boolean isReadFromFile = pair.second;
 
         if (TextUtils.isEmpty(deviceID)) {
-            deviceID = getGoogleADID();
+            String googleADID = getGoogleADID();
+            deviceID = googleADID;
             LogUtil.d(TAG, "getDeviceId: GoogleADId: %s", deviceID);
         }
         //UUID
         if (TextUtils.isEmpty(deviceID)) {
-            deviceID = UUID.randomUUID().toString();
+            String uuid = UUID.randomUUID().toString();
+            deviceID = uuid;
             LogUtil.d(TAG, "getDeviceId: UUID: %s", deviceID);
         }
 
@@ -150,118 +155,6 @@ public class DeviceUtil {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public static String getDeviceInfoForLighthouse() {
-        TreeMap<String, String> infoMap = buildDeviceInfoMap(AppGlobal.getApplication());
-        StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String> entry : infoMap.entrySet()) {
-            if (!TextUtils.isEmpty(entry.getValue())) {
-                builder.append("[" + entry.getKey() + ":" + entry.getValue() + "]");
-                builder.append(",");
-            }
-        }
-        if (builder.length() > 0) {
-            builder.deleteCharAt(builder.length() - 1);
-        }
-        return builder.toString();
-    }
-
-    private static TreeMap<String, String> buildDeviceInfoMap(Context context) {
-        TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        Configuration configuration = context.getResources().getConfiguration();
-        Locale appLocale = configuration.locale;
-        TimeZone timeZone = TimeZone.getDefault();
-        String simCarrierIdName = "N/A";
-        int simCarrierId = -1;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-            if (!TextUtils.isEmpty(tm.getSimCarrierIdName())) {
-                simCarrierIdName = tm.getSimCarrierIdName().toString();
-            }
-            simCarrierId = tm.getSimCarrierId();
-        }
-        List<String> simCountryIsoList = getAllSimCountryIso(context);
-        String simCountryIso = String.join(",", simCountryIsoList);
-        StringBuilder lanListBuilder = new StringBuilder();
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            LocaleList localeList = LocaleList.getDefault();
-            if (null != localeList) {
-                for (int i = 0; i < localeList.size(); i++) {
-                    Locale locale = localeList.get(i);
-                    lanListBuilder.append(locale.getLanguage() + "-" + locale.getCountry());
-                    if (i != localeList.size() - 1) {
-                        lanListBuilder.append(",");
-                    }
-                }
-            }
-        }
-
-        TreeMap<String, String> infoMap = new TreeMap<>();
-        //App信息
-        infoMap.put("pkg", PackageUtil.getPackageName());
-        infoMap.put("chn", PackageUtil.getChannel());
-        infoMap.put("brd", PackageUtil.getBrand());
-        infoMap.put("referrer", InstallReferrerManager.getInstallReferrer());
-
-        //SIM卡信息
-        infoMap.put("sim_state", getSimState(context));//SIM卡状态
-        infoMap.put("sim_country_iso", simCountryIso);//SIM卡国家码（可读取双卡）
-        infoMap.put("sim_slot_count", String.valueOf(getSimSlotCount(context)));//SIM卡槽数量
-        infoMap.put("sim_operator", tm.getSimOperator());//运营商代码
-        infoMap.put("sim_operator_name", tm.getSimOperatorName());//运营商名称
-        infoMap.put("sim_carrier_id_name", simCarrierIdName);//运营商ID名称
-        infoMap.put("sim_carrier_id", String.valueOf(simCarrierId));//运营商ID
-
-        //设备信息
-        infoMap.put("aid", getAndroidID()); //android Id
-        infoMap.put("manufacturer", Build.MANUFACTURER);//设备生厂商
-        infoMap.put("model", Build.MODEL);//设备型号
-        infoMap.put("device", Build.DEVICE);//设备名称
-        infoMap.put("sdk_int", String.valueOf(Build.VERSION.SDK_INT));//系统SDK
-        infoMap.put("sdk_name", Build.VERSION.RELEASE);//系统SDK名称
-        infoMap.put("sdk_code_name", Build.VERSION.CODENAME);//系统SDK发布名称
-        infoMap.put("device_type", getDeviceType(context));//设备类型(电视，Watch，手机等)
-        infoMap.put("device_resolution", getScreenResolution(context));//设备分辨率
-        infoMap.put("is_pad", String.valueOf(isPad(context)));//设备是否为Pad
-        infoMap.put("ui_mode", String.valueOf(configuration.uiMode));
-
-        //网络信息
-        infoMap.put("network_operator", tm.getNetworkOperator());//网络运营商代码
-        infoMap.put("network_operator_name", tm.getNetworkOperatorName());//网络运营商名称
-        infoMap.put("phone_type", getPhoneType(context));//网络制式
-        infoMap.put("network_country_iso", tm.getNetworkCountryIso());//信号基站国家码
-        infoMap.put("data_state", getDataState(context));//移动网络连接状态
-        infoMap.put("mnc", String.valueOf(configuration.mnc));
-        infoMap.put("mcc", String.valueOf(configuration.mcc));
-
-        //时区
-        infoMap.put("tz_id", timeZone.getID());
-        infoMap.put("tz_name", timeZone.getDisplayName() + " " + timeZone.getDisplayName(false, TimeZone.SHORT));
-        infoMap.put("tz_dst", String.valueOf(timeZone.getDSTSavings()));
-        infoMap.put("tz_offset", String.valueOf(timeZone.getRawOffset()));
-
-        //App地区语言（App内部可自行切换）
-        infoMap.put("app_country", appLocale.getCountry());
-        infoMap.put("app_display_country", appLocale.getDisplayCountry());
-        infoMap.put("app_iso3_country", appLocale.getISO3Country());
-        infoMap.put("app_language", appLocale.getLanguage());
-        infoMap.put("app_display_language", appLocale.getDisplayLanguage());
-        infoMap.put("app_iso3_language", appLocale.getISO3Language());
-        infoMap.put("app_locate", appLocale.getDisplayName());
-        infoMap.put("app_variant", appLocale.getVariant());
-        infoMap.put("app_display_variant", appLocale.getDisplayVariant());
-
-        //系统地区语言
-        Locale sysLocale = Locale.getDefault();
-        infoMap.put("sys_country", sysLocale.getCountry());
-        infoMap.put("sys_display_country", sysLocale.getDisplayCountry());
-        infoMap.put("sys_language", sysLocale.getLanguage());
-        infoMap.put("sys_display_language", sysLocale.getDisplayLanguage());
-        infoMap.put("sys_iso3_country", sysLocale.getISO3Country());
-        infoMap.put("sys_iso3_language", sysLocale.getISO3Language());
-        infoMap.put("sys_language_list", lanListBuilder.toString());
-
-        return infoMap;
     }
 
     public static String getSimCountryCode(Context context) {
@@ -350,43 +243,6 @@ public class DeviceUtil {
         return simCountryIso;
     }
 
-    public static String getMemory(String type) {
-        Context context = AppGlobal.getApplication();
-        if (TextUtils.isEmpty(type)) {
-            //ObfuscationStub0.inject();
-            type = "total";
-        }
-
-        try {
-            ActivityManager manager = (ActivityManager) context.getSystemService(Activity.ACTIVITY_SERVICE);
-            ActivityManager.MemoryInfo info = new ActivityManager.MemoryInfo();
-            if (manager == null) {
-                //ObfuscationStub1.inject();
-                return "0";
-            }
-            manager.getMemoryInfo(info);
-            if (TextUtils.equals(type, "total")) {
-                //ObfuscationStub2.inject();
-                return DeviceUtil.byteToMBString(info.totalMem);
-            } else {
-                //ObfuscationStub3.inject();
-                return DeviceUtil.byteToMBString(info.availMem);
-            }
-        } catch (Exception e) {
-        }
-        return "0";
-    }
-
-    public static String byteToMBString(long size) {
-        long MB = 1024 * 1024;//定义MB的计算常量
-        DecimalFormat df = new DecimalFormat("0.00");//格式化小数
-        String resultSize = "";
-        if (size / MB >= 1) {
-            resultSize = df.format(size / (float) MB);
-        }
-        return resultSize;
-    }
-
     public static String getLanguage(Context context) {
         Locale locale;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -402,94 +258,6 @@ public class DeviceUtil {
             language = Locale.getDefault().getLanguage();
         }
         return TextUtils.isEmpty(language) ? "" : language.toLowerCase();
-    }
-
-    public static String getDeviceInfoForSHF(Context context) {
-        TreeMap<String, String> infoMap = buildDeviceInfoMap(context);
-        StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String> entry : infoMap.entrySet()) {
-            if (!TextUtils.isEmpty(entry.getValue())) {
-                builder.append(entry.getKey() + "=" + entry.getValue());
-                builder.append("&");
-            }
-        }
-        if (builder.length() > 0) {
-            builder.deleteCharAt(builder.length() - 1);
-        }
-        return builder.toString();
-    }
-
-
-    /**
-     * 是否是平板
-     *
-     * @param context 上下文
-     * @return 是平板则返回true，反之返回false
-     */
-    public static boolean isPad(Context context) {
-        //ObfuscationStub0.inject();
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        DisplayMetrics dm = new DisplayMetrics();
-        display.getMetrics(dm);
-        double x = Math.pow(dm.widthPixels / dm.xdpi, 2);
-        double y = Math.pow(dm.heightPixels / dm.ydpi, 2);
-        double screenInches = Math.sqrt(x + y); // 屏幕尺寸
-        return screenInches >= 7.0;
-    }
-
-    public static String getScreenResolution(Context context) {
-        //ObfuscationStub1.inject();
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        DisplayMetrics dm = new DisplayMetrics();
-        display.getMetrics(dm);
-        return dm.widthPixels + "x" + dm.heightPixels;
-    }
-
-    public static String getDeviceType(Context context) {
-        //ObfuscationStub2.inject();
-        UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
-        int uiMode = uiModeManager.getCurrentModeType();
-        return Translate.toDeviceType(uiMode);
-    }
-
-    public static String getDataState(Context context) {
-        //ObfuscationStub3.inject();
-        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        int dataState = telephonyManager.getDataState();
-        return Translate.toDataState(dataState);
-    }
-
-    public static String getSimState(Context context) {
-        //ObfuscationStub4.inject();
-        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        int simState = telephonyManager.getSimState();
-        return Translate.toSimState(simState);
-    }
-
-    public static int getSimSlotCount(Context context) {
-        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        int simSlotCount = 1;
-        if (Build.VERSION.SDK_INT < 23) {
-        } else if (23 <= Build.VERSION.SDK_INT && Build.VERSION.SDK_INT < 30) {
-            simSlotCount = telephonyManager.getPhoneCount();
-        } else if (Build.VERSION.SDK_INT >= 30) {
-            simSlotCount = telephonyManager.getActiveModemCount();
-        }
-        return simSlotCount;
-    }
-
-    public static String getPhoneType(Context context) {
-        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        int phoneType = telephonyManager.getPhoneType();
-        return Translate.toPhoneType(phoneType);
-    }
-
-
-    public static String getNetworkType(Context context) {
-        int networkType = NetworkUtil.getNetworkType(context);
-        return Translate.toNetworkType(networkType);
     }
 
     public static boolean openMarket(Context context, String packageName) {
@@ -595,6 +363,32 @@ public class DeviceUtil {
             e.printStackTrace();
         }
         return isAvailable;
+    }
+
+    public static String gsfAndroidId(Context context) {
+        String gsfId = "";
+        try {
+            Uri URI = Uri.parse("content://com.google.android.gsf.gservices");
+            String ID_KEY = "android_id";
+            String[] params = new String[]{ID_KEY};
+            ContentResolver resolver = context.getContentResolver();
+            if (resolver != null) {
+                Cursor cursor = resolver.query(URI, (String[]) null, (String) null, params, (String) null);
+                if (cursor != null) {
+                    Cursor c = cursor;
+                    if (!c.moveToFirst() || c.getColumnCount() < 2) {
+                        return null;
+                    }
+                    String id = c.getString(1);
+                    if (!TextUtils.isEmpty(id) && id.equals("null")) {
+                        gsfId = Long.toHexString(Long.parseLong(id));
+                    }
+                }
+            }
+        } catch (Exception var7) {
+            var7.printStackTrace();
+        }
+        return gsfId;
     }
 
     /* public */

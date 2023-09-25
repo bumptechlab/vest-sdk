@@ -20,11 +20,6 @@ public class UIUtil {
         }
     }
 
-    public boolean isOnUiThread() {
-        //ObfuscationStub2.inject();
-        return Thread.currentThread() == Looper.getMainLooper().getThread();
-    }
-
     public static void runOnUiThread(Runnable runnable) {
         runOnUiThreadDelay(runnable, 0);
     }
@@ -36,21 +31,6 @@ public class UIUtil {
         } catch (Exception e) {
             //ObfuscationStub3.inject();
         }
-    }
-
-    public static void runOnUiThreadAtTime(Runnable runnable, long uptimeMillis) {
-        try {
-            ensureHandler();
-            sHandler.postAtTime(new NoExceptionRunnable(runnable), uptimeMillis);
-        } catch (Exception e) {
-            //ObfuscationStub4.inject();
-        }
-    }
-
-    public static Handler getUIThreadHandler() {
-        //ObfuscationStub0.inject();
-        ensureHandler();
-        return sHandler;
     }
 
     /*

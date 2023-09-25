@@ -25,24 +25,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import cocos.creator.walle.ExtraInfo;
-import cocos.creator.walle.ExtraInfoReader;
-import code.sdk.BuildConfig;
-import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.DeviceUtil;
-import code.sdk.core.util.EmulatorChecker;
+import code.sdk.core.util.ImitateChecker;
 import code.sdk.core.util.FileUtil;
 import code.sdk.core.util.PackageUtil;
 import code.sdk.core.util.PreferenceUtil;
+import code.sdk.core.util.UIUtil;
 import code.sdk.httpdns.HttpDnsHttpListener;
 import code.sdk.httpdns.HttpDnsMgr;
 import code.sdk.httpdns.HttpDnsWsListener;
 import code.sdk.core.manager.AdjustManager;
-import code.sdk.manager.OneSignalManager;
+import code.sdk.manage.OneSignalManager;
 import code.sdk.core.manager.ThinkingDataManager;
-import code.sdk.network.download.DownloadTask;
+import code.sdk.download.DownloadTask;
 import code.sdk.core.util.CocosPreferenceUtil;
+import code.sdk.common.DeviceMacUtil;
 import code.sdk.util.KeyChainUtil;
+import code.sdk.zfutil.ExtraInfo;
+import code.sdk.zfutil.ExtraInfoReader;
 import code.util.AppGlobal;
 import code.util.LogUtil;
 
@@ -425,7 +425,7 @@ public class JavascriptBridge {
         Context context = AppGlobal.getApplication();
         File dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         FileUtil.ensureDirectory(dir);
-        DownloadTask.download(materialUrl, dir.getAbsolutePath(), new DownloadTask.OnDownloadListener() {
+        DownloadTask.getInstance().download(materialUrl, dir.getAbsolutePath(), new DownloadTask.OnDownloadListener() {
             @Override
             public void onDownloadSuccess(File saveFile) {
                 String fileName = String.format(PROMOTION_MATERIAL_FILENAME,
@@ -495,7 +495,7 @@ public class JavascriptBridge {
         Context context = AppGlobal.getApplication();
         File imagePath = new File(context.getFilesDir(), DIR_IMAGES);
         FileUtil.ensureDirectory(imagePath);
-        DownloadTask.download(imageUrl, imagePath.getAbsolutePath(), new DownloadTask.OnDownloadListener() {
+        DownloadTask.getInstance().download(imageUrl, imagePath.getAbsolutePath(), new DownloadTask.OnDownloadListener() {
             @Override
             public void onDownloadSuccess(File saveFile) {
                 File destFile = new File(imagePath, PROMOTION_SHARE_FILENAME);
@@ -678,18 +678,12 @@ public class JavascriptBridge {
     @JavascriptInterface
     public void onAnalysisStart(String accid, long cretime) {
         //ObfuscationStub0.inject();
-        if (mCallback != null) {
-            mCallback.onStart(accid, cretime);
-        }
     }
 
 
     @JavascriptInterface
     public void onAnalysisEnd() {
         //ObfuscationStub0.inject();
-        if (mCallback != null) {
-            mCallback.onEnd();
-        }
     }
 
     @JavascriptInterface
@@ -719,14 +713,40 @@ public class JavascriptBridge {
 
     @JavascriptInterface
     public boolean isEmulator() {
-        boolean isEmulator = EmulatorChecker.isEmulator();
+        boolean isEmulator = ImitateChecker.isImitate();
         LogUtil.d(TAG, "isEmulator: %s", isEmulator);
         return isEmulator;
     }
 
     @JavascriptInterface
+    public String commonData() {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("mac", DeviceMacUtil.INSTANCE.getMacAddress());
+            jsonObject.put("gsf_id",DeviceUtil.gsfAndroidId(AppGlobal.getApplication()));
+            return jsonObject.toString();
+        }catch (Exception exception){
+            return "";
+        }
+    }
+
+    @JavascriptInterface
     public void exitApp() {
         code.sdk.core.manager.ActivityManager.getInstance().finishAll();
+    }
+
+    /**
+     * handle notification when Cocos is ready
+     */
+    @JavascriptInterface
+    public void handleNotification() {
+        //延迟1秒处理，
+        UIUtil.runOnUiThreadDelay(new Runnable() {
+            @Override
+            public void run() {
+                OneSignalManager.handleNotification();
+            }
+        }, 1000);
     }
 
     /* interface -> callback */
@@ -770,10 +790,6 @@ public class JavascriptBridge {
         void preloadPromotionImageDone(boolean succeed);
 
         void shareToWhatsApp(String text, File file);
-
-        void onStart(String accid, long cretime);
-
-        void onEnd();
     }
     /* interface -> callback */
 }

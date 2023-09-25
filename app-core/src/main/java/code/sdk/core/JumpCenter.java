@@ -11,15 +11,15 @@ import code.util.LogUtil;
 
 public class JumpCenter {
     public static final String TAG = JumpCenter.class.getSimpleName();
-    private static String WEBVIEW_ACTIVITY_CLASS_NAME = "code.sdk.activity.WebViewActivity";
+    private static String WEBVIEW_ACTIVITY_CLASS_NAME = "code.sdk.ui.WebActivity";
 
     public static void toWebViewActivity(Context context, String url) {
         try {
             Intent intent = new Intent();
             intent.setClassName(context, WEBVIEW_ACTIVITY_CLASS_NAME);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra("key_url", addRandomTimestamp(url));
-            intent.putExtra("key_game", true);
+            intent.putExtra("key_path_url_value", addRandomTimestamp(url));
+            intent.putExtra("key_is_game_value", true);
             context.startActivity(intent);
         } catch (Exception e) {
             //ObfuscationStub7.inject();

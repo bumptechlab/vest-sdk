@@ -11,13 +11,12 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/app-b" />
             <option value="$PROJECT_DIR$/app-core" />
             <option value="$PROJECT_DIR$/app-sdk" />
             <option value="$PROJECT_DIR$/app-shf" />
             <option value="$PROJECT_DIR$/lib-okhttp" />
             <option value="$PROJECT_DIR$/lib-util" />
-            <option value="$PROJECT_DIR$/lib-walle-reader" />
-            <option value="$PROJECT_DIR$/lib-webview" />
           </set>
         </option>
       </GradleProjectSettings>

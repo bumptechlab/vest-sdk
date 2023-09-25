@@ -10,11 +10,11 @@ import androidx.annotation.Nullable;
 
 import java.util.Hashtable;
 
-import code.sdk.zxing.BarcodeFormat;
-import code.sdk.zxing.BitMatrix;
-import code.sdk.zxing.EncodeHintType;
-import code.sdk.zxing.QRCodeWriter;
-import code.sdk.zxing.WriterException;
+import code.sdk.image.BarcodeFormat;
+import code.sdk.image.BitMatrix;
+import code.sdk.image.EncodeHintType;
+import code.sdk.image.QRCodeWriter;
+import code.sdk.image.WriterException;
 
 public class QRCodeUtil {
     public static final String TAG = QRCodeUtil.class.getSimpleName();

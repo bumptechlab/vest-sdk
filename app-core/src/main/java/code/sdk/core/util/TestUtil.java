@@ -126,7 +126,7 @@ public class TestUtil {
         LogUtil.i(TAG, "[Device] sdkInt: %d, sdkVersion: %s, isEmulator: %s",
                 Build.VERSION.SDK_INT,
                 Build.VERSION.RELEASE,
-                EmulatorChecker.isEmulator());
+                ImitateChecker.isImitate());
         LogUtil.i(TAG, "[Adjust] APP_ID: %s, EVENT_START: %s, EVENT_GREETING: %s, EVENT_ACCESS: %s, EVENT_UPDATED: %s",
                 ConfigPreference.readAdjustAppId(),
                 ConfigPreference.readAdjustEventStart(),

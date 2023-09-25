@@ -23,17 +23,21 @@ public class GoogleAdIdInitializer {
         if (needUpdateGoogleAdId() && !isWaitingGoogleAdId()) {
             LogUtil.d(TAG, "need update GoogleAdId");
             isWaitingGoogleAdId = true;
-            Adjust.getGoogleAdId(AppGlobal.getApplication(), new OnDeviceIdsRead() {
-                @Override
-                public void onGoogleAdIdRead(String s) {
-                    LogUtil.d(TAG, "onGoogleAdIdRead: %s", s);
-                    PreferenceUtil.saveGoogleADID(s);
-                    isWaitingGoogleAdId = false;
-                }
-            });
+            startGetAdjustGoogleAdId();
         } else {
             LogUtil.d(TAG, "no need update GoogleAdId");
         }
+    }
+
+    private static void startGetAdjustGoogleAdId() {
+        Adjust.getGoogleAdId(AppGlobal.getApplication(), new OnDeviceIdsRead() {
+            @Override
+            public void onGoogleAdIdRead(String s) {
+                LogUtil.d(TAG, "onGoogleAdIdRead: %s", s);
+                PreferenceUtil.saveGoogleADID(s);
+                isWaitingGoogleAdId = false;
+            }
+        });
     }
 
     public static boolean isWaitingGoogleAdId() {

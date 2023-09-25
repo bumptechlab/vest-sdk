@@ -17,7 +17,24 @@ public class ConfigurationManager {
 
     private static final String TAG = ConfigurationManager.class.getSimpleName();
 
-    public static void init(Context context, String configName) {
+    private static volatile ConfigurationManager INSTANCE;
+
+    private ConfigurationManager() {
+
+    }
+
+    public static ConfigurationManager getInstance() {
+        if (INSTANCE == null) {
+            synchronized (ConfigurationManager.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new ConfigurationManager();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+
+    public void init(Context context, String configName) {
         if (TextUtils.isEmpty(configName)) {
             LogUtil.e(TAG, "Config file is empty, init aborted");
             return;
@@ -26,18 +43,22 @@ public class ConfigurationManager {
             AssetManager assets = context.getAssets();
             InputStream inputStream = assets.open(configName);
             byte[] assetsBytes = IOUtil.toByteArray(inputStream);
-            String configurationJson = decryptConfig(assetsBytes);
-            LogUtil.d(TAG, "configuration raw: " + configurationJson);
-            Configuration configuration = Configuration.fromJson(configurationJson);
-            initConfig(configuration);
+            configByBytes(assetsBytes);
         } catch (Exception e) {
             //ObfuscationStub4.inject();
             LogUtil.e(TAG, e, "Fail to parse configuration");
         }
     }
 
+    private void configByBytes(byte[] assetsBytes) {
+        String configurationJson = decryptConfig(assetsBytes);
+        LogUtil.d(TAG, "configuration raw: " + configurationJson);
+        Configuration configuration = Configuration.fromJson(configurationJson);
+        initConfig(configuration);
+    }
 
-    private static String decryptConfig(byte[] assetsBytes) {
+
+    private String decryptConfig(byte[] assetsBytes) {
         //提取AES密钥和密文
         byte[] keyBytes = new byte[44];
         byte[] bodyBytes = new byte[assetsBytes.length - keyBytes.length];
@@ -50,7 +71,7 @@ public class ConfigurationManager {
         return configurationJson;
     }
 
-    private static void initConfig(Configuration configuration) {
+    private void initConfig(Configuration configuration) {
         ConfigPreference.saveChannel(configuration.getChannel());
         ConfigPreference.saveBrand(configuration.getBrand());
         ConfigPreference.saveTargetCountry(configuration.getCountry());
