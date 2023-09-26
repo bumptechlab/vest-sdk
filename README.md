@@ -92,15 +92,15 @@ vest-shf: 用于切换A/B面的远程开关
       implementation project(":app-shf")
       ```
 
-2. 0.9.15+版本开始，项目需要支持Kotlin。
-   (1)AndroidStudio项目根目录build.gradle
+2. 0.9.15+版本开始，项目需要支持Kotlin。   
+   (1) AndroidStudio项目根目录build.gradle
    ```groovy
    plugins {
        //kotlin
        id 'org.jetbrains.kotlin.android' version '1.8.10' apply false
    }
    ```
-   (2)app目录下的build.gradle
+   (2) app目录下的build.gradle
    ```groovy
    plugins {
        //kotlin
