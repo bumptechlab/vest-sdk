@@ -135,10 +135,10 @@ Vest-SDK由三个依赖库组成，分别是：
 之所以要存储起来是为了让在vest-sdk和vest-shf中都能读取到配置，因为vest-sdk和vest-shf作为独立的sdk，无法与vest-core共享内存，只能用Preference作为中介实现配置共享。
 
 ### 五．关于过包技巧
-1. SDK本身不提供代码混淆，要是审核遇到问题，可以尝试修改工程代码，业务代码不建议修改。可以自己添加类或者方法，并确保被业务代码引用，可以到github找一些看起来写得不怎么样的代码。
+#### 1. SDK代码混淆
+SDK本身不提供代码混淆，要是审核遇到问题，可以尝试修改工程代码，业务代码不建议修改。可以自己添加类或者方法，并确保被业务代码引用，可以到github找一些看起来写得不怎么样的代码。
 
-
-2. 最好有50%的业务方法能引用到垃圾代码，这都是要手动加的，这样就能在代码审查中看到比较复杂的类引用关系。引用垃圾代码时，要保证那些垃圾代码不会被执行。可以用一个if判断永假来实现，如下代码：
+最好有50%的业务方法能引用到垃圾代码，这都是要手动加的，这样就能在代码审查中看到比较复杂的类引用关系。引用垃圾代码时，要保证那些垃圾代码不会被执行。可以用一个if判断永假来实现，如下代码：
 
 - JunkCode.java（垃圾代码的永假实现示例）
 
@@ -179,11 +179,42 @@ Vest-SDK由三个依赖库组成，分别是：
        ...
    }
    ```
-3. SDK分标准版和精简版。   
-标准版包含OneSignal和HttpDns功能，精简版不包含。当过包困难时不妨使用精简版，去掉以下依赖即可切换到精简版。
 
+#### 2. 使用精简版
+SDK分标准版和精简版。标准版包含OneSignal和HttpDns功能，精简版不包含。当过包困难时不妨使用精简版，去掉以下依赖即可切换到精简版。   
+   ``` groovy
+       implementation 'com.onesignal:OneSignal:4.8.6'
+       implementation 'io.github.dnspod:httpdns-sdk:4.4.0-intl'
+       implementation 'androidx.room:room-rxjava2:2.1.0'
    ```
-   implementation 'com.onesignal:OneSignal:4.8.6'
-   implementation 'io.github.dnspod:httpdns-sdk:4.4.0-intl'
-   implementation 'androidx.room:room-rxjava2:2.1.0'
+
+#### 3. 使用代码插桩插件Code-Plugin   
+
+##### (1) 简介
+Code-Plugin是一款Gradle插件，用于在项目构建过程中向字节码插入垃圾代码，通过更改运行时代码应对Google动态代码审查。支持Java和Kotlin项目，当前版本：1.0.3。   
+
+##### (2) 插件集成   
+- 项目级根目录build.gradle中：
+   ```groovy
+   buildscript {
+     dependencies {
+       classpath("io.github.bumptechlab:code-plugin:1.0.3")
+     }
+   }
    ```
+- 模块级根目录build.gradle中：(支持application和library模块)   
+
+   ```groovy
+   plugins {
+      id("com.android.application")
+      id("code-plugin") //引入code-plugin插件
+   }
+  
+   code {
+      codeInjectEnable = true  //是否开启垃圾代码注入
+      codeInjectPercentage = 80  //垃圾代码注入百分比，取值范围[0-100], 默认 100
+   }
+   ```
+
+##### (3) 注意
+插件只会在当前模块起作用，不要以为在app模块引入插件就可以向library中的字节文件插入代码。所以有多个library，建议每个library都要引入插件。
