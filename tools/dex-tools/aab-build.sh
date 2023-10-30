@@ -131,7 +131,7 @@ for dexFile in ${aabDexFiles}; do
 done
 
 zip -rjq ${aabDexZip} ${aabDexTemp}
-java -jar ${rootDir}/libs/lib-dex-encrypt.jar -i ${aabDexZip} -o ${aabDexData}
+java -jar ${rootDir}/libs/lib-dex-encrypt.jar -e -i ${aabDexZip} -o ${aabDexData}
 
 #取8位md5放入文件名
 aabDexDataMd5=$(md5 ${aabDexData} | awk -F ' = ' '{print $2}')

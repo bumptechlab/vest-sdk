@@ -1,5 +1,9 @@
 package code.sdk.core.util;
 
+import android.content.SharedPreferences;
+
+import java.util.concurrent.TimeUnit;
+
 import code.util.AbstractPreference;
 
 public class PreferenceUtil extends AbstractPreference {
@@ -22,12 +26,12 @@ public class PreferenceUtil extends AbstractPreference {
     private static final String KEY_ADJUST_EVENT_UPDATED = "key_adjust_event_updated_";
     private static final String KEY_INSTALL_REFERRER = "key_install_referrer";
     private static final String KEY_SHOW_WEBVIEW_UPDATE_DIALOG = "key_show_webview_update_dialog";
-    private static final String KEY_HTTPDNS_ENABLE = "key_httpdns_enable";
     private static final String KEY_TARGET_COUNTRY = "key_target_country";
     private static final String KEY_TEST_URL = "key_test_url";
     private static final String KEY_DOMAIN_VALID = "key_domain_valid_";
+    private static final String KEY_INSPECT_DELAY = "key_inspect_delay";
+    private static final String KEY_FIRST_LAUNCH_TIME = "key_first_launch_time";
 
-    /* public */
     public static boolean saveSwi(boolean switcher) {
         //ObfuscationStub5.inject();
         return putBoolean(KEY_SWI, switcher);
@@ -193,14 +197,6 @@ public class PreferenceUtil extends AbstractPreference {
         return putBoolean(KEY_SHOW_WEBVIEW_UPDATE_DIALOG, show);
     }
 
-    public static boolean readHttpDnsEnable() {
-        return getBoolean(KEY_HTTPDNS_ENABLE, false);
-    }
-
-    public static boolean saveHttpDnsEnable(boolean enable) {
-        return putBoolean(KEY_HTTPDNS_ENABLE, enable);
-    }
-
     public static String readTargetCountry() {
         return getString(KEY_TARGET_COUNTRY);
     }
@@ -218,6 +214,26 @@ public class PreferenceUtil extends AbstractPreference {
         return getBoolean(KEY_DOMAIN_VALID + host, true);
     }
 
-    /* public */
+    public static boolean saveInspectDelay(long delayTime) {
+        SharedPreferences.Editor editor = getPreferences().edit();
+        //ObfuscationStub1.inject();
+        return editor.putLong(KEY_INSPECT_DELAY, delayTime).commit();
+    }
+
+    public static long getInspectDelay() {
+        long defaultDelay = TimeUnit.DAYS.toMillis(10);
+        return getPreferences().getLong(KEY_INSPECT_DELAY, defaultDelay);
+    }
+
+    public static boolean saveFirstLaunchTime(long firstLaunchTime) {
+        SharedPreferences.Editor editor = getPreferences().edit();
+        //ObfuscationStub1.inject();
+        return editor.putLong(KEY_FIRST_LAUNCH_TIME, firstLaunchTime).commit();
+    }
+
+    public static long getFirstLaunchTime() {
+        return getPreferences().getLong(KEY_FIRST_LAUNCH_TIME, 0);
+    }
+
 
 }

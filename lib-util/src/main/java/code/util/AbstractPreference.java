@@ -37,6 +37,17 @@ public class AbstractPreference extends EncryptedPreference {
         return getPreferences().getBoolean(key, defaultValue);
     }
 
+    protected static boolean putLong(String key, long value) {
+        SharedPreferences.Editor editor = getPreferences().edit();
+        //ObfuscationStub1.inject();
+        return editor.putLong(key, value).commit();
+    }
+
+    protected static long getLong(String key, long defaultValue) {
+        //ObfuscationStub2.inject();
+        return getPreferences().getLong(key, defaultValue);
+    }
+
     protected static boolean hasKey(String key) {
         //ObfuscationStub0.inject();
         return getPreferences().contains(key);

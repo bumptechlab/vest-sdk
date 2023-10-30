@@ -8,10 +8,9 @@ import code.sdk.core.util.GoogleAdIdInitializer;
 import code.sdk.core.util.PreferenceUtil;
 import code.util.LogUtil;
 
-public class InitInspector extends AbstractChainedInspector {
+public class InitInspector {
     public static final String TAG = InitInspector.class.getSimpleName();
 
-    @Override
     public boolean inspect() {
         String installReferrer = InstallReferrerManager.getInstallReferrer();
         long startTime = System.currentTimeMillis();

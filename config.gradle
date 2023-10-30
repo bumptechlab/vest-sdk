@@ -13,32 +13,30 @@
 // limitations under the License.
 project.ext {
     android = [
-            projectName      : 'Shell',
-            projectCode      : "vest-sdk",
-            applicationId    : 'com.example.app.test',   //package name 注意：此处key不可改动，buildSrc脚本中会使用到
-            appApplication   : "code.core.MainApplication", //主入口Application
-            proxyApplication : "ddecrypt.dex.lemon.ProxyApplication",//解密并加载Dex的代理Application
-            trickFile        : "main.index.html",   //asset目录下对应加密引擎文件的名称
-            minSdkVersion    : 24,
-            targetSdkVersion : 33,
-            compileSdkVersion: 33,
-            versionCode      : 100,
-            versionName      : '1.0.0',
-            frameVersion     : "011",   //框架版本，阶段性发布请+1（在框架功能开发｜dev分支更新，其他分支请不要更新）
-            country          : "br",    //配置TD/OneSignal/网络限制国家。in: 印度; br: 巴西; id: 印尼
+            projectName         : 'Shell',
+            projectCode         : "vest-sdk",
+            minSdkVersion       : 24,
+            targetSdkVersion    : 33,
+            compileSdkVersion   : 33,
+            versionCode         : 100,
+            versionName         : '1.0.0',
+            frameVersion        : "012",   //框架版本，阶段性发布请+1（在框架功能开发｜dev分支更新，其他分支请不要更新）
+            country             : "br",    //配置TD/OneSignal/网络限制国家。in: 印度; br: 巴西; id: 印尼
+            codeInjectEnable    : true,    //是否开启代码注入
+            codeInjectPercentage: 100,     //垃圾代码注入百分比，取值[0-100]
     ]
 
     dependencies = [
             androidxMultidexVersion          : '2.0.1',
             androidxAppcompatVersion         : '1.4.1',
             androidxConstraintlayoutVersion  : '2.1.3',
-            googleMaterialVersion            : '1.5.0',
+            googleMaterialVersion            : '1.9.0',
             androidxLegacyVersion            : '1.0.0',
             androidxCardviewVersion          : '1.0.0',
-            androidxAnnotation               : '1.5.0',
+            androidxAnnotation               : '1.7.0',
             installreferrerVersion           : '2.2',
             googleGsonVersion                : '2.9.0',
-            okhttpVersion                    : '3.12.2',
+            okhttpVersion                    : '4.10.0',
             googlePlayServiceVersion         : '18.0.1',
             eventBusVersion                  : '3.3.1',
             adjustVersion                    : '4.33.0',
@@ -47,10 +45,10 @@ project.ext {
             thinkingDataSdkVersion           : '2.8.3',
             thinkingDataThirdPartyVersion    : '1.1.0',
             jakewhartonPhoenixVersion        : '2.1.2',
-            rxJavaVersion                    : '2.1.0',
+            rxJavaVersion                    : '3.0.0',
             httpdnsVersion                   : "4.4.0-intl",
             onesignalVersion                 : "4.8.6",
-            securityCryptoVersion            : "1.0.0",
+            securityCryptoVersion            : "1.1.0-alpha06",
             securityIdentityCredentialVersion: "1.0.0-alpha03",
             securityAppAuthenticatorVersion  : "1.0.0-alpha02"
     ]
@@ -69,7 +67,6 @@ project.ext {
             okhttp    : "code.okhttp",
             util      : "code.util",
             walle     : "code.walle.reader",
-            webview   : "code.webview",
             junkcode  : "code.junkcode",
     ]
 
@@ -79,7 +76,7 @@ project.ext {
             artifactIdSdk    : 'vest-sdk',
             artifactIdShf    : 'vest-shf',
             artifactIdCore   : 'vest-core',
-            version          : '0.9.15',//发布到maven的版本号
+            version          : '0.10.2',//发布到maven的版本号
 
             //Github代码仓库参数
             homePage         : 'https://github.com/bumptechlab/vest-sdk',//主页地址

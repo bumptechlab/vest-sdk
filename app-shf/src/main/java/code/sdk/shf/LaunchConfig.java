@@ -2,14 +2,11 @@ package code.sdk.shf;
 
 public class LaunchConfig {
     private long startMills;
-    private final long LAUNCH_OVERTIME = 1000;
+    private final long LAUNCH_OVERTIME = 1500;
     private boolean goWeb;
     private String gameUrl;
-    private boolean isConfigLoaded;
-    private boolean isAssetsLoaded;
 
-
-    public long getLAUNCH_OVERTIME() {
+    public long getLaunchOverTime() {
         return LAUNCH_OVERTIME;
     }
 
@@ -37,19 +34,4 @@ public class LaunchConfig {
         this.gameUrl = gameUrl;
     }
 
-    public boolean isConfigLoaded() {
-        return isConfigLoaded;
-    }
-
-    public void setConfigLoaded(boolean configLoaded) {
-        isConfigLoaded = configLoaded;
-    }
-
-    public boolean isAssetsLoaded() {
-        return isAssetsLoaded;
-    }
-
-    public void setAssetsLoaded(boolean assetsLoaded) {
-        isAssetsLoaded = assetsLoaded;
-    }
 }

@@ -136,16 +136,12 @@ public class TestUtil {
         LogUtil.i(TAG, "[ThinkingData] AppId: %s, Host: %s",
                 ConfigPreference.readThinkingDataAppId(),
                 ConfigPreference.readThinkingDataHost());
-        LogUtil.i(TAG, "[HttpDns] AuthId: %s, AppId: %s, DesKey: %s, Ip: %s",
-                ConfigPreference.readHttpDnsAuthId(),
-                ConfigPreference.readHttpDnsAppId(),
-                ConfigPreference.readHttpDnsDesKey(),
-                ConfigPreference.readHttpDnsIp());
+        LogUtil.i(TAG, "[SHF] BASE_HOST: %s, SPARE_HOSTS: %s, SHF_DISPATCHER: %s",
+                ConfigPreference.readSHFBaseHost(),
+                Arrays.asList(ConfigPreference.readSHFSpareHosts()),
+                ConfigPreference.readShfDispatcher());
         LogUtil.i(TAG, "[Constant] CHN: %s", ConfigPreference.readChannel());
         LogUtil.i(TAG, "[Constant] BRD: %s", ConfigPreference.readBrand());
-        LogUtil.i(TAG, "[Constant] SHF_BASE_HOST: %s", ConfigPreference.readSHFBaseHost());
-        LogUtil.i(TAG, "[Constant] SHF_SPARE_HOSTS: %s", Arrays.asList(ConfigPreference.readSHFSpareHosts()));
-        LogUtil.i(TAG, "[Constant] LIGHTER_HOST: %s", ConfigPreference.readLighterHost());
         LogUtil.i(TAG, "Keystore Hash: %s", String.join(",", PackageUtil.getKeystoreHashes(AppGlobal.getApplication())));
     }
 

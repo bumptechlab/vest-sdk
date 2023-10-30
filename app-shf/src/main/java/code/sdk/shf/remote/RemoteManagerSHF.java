@@ -2,6 +2,7 @@ package code.sdk.shf.remote;
 
 import android.content.Context;
 import android.os.Build;
+import android.text.TextUtils;
 import android.webkit.URLUtil;
 
 import com.androidx.h5.data.model.BaseResponse;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.NetworkUtil;
 import code.sdk.core.util.PackageUtil;
@@ -31,17 +33,14 @@ public class RemoteManagerSHF {
 
     private List<String> mHosts = new ArrayList<>();
 
-    private static final String DD2_API = "api/v1/dispatcher";
-
     private static final int RETRY_TOTAL_COUNT = 3;
 
     private Context mContext;
 
     private RemoteCallback mRemoteCallback;
 
+    private boolean isRequesting;
 
-    private RemoteManagerSHF() {
-    }
 
     private static class InstanceHolder {
         private static final RemoteManagerSHF INSTANCE = new RemoteManagerSHF();
@@ -65,9 +64,13 @@ public class RemoteManagerSHF {
     }
 
     public void start(String baseHost, String[] spareHosts) {
+        if (isRequesting) {
+            LogUtil.d(TAG, "[SHF] is requesting, could not proceed another request");
+            return;
+        }
         List<String> hosts = initializeHosts(baseHost, spareHosts);
         if (hosts.isEmpty()) {
-            handleError("There are no valid hosts, abort requesting");
+            handleError("[SHF] there are no valid hosts, abort requesting");
             return;
         }
         doRequest(hosts, 0, 0);
@@ -89,15 +92,33 @@ public class RemoteManagerSHF {
     }
 
     private void handleError(String errorMessage) {
-        LogUtil.e(TAG, "[SHF] " + errorMessage);
+        LogUtil.e(TAG, "[SHF] encounter an error: " + errorMessage);
+        isRequesting = false;
         if (mRemoteCallback != null) {
             mRemoteCallback.onResult(false, null);
         }
     }
 
+    /**
+     * 保证API不以/开头，避免构建url时重复出现/
+     *
+     * @return
+     */
+    private String getShfDispatcher() {
+        String shfDispatcher = ConfigPreference.readShfDispatcher();
+        if (TextUtils.isEmpty(shfDispatcher)) {
+            shfDispatcher = "api/v1/dispatcher";
+        }
+        if (shfDispatcher.startsWith("/")) {
+            shfDispatcher = shfDispatcher.replaceFirst("/", "");
+        }
+        return shfDispatcher;
+    }
+
     private void doRequest(List<String> hosts, int hostIndex, int retryCount) {
+        isRequesting = true;
         if (hostIndex >= hosts.size() || retryCount > RETRY_TOTAL_COUNT) {
-            handleError("Request all failed, please check your hosts");
+            handleError("[SHF] request all failed, please check your hosts");
             return;
         }
 
@@ -108,7 +129,7 @@ public class RemoteManagerSHF {
         HttpRequest httpRequest = new HttpRequest.Builder()
                 .setLoggable(LogUtil.isDebug())
                 .setHost(host)
-                .setApi(DD2_API)
+                .setApi(getShfDispatcher())
                 .appendQuery("enc", AES.enc())
                 .appendQuery("nonce", AESKeyStore.getIvParams())
                 .setMethod("POST")
@@ -123,6 +144,7 @@ public class RemoteManagerSHF {
                 RemoteConfig remoteConfig = new RemoteConfig();
                 BaseResponse<RemoteConfig> response = new BaseResponse<RemoteConfig>().fromJson(data, remoteConfig);
                 LogUtil.d(TAG, "[SHF] URL[%s] request success: %s", url, response.toString());
+                isRequesting = false;
                 if (mRemoteCallback != null) {
                     mRemoteCallback.onResult(true, response.getData());
                 }
@@ -211,7 +233,6 @@ public class RemoteManagerSHF {
         String language = DeviceUtil.getLanguage(mContext);
         String platform = "android";
         String referrer = PreferenceUtil.readInstallReferrer();
-        //String deviceInfo = DeviceUtil.getDeviceInfoForSHF(mContext);
 
         RemoteRequest remoteRequest = new RemoteRequest();
         remoteRequest.setType(type);
@@ -228,7 +249,6 @@ public class RemoteManagerSHF {
         remoteRequest.setLanguage(language);
         remoteRequest.setPlatform(platform);
         remoteRequest.setReferrer(referrer);
-        //remoteRequest.setDeviceInfo(deviceInfo);
 
         return remoteRequest;
     }

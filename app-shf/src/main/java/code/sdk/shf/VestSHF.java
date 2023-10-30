@@ -1,28 +1,48 @@
 package code.sdk.shf;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.webkit.URLUtil;
 
+import androidx.annotation.NonNull;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import code.sdk.core.VestCore;
+import code.sdk.core.VestGameReason;
 import code.sdk.core.VestInspectCallback;
 import code.sdk.core.manager.AdjustManager;
 import code.sdk.core.manager.InstallReferrerManager;
 import code.sdk.core.util.GoogleAdIdInitializer;
 import code.sdk.core.util.PreferenceUtil;
 import code.sdk.core.util.TestUtil;
-import code.sdk.core.util.UIUtil;
-import code.sdk.shf.inspector.AbstractChainedInspector;
 import code.sdk.shf.inspector.InitInspector;
 import code.sdk.shf.remote.RemoteConfig;
 import code.sdk.shf.remote.RemoteSourceSHF;
 import code.util.AppGlobal;
 import code.util.LogUtil;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableEmitter;
+import io.reactivex.rxjava3.core.ObservableOnSubscribe;
+import io.reactivex.rxjava3.core.ObservableSource;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class VestSHF {
 
     private static final String TAG = VestSHF.class.getSimpleName();
     private LaunchConfig mLaunchConfig = new LaunchConfig();
+    private Handler mHandler = new Handler(Looper.getMainLooper());
+
+    private VestSHF() {
+    }
 
     private static class InstanceHolder {
         private static VestSHF INSTANCE = new VestSHF();
@@ -35,60 +55,126 @@ public class VestSHF {
     private VestInspectCallback mVestInspectCallback = null;
 
     public void inspect(Context context, VestInspectCallback vestInspectCallback) {
+        mVestInspectCallback = vestInspectCallback;
         boolean isHandled = TestUtil.handleIntent(context);
         TestUtil.printDebugInfo();
         LogUtil.setDebug(TestUtil.isLoggable());
-        mVestInspectCallback = vestInspectCallback;
-        mLaunchConfig.setStartMills(System.currentTimeMillis());
-
-        String installReferrer = InstallReferrerManager.getInstallReferrer();
-        if (TextUtils.isEmpty(installReferrer) || InstallReferrerManager.INSTALL_REFERRER_UNKNOWN.equals(installReferrer)) {
-            InstallReferrerManager.initInstallReferrer();
-        }
-        GoogleAdIdInitializer.init();
         if (isHandled) {
             LogUtil.d(TAG, "Open WebView using intent, SHF request aborted!");
             return;
         }
-        new Thread(() -> {
-            AbstractChainedInspector inspector = AbstractChainedInspector.makeChain(
-                    new InitInspector()
-            );
-            boolean inspected = inspector.verify();
-            LogUtil.d(TAG, "inspected = " + inspected);
-            onInspectResult(inspected);
-        }).start();
-    }
-
-    private void onInspectResult(boolean inspected) {
-        if (inspected) {
-            //ObfuscationStub3.inject();
-            fetchRemoteConfig();
-        } else {
-            //ObfuscationStub4.inject();
-            mLaunchConfig.setConfigLoaded(true);
-            checkRemoteConfig(null);
+        if (!canInspect()) {
+            if (vestInspectCallback != null) {
+                vestInspectCallback.onShowVestGame(VestGameReason.REASON_NOT_THE_TIME);
+            }
+            return;
         }
+        startInspect();
     }
 
-    private void fetchRemoteConfig() {
-        RemoteSourceSHF remoteSource = new RemoteSourceSHF(AppGlobal.getApplication());
-        remoteSource.setCallback((success, remoteConfig) -> {
-            mLaunchConfig.setConfigLoaded(true);
-            if (success && remoteConfig != null) {
-                PreferenceUtil.saveHttpDnsEnable(remoteConfig.isHttpDns());
-                PreferenceUtil.saveTargetCountry(remoteConfig.getCountry());
+    public void setInspectDelayTime(long time, TimeUnit timeUnit) {
+        long timeMills = timeUnit.toMillis(time);
+        PreferenceUtil.saveInspectDelay(timeMills);
+    }
+
+    private boolean canInspect() {
+        boolean canInspect = true;
+        long now = System.currentTimeMillis();
+        long firstLaunchTime = PreferenceUtil.getFirstLaunchTime();
+        long inspectDelay = PreferenceUtil.getInspectDelay();
+        long inspectTimeMills = firstLaunchTime + inspectDelay;
+        if (firstLaunchTime > 0 && inspectDelay > 0) {
+            canInspect = now > inspectTimeMills;
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss");
+            if (canInspect) {
+                LogUtil.d(TAG, "now is ahead of inspect date: " + format.format(new Date(inspectTimeMills)));
             } else {
-                PreferenceUtil.saveHttpDnsEnable(false);
+                LogUtil.d(TAG, "now is behind of inspect date: " + format.format(new Date(inspectTimeMills)));
             }
-            VestCore.initThirdSDK();
-            if (success && remoteConfig != null) {
-                AdjustManager.trackEventGreeting(null);
+        } else {
+            LogUtil.d(TAG, "inspect date not set");
+        }
+        return canInspect;
+    }
+
+    private void startInspect() {
+        Observable.create(new ObservableOnSubscribe<Boolean>() {
+                    @Override
+                    public void subscribe(ObservableEmitter<Boolean> emitter) throws Exception {
+                        mLaunchConfig.setStartMills(System.currentTimeMillis());
+                        String installReferrer = InstallReferrerManager.getInstallReferrer();
+                        if (TextUtils.isEmpty(installReferrer) || InstallReferrerManager.INSTALL_REFERRER_UNKNOWN.equals(installReferrer)) {
+                            InstallReferrerManager.initInstallReferrer();
+                        }
+                        GoogleAdIdInitializer.init();
+                        boolean inspected = new InitInspector().inspect();
+                        LogUtil.d(TAG, "onInspectResult: " + inspected);
+                        emitter.onNext(inspected);
+                    }
+                }).flatMap(new Function<Boolean, ObservableSource<RemoteConfig>>() {
+                    @Override
+                    public ObservableSource<RemoteConfig> apply(Boolean inspected) throws Throwable {
+                        if (inspected) {
+                            return createRemoteConfigObservable();
+                        } else {
+                            return Observable.error(new IllegalStateException("inspect return false"));
+                        }
+                    }
+                })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<RemoteConfig>() {
+                    //这是新加入的方法，在订阅后发送数据之前，
+                    //回首先调用这个方法，而Disposable可用于取消订阅
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        LogUtil.d(TAG, "inspect start");
+                    }
+
+                    @Override
+                    public void onNext(RemoteConfig remoteConfig) {
+                        LogUtil.d(TAG, "inspect result: " + remoteConfig);
+                        checkRemoteConfig(remoteConfig);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        LogUtil.e(TAG, "inspect encounter an error: " + (e == null ? "" : e.getMessage()));
+                        checkRemoteConfig(null);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        LogUtil.d(TAG, "inspect complete");
+                    }
+                });
+
+    }
+
+    private ObservableSource<RemoteConfig> createRemoteConfigObservable() {
+        return Observable.create(new ObservableOnSubscribe<RemoteConfig>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<RemoteConfig> emitter) throws Throwable {
+                RemoteSourceSHF remoteSource = new RemoteSourceSHF(AppGlobal.getApplication());
+                remoteSource.setCallback((success, remoteConfig) -> {
+                    //这里的执行需要按照严格顺序：
+                    //1.先保存目标国家
+                    //2.初始化TD/Adjust SDK
+                    //3.执行Adjust Track需要用到第一步保存的目标国家
+                    if (success && remoteConfig != null) {
+                        PreferenceUtil.saveTargetCountry(remoteConfig.getCountry());
+                    }
+                    VestCore.initThirdSDK();
+                    if (success && remoteConfig != null) {
+                        AdjustManager.trackEventGreeting(null);
+                        emitter.onNext(remoteConfig);
+                    } else {
+                        emitter.onError(new IllegalStateException("remote config is null"));
+                    }
+                });
+                remoteSource.fetch();
             }
-            checkRemoteConfig(remoteConfig);
-            LogUtil.d(TAG, "[HttpDns] isHttpDnsEnable: " + PreferenceUtil.readHttpDnsEnable());
         });
-        remoteSource.fetch();
     }
 
     /**
@@ -142,20 +228,17 @@ public class VestSHF {
     }
 
     public void checkJump() {
-        if (mLaunchConfig.isConfigLoaded()) {
-            long delayMills = System.currentTimeMillis() - mLaunchConfig.getStartMills();
-            LogUtil.d(TAG, "Jump to activity after delay %d mills", delayMills);
-            if (delayMills >= mLaunchConfig.getLAUNCH_OVERTIME()) {
-                doJump();
-            } else {
-                UIUtil.runOnUiThreadDelay(() -> {
-                    doJump();
-                }, mLaunchConfig.getLAUNCH_OVERTIME() - delayMills);
-            }
+        long delayMills = System.currentTimeMillis() - mLaunchConfig.getStartMills();
+        LogUtil.d(TAG, "Jump to activity after delay %d mills", delayMills);
+        if (delayMills >= mLaunchConfig.getLaunchOverTime()) {
+            doJump();
         } else {
-            LogUtil.d(TAG, "Jump to activity aborted");
+            mHandler.removeCallbacks(mJumpDelayTask);
+            mHandler.postDelayed(mJumpDelayTask, mLaunchConfig.getLaunchOverTime() - delayMills);
         }
     }
+
+    private final Runnable mJumpDelayTask = () -> doJump();
 
     private void doJump() {
         LogUtil.d(TAG, "LaunchConfig: isGogoWeb=%s, gameUrl=%s", mLaunchConfig.isGoWeb(), mLaunchConfig.getGameUrl());
@@ -165,7 +248,7 @@ public class VestSHF {
             }
         } else {
             if (mVestInspectCallback != null) {
-                mVestInspectCallback.onShowVestGame();
+                mVestInspectCallback.onShowVestGame(VestGameReason.REASON_OFF_ON_SERVER);
             }
         }
     }

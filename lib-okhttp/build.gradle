@@ -1,10 +1,16 @@
 plugins {
     id 'com.android.library'
+    id 'code-plugin'
 }
 
 def androidConfig = rootProject.ext.android
 def dependenciesConfig = rootProject.ext.dependencies
 def _namespace = rootProject.ext.namespaces
+
+code {
+    codeInjectEnable = androidConfig.codeInjectEnable
+    codeInjectPercentage = androidConfig.codeInjectPercentage
+}
 
 android {
     namespace _namespace.okhttp
@@ -30,7 +36,7 @@ android {
 dependencies {
     implementation project(":lib-util")
     //OkHttp网络框架
-    implementation 'com.squareup.okhttp3:okhttp:' + dependenciesConfig.okhttpVersion
-    implementation 'com.squareup.okhttp3:logging-interceptor:' + dependenciesConfig.okhttpVersion
-    implementation 'androidx.annotation:annotation:' + dependenciesConfig.androidxAnnotation
+    implementation "com.squareup.okhttp3:okhttp:$dependenciesConfig.okhttpVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$dependenciesConfig.okhttpVersion"
+    implementation "androidx.annotation:annotation:$dependenciesConfig.androidxAnnotation"
 }

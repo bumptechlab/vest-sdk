@@ -57,33 +57,32 @@ android.applicationVariants.all { variant ->
 
 dependencies {
     // 方式一：引入Maven依赖
-    implementation 'io.github.bumptechlab:vest-core:0.10.1'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.1'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.1'
+    implementation 'io.github.bumptechlab:vest-core:0.10.2'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.2'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.2'
 
     // 方式二：引入工程依赖
 //    implementation project(":app-core")
 //    implementation project(":app-sdk")
 //    implementation project(":app-shf")
-//    implementation 'androidx.multidex:multidex:' + dependenciesConfig.androidxMultidexVersion
-//    implementation 'androidx.annotation:annotation:' + dependenciesConfig.androidxAnnotation
+//    implementation "androidx.multidex:multidex:$dependenciesConfig.androidxMultidexVersion"
+//    implementation "androidx.annotation:annotation:$dependenciesConfig.androidxAnnotation"
 
     // 方式三：引入本地Libs依赖（同时要引入以下三方依赖）
 //    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-//    implementation 'com.google.android.material:material:' + dependenciesConfig.googleMaterialVersion
-//    implementation 'androidx.multidex:multidex:' + dependenciesConfig.androidxMultidexVersion
-//    implementation 'androidx.annotation:annotation:' + dependenciesConfig.androidxAnnotation
-//    implementation 'com.android.installreferrer:installreferrer:' + dependenciesConfig.installreferrerVersion
-//    implementation 'com.google.android.gms:play-services-ads-identifier:' + dependenciesConfig.googlePlayServiceVersion
-//    implementation 'com.squareup.okhttp3:okhttp:' + dependenciesConfig.okhttpVersion
-//    implementation 'com.squareup.okhttp3:logging-interceptor:' + dependenciesConfig.okhttpVersion
-//    implementation 'com.adjust.sdk:adjust-android:' + dependenciesConfig.adjustVersion
-//    implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:' + dependenciesConfig.thinkingDataSdkVersion
-//    implementation 'cn.thinkingdata.android:TAThirdParty:' + dependenciesConfig.thinkingDataThirdPartyVersion
-//    implementation "androidx.security:security-crypto:" + dependenciesConfig.securityCryptoVersion
-//    implementation "androidx.security:security-identity-credential:" + dependenciesConfig.securityIdentityCredentialVersion
-//    implementation "androidx.security:security-app-authenticator:" + dependenciesConfig.securityAppAuthenticatorVersion
-//    implementation 'com.onesignal:OneSignal:' + dependenciesConfig.onesignalVersion
-//    implementation 'io.github.dnspod:httpdns-sdk:' + dependenciesConfig.httpdnsVersion
-//    implementation 'androidx.room:room-rxjava2:' + dependenciesConfig.rxJavaVersion
+//    implementation "com.google.android.material:material:$dependenciesConfig.googleMaterialVersion"
+//    implementation "androidx.multidex:multidex:$dependenciesConfig.androidxMultidexVersion"
+//    implementation "androidx.annotation:annotation:$dependenciesConfig.androidxAnnotation"
+//    implementation "com.android.installreferrer:installreferrer:$dependenciesConfig.installreferrerVersion"
+//    implementation "com.google.android.gms:play-services-ads-identifier:$dependenciesConfig.googlePlayServiceVersion"
+//    implementation "com.squareup.okhttp3:okhttp:$dependenciesConfig.okhttpVersion"
+//    implementation "com.squareup.okhttp3:logging-interceptor:$dependenciesConfig.okhttpVersion"
+//    implementation "com.adjust.sdk:adjust-android:$dependenciesConfig.adjustVersion"
+//    implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:$dependenciesConfig.thinkingDataSdkVersion"
+//    implementation "cn.thinkingdata.android:TAThirdParty:$dependenciesConfig.thinkingDataThirdPartyVersion"
+//    implementation "androidx.security:security-crypto:$dependenciesConfig.securityCryptoVersion"
+//    implementation "androidx.security:security-identity-credential:$dependenciesConfig.securityIdentityCredentialVersion"
+//    implementation "androidx.security:security-app-authenticator:$dependenciesConfig.securityAppAuthenticatorVersion"
+//    implementation "io.reactivex.rxjava3:rxjava:$dependenciesConfig.rxJavaVersion"
+//    implementation "io.reactivex.rxjava3:rxandroid:$dependenciesConfig.rxJavaVersion"
 }

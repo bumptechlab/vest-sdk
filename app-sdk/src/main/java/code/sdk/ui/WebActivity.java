@@ -40,11 +40,12 @@ import androidx.annotation.RequiresApi;
 import code.sdk.R;
 import code.sdk.SdkInit;
 import code.sdk.base.BaseWebActivity;
+import code.sdk.bridge.JsBridge;
+import code.sdk.command.AssetLoaderManager;
 import code.sdk.core.Constant;
 import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.NetworkUtil;
 import code.sdk.core.util.PreferenceUtil;
-import code.sdk.command.AssetLoaderManager;
 import code.sdk.util.AndroidBug5497Workaround;
 import code.sdk.util.PromotionImageSynthesizer;
 import code.util.LogUtil;
@@ -62,7 +63,6 @@ public class WebActivity extends BaseWebActivity {
 
     public final int REQUEST_SAVE_IMAGE = 100;
     public final int REQUEST_SYNTHESIZE_PROMOTION_IMAGE = 10001;
-    public final int REQUEST_CODE_LOGIN_FACEBOOK = 10002;
     public final int REQUEST_CODE_FILE_CHOOSER = 10003;
 
 
@@ -140,17 +140,6 @@ public class WebActivity extends BaseWebActivity {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             LogUtil.d(TAG, "shouldInterceptRequest[%s]: %s", request.getMethod(), request.getUrl());
-//            InputStream stream = null;
-//            if (mWebView.isCocosEngineUrl(request.getUrl())) {
-//                stream = AssetsUtils.getEncryptFileStream(WebViewActivity.this);
-//            }
-//            else {
-//                //对静态资源进行HttpDns域名解析(网络请求太慢，暂停使用)
-//                if ("GET".equalsIgnoreCase(request.getMethod())) {
-//                    stream = HttpDnsMgr.doHttpGetSync(request.getUrl().toString());
-//                }
-//            }
-//            return mWebView.shouldInterceptUrlEvent(request.getUrl(), stream);
             return AssetLoaderManager.getInstance(WebActivity.this).shouldInterceptRequest(request.getUrl());
         }
 
@@ -158,14 +147,6 @@ public class WebActivity extends BaseWebActivity {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             LogUtil.d(TAG, "shouldInterceptRequest: %s", url);
-//            InputStream stream = null;
-//            if (mWebView.isCocosEngineUrl(Uri.parse(url))) {
-//                stream = AssetsUtils.getEncryptFileStream(WebViewActivity.this);
-//            }
-//            else {
-//                stream = HttpDnsMgr.doHttpGetSync(url);
-//            }
-//            return mWebView.shouldInterceptUrlEvent(Uri.parse(url), stream);
             return AssetLoaderManager.getInstance(WebActivity.this).shouldInterceptRequest(Uri.parse(url));
         }
 
@@ -179,7 +160,7 @@ public class WebActivity extends BaseWebActivity {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            doPageFinish(view,url);
+            doPageFinish(view, url);
         }
 
         @Override
@@ -233,12 +214,13 @@ public class WebActivity extends BaseWebActivity {
             return;
         }
         isGame = intent.getBooleanExtra(KEY_GAME, false);
-        mUrl = intent.getStringExtra(KEY_URL);
-        LogUtil.d(TAG, "open url: %s", mUrl);
-        if (TextUtils.isEmpty(mUrl)) {
+        String url = intent.getStringExtra(KEY_URL);
+        if (TextUtils.isEmpty(url)) {
             finish();
             return;
         }
+        mUrl = JsBridge.formatUrlWithJsb(url);
+        LogUtil.d(TAG, "open url: %s", mUrl);
         super.onCreate(savedInstanceState);
     }
 
@@ -369,8 +351,9 @@ public class WebActivity extends BaseWebActivity {
     protected void onResume() {
         super.onResume();
     }
+
     @Override
-    protected void doResume(){
+    protected void doResume() {
         // hover menu
         if (mShowHoverMenu) {
             showHoverMenu();
@@ -497,18 +480,6 @@ public class WebActivity extends BaseWebActivity {
             }
 
             mUploadMessage = null;
-        } else if (requestCode == REQUEST_CODE_LOGIN_FACEBOOK) {
-            if (resultCode == RESULT_OK) {
-                boolean isLogin = data.getBooleanExtra("is_login", false);
-                String result = data.getStringExtra("result");
-                if (isLogin) {
-                    LogUtil.d(TAG, "Facebook login complete...");
-                    mWebPresenter.notifyFacebookLoginResult(result);
-                } else {
-                    LogUtil.d(TAG, "Facebook logout complete...");
-                    mWebPresenter.notifyFacebookLogoutResult(result);
-                }
-            }
         }
     }
 
@@ -527,7 +498,7 @@ public class WebActivity extends BaseWebActivity {
     protected void onDestroy() {
         super.onDestroy();
         mWebPresenter.onDestroy();
-        mWebView.removeJavascriptInterface("jsBridge");
+        mWebView.removeJavascriptInterface(JsBridge.getJsBridgeName());
         mWebView.destroy();
         if (mNetworkReceiver != null) {
             unregisterReceiver(mNetworkReceiver);
@@ -609,20 +580,22 @@ public class WebActivity extends BaseWebActivity {
 
     class NetworkReceiver extends BroadcastReceiver {
         private boolean networkListenerInit = false;
+
         public NetworkReceiver() {
         }
+
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
                 LogUtil.d(TAG, "receive intentAction: " + intent.getAction());
                 if (networkListenerInit) {
                     boolean isConnected = NetworkUtil.isConnected(context);
-                        if (isConnected) {
-                            LogUtil.d(TAG, "network connected!");
-                            mLoadingLayout.setVisibility(View.VISIBLE);
-                            mWebView.reload();
-                        }
+                    if (isConnected) {
+                        LogUtil.d(TAG, "network connected!");
+                        mLoadingLayout.setVisibility(View.VISIBLE);
+                        mWebView.reload();
                     }
+                }
                 networkListenerInit = true;
             }
         }

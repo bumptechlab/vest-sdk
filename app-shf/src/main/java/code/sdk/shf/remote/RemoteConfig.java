@@ -12,8 +12,6 @@ public class RemoteConfig implements BaseData {
 
     private boolean swi;
 
-    private boolean httpDns;
-
     private String country;
 
     private String message;
@@ -21,10 +19,9 @@ public class RemoteConfig implements BaseData {
     public RemoteConfig() {
     }
 
-    public RemoteConfig(boolean swi, String url, boolean httpDns, String country) {
+    public RemoteConfig(boolean swi, String url, String country) {
         this.swi = swi;
         this.url = url;
-        this.httpDns = httpDns;
         this.country = country;
     }
 
@@ -34,10 +31,6 @@ public class RemoteConfig implements BaseData {
 
     public String getGameUrl() {
         return url;
-    }
-
-    public boolean isHttpDns() {
-        return this.httpDns;
     }
 
     public String getCountry() {
@@ -58,7 +51,6 @@ public class RemoteConfig implements BaseData {
         return "RemoteConfig{" +
                 "url='" + url + '\'' +
                 ", swi=" + swi +
-                ", httpDns=" + httpDns +
                 ", message='" + message + '\'' +
                 '}';
     }
@@ -69,7 +61,6 @@ public class RemoteConfig implements BaseData {
         try {
             jsonObject.put("h5_url", getGameUrl());
             jsonObject.put("switch", isSwi());
-            jsonObject.put("http_dns", isHttpDns());
             jsonObject.put("msg", getMessage());
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -82,10 +73,9 @@ public class RemoteConfig implements BaseData {
         if (jsonObject != null) {
             boolean switcher = jsonObject.optBoolean("switch");
             String url = jsonObject.optString("h5_url");
-            boolean httpDns = jsonObject.optBoolean("http_dns");
             String message = jsonObject.optString("msg");
             String country = jsonObject.optString("country");
-            remoteConfig = new RemoteConfig(switcher, url, httpDns, country);
+            remoteConfig = new RemoteConfig(switcher, url, country);
             remoteConfig.setMessage(message);
         }
         return remoteConfig;

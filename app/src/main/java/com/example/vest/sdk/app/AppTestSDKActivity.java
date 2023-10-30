@@ -4,9 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.Nullable;
+
+import java.util.concurrent.TimeUnit;
 
 import code.sdk.core.VestInspectCallback;
 import code.sdk.core.VestSDK;
@@ -20,10 +21,11 @@ public class AppTestSDKActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_custom_splash);
+        VestSHF.getInstance().setInspectDelayTime(10, TimeUnit.DAYS);
         VestSHF.getInstance().inspect(this, new VestInspectCallback() {
             //这里跳转到A面，A面请自行实现
             @Override
-            public void onShowVestGame() {
+            public void onShowVestGame(int reason) {
                 Log.d(TAG, "show vest game");
                 Intent intent = new Intent(getBaseContext(), VestGameActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

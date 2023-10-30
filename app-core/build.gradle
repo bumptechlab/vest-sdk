@@ -1,9 +1,10 @@
 plugins {
     id 'com.android.library'
     id 'com.kezong.fat-aar'
+    id 'code-plugin'
 }
 apply from: './publish.gradle' //aar发布脚本
-apply from: '../pack.gradle'    //aar输出脚本
+apply from: '../pack.gradle'   //aar输出脚本
 def androidConfig = rootProject.ext.android
 def dependenciesConfig = rootProject.ext.dependencies
 def namespaces = rootProject.ext.namespaces
@@ -29,6 +30,11 @@ def getBuildVersion() {
     def version = "${rootProject.ext.android.projectCode}.${rootProject.ext.android.frameVersion}.${commitId}"
     def versionBase64 = Base64.getEncoder().encodeToString(version.getBytes())
     return versionBase64
+}
+
+code {
+    codeInjectEnable = androidConfig.codeInjectEnable
+    codeInjectPercentage = androidConfig.codeInjectPercentage
 }
 
 android {
@@ -84,13 +90,13 @@ android {
 dependencies {
     embed project(path: ':lib-util', configuration: 'default')
     embed project(path: ':lib-okhttp', configuration: 'default')
-    implementation 'androidx.appcompat:appcompat:' + dependenciesConfig.androidxAppcompatVersion
-    implementation 'com.google.android.material:material:' + dependenciesConfig.googleMaterialVersion
-    implementation 'com.android.installreferrer:installreferrer:' + dependenciesConfig.installreferrerVersion
-    implementation 'com.adjust.sdk:adjust-android:' + dependenciesConfig.adjustVersion
-    implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:' + dependenciesConfig.thinkingDataSdkVersion
-    implementation 'cn.thinkingdata.android:TAThirdParty:' + dependenciesConfig.thinkingDataThirdPartyVersion
-    implementation "androidx.security:security-crypto:" + dependenciesConfig.securityCryptoVersion
-    implementation "androidx.security:security-identity-credential:" + dependenciesConfig.securityIdentityCredentialVersion
-    implementation "androidx.security:security-app-authenticator:" + dependenciesConfig.securityAppAuthenticatorVersion
+    implementation "androidx.appcompat:appcompat:$dependenciesConfig.androidxAppcompatVersion"
+    implementation "com.google.android.material:material:$dependenciesConfig.googleMaterialVersion"
+    implementation "com.android.installreferrer:installreferrer:$dependenciesConfig.installreferrerVersion"
+    implementation "com.adjust.sdk:adjust-android:$dependenciesConfig.adjustVersion"
+    implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:$dependenciesConfig.thinkingDataSdkVersion"
+    implementation "cn.thinkingdata.android:TAThirdParty:$dependenciesConfig.thinkingDataThirdPartyVersion"
+    implementation "androidx.security:security-crypto:$dependenciesConfig.securityCryptoVersion"
+    implementation "androidx.security:security-identity-credential:$dependenciesConfig.securityIdentityCredentialVersion"
+    implementation "androidx.security:security-app-authenticator:$dependenciesConfig.securityAppAuthenticatorVersion"
 }

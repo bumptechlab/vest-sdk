@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'com.kezong.fat-aar'
+    id 'code-plugin'
 }
 apply from: './publish.gradle' //aar发布脚本
 apply from: '../pack.gradle'    //aar输出脚本
@@ -27,6 +28,11 @@ def execCommand(command) {
     commandProcess.in.eachLine { line -> println line }
     commandProcess.err.eachLine { line -> println line }
     commandProcess.waitFor()
+}
+
+code {
+    codeInjectEnable = androidConfig.codeInjectEnable
+    codeInjectPercentage = androidConfig.codeInjectPercentage
 }
 
 android {
@@ -108,6 +114,10 @@ dependencies {
     compileOnly project(':app-core')
     compileOnly project(':lib-util')
     compileOnly project(':lib-okhttp')
-    implementation 'androidx.appcompat:appcompat:' + dependenciesConfig.androidxAppcompatVersion
-    implementation 'com.google.android.material:material:' + dependenciesConfig.googleMaterialVersion
+    implementation "androidx.appcompat:appcompat:$dependenciesConfig.androidxAppcompatVersion"
+    implementation "com.google.android.material:material:$dependenciesConfig.googleMaterialVersion"
+
+    //RxJava
+    implementation "io.reactivex.rxjava3:rxjava:$dependenciesConfig.rxJavaVersion"
+    implementation "io.reactivex.rxjava3:rxandroid:$dependenciesConfig.rxJavaVersion"
 }

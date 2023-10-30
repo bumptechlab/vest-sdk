@@ -36,12 +36,20 @@ public class VestCore {
 
     public static void init(Context context, String configAssets) {
         mContext = context;
+        recordFirstLaunchTime();
         setUncaughtException();
         AESKeyStore.init();
         LogUtil.setDebug(TestUtil.isLoggable());
         ConfigurationManager.getInstance().init(context, configAssets);
         registerActivityLifecycleCallbacks();
         GoogleAdIdInitializer.init();
+    }
+
+    private static void recordFirstLaunchTime() {
+        long firstLaunchTime = PreferenceUtil.getFirstLaunchTime();
+        if (firstLaunchTime == 0) {
+            PreferenceUtil.saveFirstLaunchTime(System.currentTimeMillis());
+        }
     }
 
     public static void registerActivityLifecycleCallbacks() {

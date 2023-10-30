@@ -13,11 +13,11 @@ import android.view.Gravity;
 
 import java.io.File;
 
-import code.sdk.bridge.JavascriptBridge;
+import code.sdk.bridge.BridgeCallback;
+import code.sdk.bridge.JsBridgeImpl;
 import code.sdk.core.util.FileUtil;
 import code.sdk.core.util.PackageUtil;
 import code.util.AppGlobal;
-import code.util.ImageUtil;
 import code.util.LogUtil;
 
 public class PromotionImageSynthesizer extends AsyncTask<Void, Void, String> {
@@ -25,11 +25,11 @@ public class PromotionImageSynthesizer extends AsyncTask<Void, Void, String> {
 
     private String mQrCodeUrl;
     private int mSize = 0, mX = 0, mY = 0;
-    private JavascriptBridge.Callback mCallback;
+    private BridgeCallback mCallback;
 
     private Context context;
 
-    public PromotionImageSynthesizer(Context context, String qrCodeUrl, int size, int x, int y, JavascriptBridge.Callback callback) {
+    public PromotionImageSynthesizer(Context context, String qrCodeUrl, int size, int x, int y, BridgeCallback callback) {
         this.context = context;
         mQrCodeUrl = qrCodeUrl;
         mSize = size;
@@ -83,7 +83,7 @@ public class PromotionImageSynthesizer extends AsyncTask<Void, Void, String> {
 
         Context context = AppGlobal.getApplication();
         File dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        String fileName = String.format(JavascriptBridge.PROMOTION_MATERIAL_FILENAME,
+        String fileName = String.format(JsBridgeImpl.PROMOTION_MATERIAL_FILENAME,
                 PackageUtil.getPackageName(), PackageUtil.getChannel());
         return BitmapFactory.decodeFile(dir + File.separator + fileName);
     }
@@ -91,7 +91,7 @@ public class PromotionImageSynthesizer extends AsyncTask<Void, Void, String> {
     private String savePromotionImage(Bitmap bitmap) {
         //ObfuscationStub3.inject();
         File dir = context.getExternalFilesDir(Environment.DIRECTORY_DCIM);
-        String fileName = String.format(JavascriptBridge.PROMOTION_IMAGE_FILENAME, System.currentTimeMillis());
+        String fileName = String.format(JsBridgeImpl.PROMOTION_IMAGE_FILENAME, System.currentTimeMillis());
         String promotionImagePath = dir + File.separator + fileName;
         FileUtil.saveBitmap(promotionImagePath, bitmap);
 

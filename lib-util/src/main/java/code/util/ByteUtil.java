@@ -1,5 +1,7 @@
 package code.util;
 
+import android.text.TextUtils;
+
 public class ByteUtil {
     public static final String TAG = ByteUtil.class.getSimpleName();
 
@@ -31,5 +33,27 @@ public class ByteUtil {
             return 0;
         }
         return x;
+    }
+
+    public static byte intToByte(int value) {
+        return (byte) (value & 0xFF);
+    }
+
+    public static byte[] stringToBytes(String byteText) {
+        if (TextUtils.isEmpty(byteText)) {
+            return null;
+        }
+        byte[] bytes = null;
+        try {
+            String[] bytesArray = byteText.split(",");
+            bytes = new byte[bytesArray.length];
+            for (int i = 0; i < bytesArray.length; i++) {
+                int byteInt = Integer.parseInt(bytesArray[i]);
+                bytes[i] = intToByte(byteInt);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bytes;
     }
 }

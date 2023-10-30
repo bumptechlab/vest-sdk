@@ -15,30 +15,24 @@ import android.webkit.ValueCallback;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-import org.json.JSONObject;
-
 import java.io.File;
 
 import code.sdk.R;
-import code.sdk.bridge.JavascriptBridge;
+import code.sdk.bridge.BridgeCallback;
+import code.sdk.bridge.JsBridge;
+import code.sdk.common.PermissionUtils;
+import code.sdk.common.ShareUtil;
 import code.sdk.core.Constant;
 import code.sdk.core.manager.AdjustManager;
 import code.sdk.core.util.CocosPreferenceUtil;
-import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.FileUtil;
-import code.sdk.core.util.IOUtil;
 import code.sdk.core.util.PreferenceUtil;
 import code.sdk.core.util.UIUtil;
 import code.sdk.core.util.URLUtilX;
-import code.sdk.httpdns.HttpDnsMgr;
-import code.sdk.manage.OneSignalManager;
-import code.sdk.manage.OneSignalNotificationListener;
 import code.sdk.download.DownloadTask;
-import code.sdk.common.PermissionUtils;
 import code.sdk.util.PromotionImageSynthesizer;
-import code.sdk.common.ShareUtil;
-import code.util.AppGlobal;
+import code.util.IOUtil;
 import code.util.ImageUtil;
 import code.util.LogUtil;
 
@@ -53,7 +47,6 @@ public class WebPresenter {
     private final int msg_check_webView_compatibility = 20002;
     private String mImageUrl;
 
-    private final String facebookLoginAct = "code.facebook.FacebookLoginActivity";
     public final String systemWebViewPackage = "com.google.android.webview";
     private final String miniSystemWebViewVersion = "64.0.3282.29";
     private final int miniSystemWebViewVersionCode = 328202950;
@@ -72,7 +65,7 @@ public class WebPresenter {
     };
 
 
-    private final JavascriptBridge.Callback mJsBridgeCb = new JavascriptBridge.Callback() {
+    private final BridgeCallback mJsBridgeCb = new BridgeCallback() {
         @Override
         public void openUrlByBrowser(String url) {
             try {
@@ -235,12 +228,10 @@ public class WebPresenter {
 
         @Override
         public void loginFacebook() {
-            WebPresenter.this.loginFacebook();
         }
 
         @Override
         public void logoutFacebook() {
-            WebPresenter.this.logoutFacebook();
         }
 
         @Override
@@ -258,27 +249,6 @@ public class WebPresenter {
         }
     };
 
-    private OneSignalNotificationListener mOneSignalNotificationListener = new OneSignalNotificationListener() {
-        @Override
-        public void onOpenNotification(JSONObject data) {
-            UIUtil.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    LogUtil.d(TAG, "[OneSignal] Notification send to WebView: %s", data);
-                    if (data != null && data.has("open_dialog")) {
-                        JSONObject openDialogData = data.optJSONObject("open_dialog");
-                        if (openDialogData != null) {
-                            String script = String.format("Listener.send('OPEN_DIALOG', '%s');", openDialogData);
-                            mWebViewActivity.webViewEvaluatescript(script);
-                            LogUtil.d(TAG, "[OneSignal] evaluateJavascript: %s", script);
-                        }
-                    }
-                }
-            });
-        }
-    };
-
-
     public WebPresenter(WebActivity activity) {
         this.mWebViewActivity = activity;
     }
@@ -286,13 +256,10 @@ public class WebPresenter {
     public void init(boolean isGame, String url) {
         this.isGame = isGame;
         this.mUrl = url;
-        HttpDnsMgr.init(AppGlobal.getApplication());
         mWebGlScript = IOUtil.readRawContent(mWebViewActivity.getBaseContext(), R.raw.webgl_script);
         LogUtil.d(TAG, "WebGlScript=" + mWebGlScript);
-        JavascriptBridge jsBridge = new JavascriptBridge();
-        jsBridge.setCallback(mJsBridgeCb);
-
-        mWebViewActivity.getWebView().addJavascriptInterface(jsBridge, "jsBridge");
+        JsBridge jsBridge = new JsBridge(mJsBridgeCb);
+        mWebViewActivity.getWebView().addJavascriptInterface(jsBridge, JsBridge.getJsBridgeName());
 
         Uri uri = Uri.parse(mUrl);
         // hover menu
@@ -309,56 +276,8 @@ public class WebPresenter {
 
         if (isGame) {
             AdjustManager.trackEventAccess(null);
-            OneSignalManager.setOneSignalNotificationListener(mOneSignalNotificationListener);
-            OneSignalManager.init(mWebViewActivity);
-            //等OneSignal初始化完成才能执行setup
-            UIUtil.runOnUiThreadDelay(new Runnable() {
-                @Override
-                public void run() {
-                    OneSignalManager.showPrompt();
-                    OneSignalManager.setup();
-                }
-            }, 3000);
         }
     }
-
-
-    /* Facebook Login START */
-    private void loginFacebook() {
-        launchFacebookSDK(true);
-    }
-
-    private void logoutFacebook() {
-        launchFacebookSDK(false);
-    }
-
-    private void launchFacebookSDK(boolean isLogin) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setClassName(mWebViewActivity.getBaseContext(), facebookLoginAct);
-            intent.putExtra("is_login", isLogin);
-            intent.putExtra("app_id", ConfigPreference.readFacebookAppId());
-            intent.putExtra("client_token", ConfigPreference.readFacebookClientToken());
-            mWebViewActivity.startActivityForResult(intent, mWebViewActivity.REQUEST_CODE_LOGIN_FACEBOOK);
-            mWebViewActivity.overridePendingTransition(0, 0);
-        } catch (Exception e) {
-            e.printStackTrace();
-            LogUtil.e(TAG, "FacebookLoginActivity not found, please check the class name: " + facebookLoginAct);
-        }
-    }
-
-    public void notifyFacebookLoginResult(String result) {
-        LogUtil.d(TAG, "Notify facebook login result: " + result);
-        String script = String.format("Listener.send('FACEBOOK_LOGIN_RESULT', '%s');", result);
-        mWebViewActivity.webViewEvaluatescript(script);
-    }
-
-    public void notifyFacebookLogoutResult(String result) {
-        LogUtil.d(TAG, "Notify facebook logout result: " + result);
-        String script = String.format("Listener.send('FACEBOOK_LOGOUT_RESULT', '%s');", result);
-        mWebViewActivity.webViewEvaluatescript(script);
-    }
-    /* Facebook Login END */
 
     /**
      * 检查游戏特征值包括(延迟1min检查)
@@ -425,7 +344,7 @@ public class WebPresenter {
         mJsBridgeCb.synthesizePromotionImageDone(succeed);
     }
 
-    public JavascriptBridge.Callback getJsBridge() {
+    public BridgeCallback getJsBridge() {
         return mJsBridgeCb;
     }
 

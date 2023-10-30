@@ -83,7 +83,7 @@ function splitAndMv() {
   jsonBody=${jsonBody%?}
   echo "{\"data\":[${jsonBody}]$encryptBody}" >${apkAssetsGuideJson}
   #加密guide.json
-  java -jar "$dexToolsDir/libs/lib-dex-encrypt.jar" -i "$apkAssetsGuideJson" -o "$apkAssetsGuideJson"
+  java -jar "$dexToolsDir/libs/lib-dex-encrypt.jar" -e -i "$apkAssetsGuideJson" -o "$apkAssetsGuideJson"
 }
 
 function mvRandomFileName() {
@@ -100,7 +100,7 @@ function mvRandomFileName() {
     if [ $index -eq $2 ]; then
       echo "encrypt :$index"
       #加密
-      java -jar "$dexToolsDir/libs/lib-dex-encrypt.jar" -i "$fakeName" -o "$fakeName"
+      java -jar "$dexToolsDir/libs/lib-dex-encrypt.jar" -e -i "$fakeName" -o "$fakeName"
     fi
     #  删除切片文件
     rm -rf "$anyFile"

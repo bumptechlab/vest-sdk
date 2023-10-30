@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 import code.sdk.core.Configuration;
 import code.sdk.core.util.ConfigPreference;
-import code.sdk.core.util.IOUtil;
+import code.util.IOUtil;
 import code.util.AESUtil;
 import code.util.LogUtil;
 
@@ -75,21 +75,15 @@ public class ConfigurationManager {
         ConfigPreference.saveChannel(configuration.getChannel());
         ConfigPreference.saveBrand(configuration.getBrand());
         ConfigPreference.saveTargetCountry(configuration.getCountry());
-        ConfigPreference.saveLighterHost(configuration.getLighterHost());
         ConfigPreference.saveSHFBaseHost(configuration.getShfBaseHost());
         ConfigPreference.saveSHFSpareHosts(configuration.getShfSpareHosts());
+        ConfigPreference.saveShfDispatcher(configuration.getShfDispatcher());
         ConfigPreference.saveAdjustAppId(configuration.getAdjustAppId());
         ConfigPreference.saveAdjustEventStart(configuration.getAdjustEventStart());
         ConfigPreference.saveAdjustEventGreeting(configuration.getAdjustEventGreeting());
         ConfigPreference.saveAdjustEventAccess(configuration.getAdjustEventAccess());
         ConfigPreference.saveAdjustEventUpdated(configuration.getAdjustEventUpdated());
-        ConfigPreference.saveFacebookAppId(configuration.getFacebookAppId());
-        ConfigPreference.saveFacebookClientToken(configuration.getFacebookClientToken());
         ConfigPreference.saveThinkingDataAppId(configuration.getThinkingDataAppId());
         ConfigPreference.saveThinkingDataHost(configuration.getThinkingDataHost());
-        ConfigPreference.saveHttpDnsAuthId(configuration.getHttpdnsAuthId());
-        ConfigPreference.saveHttpDnsAppId(configuration.getHttpdnsAppId());
-        ConfigPreference.saveHttpDnsDesKey(configuration.getHttpdnsDesKey());
-        ConfigPreference.saveHttpDnsIp(configuration.getHttpdnsIp());
     }
 }

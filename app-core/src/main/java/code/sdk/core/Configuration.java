@@ -15,11 +15,11 @@ public class Configuration {
 
     private String country;
 
-    private String lighterHost;
-
     private String[] shfSpareHosts;
 
     private String shfBaseHost;
+
+    private String shfDispatcher;
 
     /* adjust start */
     private String adjustAppId;
@@ -32,24 +32,10 @@ public class Configuration {
 
     private String adjustEventUpdated;
 
-    /* facebook start */
-    private String facebookAppId = "";
-
-    private String facebookClientToken = "";
-
     /* thinking data start */
     private String thinkingDataAppId = "";
 
     private String thinkingDataHost = "";
-
-
-    private String httpdnsAuthId = "";
-
-    private String httpdnsAppId = "";
-
-    private String httpdnsDesKey = "";
-
-    private String httpdnsIp = "";
 
     public static Configuration fromJson(String json) {
         Configuration configuration = null;
@@ -59,29 +45,23 @@ public class Configuration {
             configuration.setChannel(jsonObject.optString("channel"));
             configuration.setBrand(jsonObject.optString("brand"));
             configuration.setCountry(jsonObject.optString("country"));
-            configuration.setLighterHost(jsonObject.optString("lighter_host"));
             configuration.setShfBaseHost(jsonObject.optString("shf_base_domain"));
             JSONArray shfSpareHosts = jsonObject.optJSONArray("shf_spare_domains");
             List<String> shfSpareHostList = new ArrayList<>();
-            if(shfSpareHosts != null){
+            if (shfSpareHosts != null) {
                 for (int i = 0; i < shfSpareHosts.length(); i++) {
                     shfSpareHostList.add(shfSpareHosts.optString(i));
                 }
             }
+            configuration.setShfDispatcher(jsonObject.optString("shf_dispatcher"));
             configuration.setShfSpareHosts(shfSpareHostList.toArray(new String[]{}));
             configuration.setAdjustAppId(jsonObject.optString("adjust_app_id"));
             configuration.setAdjustEventStart(jsonObject.optString("adjust_event_start"));
             configuration.setAdjustEventGreeting(jsonObject.optString("adjust_event_greeting"));
             configuration.setAdjustEventAccess(jsonObject.optString("adjust_event_access"));
             configuration.setAdjustEventUpdated(jsonObject.optString("adjust_event_updated"));
-            configuration.setFacebookAppId(jsonObject.optString("facebook_app_id"));
-            configuration.setFacebookClientToken(jsonObject.optString("facebook_client_token"));
             configuration.setThinkingDataAppId(jsonObject.optString("thinking_data_app_id"));
             configuration.setThinkingDataHost(jsonObject.optString("thinking_data_host"));
-            configuration.setHttpdnsAuthId(jsonObject.optString("httpdns_auth_id"));
-            configuration.setHttpdnsAppId(jsonObject.optString("httpdns_app_id"));
-            configuration.setHttpdnsDesKey(jsonObject.optString("httpdns_des_key"));
-            configuration.setHttpdnsIp(jsonObject.optString("httpdns_ip"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -102,14 +82,6 @@ public class Configuration {
 
     public void setBrand(String brand) {
         this.brand = brand;
-    }
-
-    public String getLighterHost() {
-        return lighterHost;
-    }
-
-    public void setLighterHost(String lighterHost) {
-        this.lighterHost = lighterHost;
     }
 
     public String[] getShfSpareHosts() {
@@ -168,22 +140,6 @@ public class Configuration {
         this.adjustEventUpdated = adjustEventUpdated;
     }
 
-    public String getFacebookAppId() {
-        return facebookAppId;
-    }
-
-    public void setFacebookAppId(String facebookAppId) {
-        this.facebookAppId = facebookAppId;
-    }
-
-    public String getFacebookClientToken() {
-        return facebookClientToken;
-    }
-
-    public void setFacebookClientToken(String facebookClientToken) {
-        this.facebookClientToken = facebookClientToken;
-    }
-
     public String getThinkingDataAppId() {
         return thinkingDataAppId;
     }
@@ -208,35 +164,11 @@ public class Configuration {
         this.country = country;
     }
 
-    public String getHttpdnsAuthId() {
-        return httpdnsAuthId;
+    public String getShfDispatcher() {
+        return shfDispatcher;
     }
 
-    public void setHttpdnsAuthId(String httpdnsAuthId) {
-        this.httpdnsAuthId = httpdnsAuthId;
-    }
-
-    public String getHttpdnsAppId() {
-        return httpdnsAppId;
-    }
-
-    public void setHttpdnsAppId(String httpdnsAppId) {
-        this.httpdnsAppId = httpdnsAppId;
-    }
-
-    public String getHttpdnsDesKey() {
-        return httpdnsDesKey;
-    }
-
-    public void setHttpdnsDesKey(String httpdnsDesKey) {
-        this.httpdnsDesKey = httpdnsDesKey;
-    }
-
-    public String getHttpdnsIp() {
-        return httpdnsIp;
-    }
-
-    public void setHttpdnsIp(String httpdnsIp) {
-        this.httpdnsIp = httpdnsIp;
+    public void setShfDispatcher(String shfDispatcher) {
+        this.shfDispatcher = shfDispatcher;
     }
 }

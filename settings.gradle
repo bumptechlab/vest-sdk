@@ -16,7 +16,6 @@ rootProject.name = "Vest-SDK"
 include ':app-sdk'
 include ':lib-okhttp'
 include ':lib-util'
-include ':app-b'
 include ':app-shf'
 include ':app-core'
 include ':app'

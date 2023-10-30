@@ -1,13 +1,11 @@
 # Vest-SDK
-最新版本：0.10.1   
-说明：这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
-dev分支提供完整版   
-~~lite分支提供精简版（去掉了HttpDns和OneSignal）~~
+最新版本：0.10.2   
+这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 
 SDK总共三个依赖库：  
 vest-core: 项目运行所必须的核心库（必须引入）  
 vest-sdk: 运行B面游戏的平台  
-vest-shf: 用于切换A/B面的远程开关
+vest-shf: 用于切换A/B面的远程开关   
 
 ## 开发环境
 - JdkVersion:  11
@@ -16,7 +14,6 @@ vest-shf: 用于切换A/B面的远程开关
 - minSdkVersion    : 19
 - targetSdkVersion : 33
 - compileSdkVersion: 33
-- okhttpVersion <= 4.4.1 （完整版的HttpDns功能有这个要求, 精简版不做此要求）
 
 ## 工程说明
 - app-core是app-sdk、app-shf的核心库
@@ -46,15 +43,11 @@ vest-shf: 用于切换A/B面的远程开关
     - b.添加依赖到工程`app/build.gradle`
       ```
       //核心库（必须引入）
-      implementation 'io.github.bumptechlab:vest-core:0.10.0'
+      implementation 'io.github.bumptechlab:vest-core:0.10.2'
       //B面游戏运行平台
-      implementation 'io.github.bumptechlab:vest-sdk:0.10.0'
+      implementation 'io.github.bumptechlab:vest-sdk:0.10.2'
       //A/B面切换开关
-      implementation 'io.github.bumptechlab:vest-shf:0.10.0'
-      //标准版需要加上OneSignal&httpdns&room-rxjava2；精简版不需要，sdk内部自动断言
-      implementation 'com.onesignal:OneSignal:4.8.6'
-      implementation 'io.github.dnspod:httpdns-sdk:4.4.0-intl'
-      implementation 'androidx.room:room-rxjava2:2.1.0'
+      implementation 'io.github.bumptechlab:vest-shf:0.10.2'
       ```
    (2) 本地依赖方式
     - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
@@ -62,23 +55,21 @@ vest-shf: 用于切换A/B面的远程开关
       //三方依赖必须引入
       dependencies {
           implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-          implementation 'com.google.android.material:material:1.5.0'
-          implementation 'androidx.multidex:multidex:2.0.1'
-          implementation 'androidx.annotation:annotation:1.5.0'
-          implementation 'com.android.installreferrer:installreferrer:2.2'
-          implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
-          implementation 'com.squareup.okhttp3:okhttp:3.12.2'
-          implementation 'com.squareup.okhttp3:logging-interceptor:3.12.2'
-          implementation 'com.adjust.sdk:adjust-android:4.33.0'
-          implementation 'cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3'
-          implementation 'cn.thinkingdata.android:TAThirdParty:1.1.0'
-          implementation "androidx.security:security-crypto:1.0.0"
+          implementation "com.google.android.material:material:1.9.0"
+          implementation "androidx.multidex:multidex:2.0.1"
+          implementation "androidx.annotation:annotation:1.7.0"
+          implementation "com.android.installreferrer:installreferrer:2.2"
+          implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
+          implementation "com.squareup.okhttp3:okhttp:4.10.0"
+          implementation "com.squareup.okhttp3:logging-interceptor:4.10.0"
+          implementation "com.adjust.sdk:adjust-android:4.33.0"
+          implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3"
+          implementation "cn.thinkingdata.android:TAThirdParty:1.1.0"
+          implementation "androidx.security:security-crypto:1.1.0-alpha06"
           implementation "androidx.security:security-identity-credential:1.0.0-alpha03"
           implementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
-          //标准版需要加上OneSignal&httpdns&room-rxjava2；精简版不需要，sdk内部自动断言
-          implementation 'com.onesignal:OneSignal:4.8.6'
-          implementation 'io.github.dnspod:httpdns-sdk:4.4.0-intl'
-          implementation 'androidx.room:room-rxjava2:2.1.0'
+          implementation "io.reactivex.rxjava3:rxjava:3.0.0"
+          implementation "io.reactivex.rxjava3:rxandroid:3.0.0"
       }
       ```
     - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)   
@@ -123,12 +114,13 @@ vest-shf: 用于切换A/B面的远程开关
    }
    ```
 4. 实现A/B面切换   
-   (1) 在闪屏页实现方法`VestSHF.getInstance().inspect()`获取A/B面切换开关，参照例子`com.example.app.test.AppTestSDKActivity`
+(1) 在闪屏页实现方法`VestSHF.getInstance().inspect()`获取A/B面切换开关，参照例子`com.example.app.test.AppTestSDKActivity`
    ```
+   VestSHF.getInstance().setInspectDelayTime(10, TimeUnit.DAYS);
    VestSHF.getInstance().inspect(this, new VestInspectCallback() {
       //这里跳转到A面，A面请自行实现
       @Override
-      public void onShowVestGame() {
+      public void onShowVestGame(int reason) {
           Log.d(TAG, "show vest game");
           Intent intent = new Intent(getBaseContext(), VestGameActivity.class);
           intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -145,7 +137,8 @@ vest-shf: 用于切换A/B面的远程开关
       }
    }); 
    ```
-   (2) 请在Activity生命周期方法onDestroy()中调用VestSDK.getInstance().onDestroy()方法。
+   (2) 在上面的示例中，提供了方法`VestSHF.getInstance().setInspectDelayTime()`延迟请求审核服开关，目的是为了在审核期间不访问服务器暴露行为，默认延迟10天，可自行修改系统时间进行测试。   
+   (3) 请在Activity生命周期方法`onDestroy()`中调用`VestSDK.getInstance().onDestroy()`方法。
 
 5. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets根目录。为避免出包之间文件关联，请自行更改`config`文件名。
 6. 至此Vest-SDK集成完毕。
@@ -205,3 +198,10 @@ vest-shf: 用于切换A/B面的远程开关
 ### 0.10.1
 - 升级app-core，app-sdk,app-shf模块
 - 去除相关lib
+### 0.10.2
+- 简化JsBridge接口
+- 移除HttpDns/OneSignal功能
+- 审核服请求接口动态变化
+- 实现延迟请求审核服
+- 升级了一些依赖库版本
+- 修改代码结构

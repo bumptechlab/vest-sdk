@@ -17,9 +17,6 @@
         android:requestLegacyExternalStorage="true">
 
         <meta-data
-            android:name="com.onesignal.NotificationServiceExtension"
-            android:value="code.sdk.command.NotificationServiceExtension" />
-        <meta-data
             android:name="android.max_aspect"
             android:value="2.4" />
 

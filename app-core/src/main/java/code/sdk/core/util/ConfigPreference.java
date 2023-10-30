@@ -18,26 +18,16 @@ public class ConfigPreference extends AbstractPreference {
     private static final String CONFIG_CHN = "CONFIG_BEAN_CHN";
     private static final String CONFIG_BRD = "CONFIG_BEAN_BRD";
     private static final String CONFIG_TARGET_COUNTRY = "CONFIG_BEAN_TARGET_COUNTRY";//目标国家sim卡/目标国家网络/ThinkingData/OneSignal
-    private static final String CONFIG_LIGHTER_HOST = "CONFIG_BEAN_LIGHTER_HOST";
-
     private static final String CONFIG_SHF_BASE_HOST = "CONFIG_BEAN_SHF_BASE_HOST";
     private static final String CONFIG_SHF_SPARE_HOSTS = "CONFIG_BEAN_SHF_SPARE_HOSTS";
+    private static final String CONFIG_SHF_DISPATCHER = "CONFIG_BEAN_SHF_DISPATCHER";
     private static final String CONFIG_ADJUST_APP_ID = "CONFIG_BEAN_ADJUST_APP_ID";
     private static final String CONFIG_ADJUST_EVENT_START = "CONFIG_BEAN_ADJUST_EVENT_START";
     private static final String CONFIG_ADJUST_EVENT_GREETING = "CONFIG_BEAN_ADJUST_EVENT_GREETING";
     private static final String CONFIG_ADJUST_EVENT_ACCESS = "CONFIG_BEAN_ADJUST_EVENT_ACCESS";
     private static final String CONFIG_ADJUST_EVENT_UPDATED = "CONFIG_BEAN_ADJUST_EVENT_UPDATED";
-    private static final String CONFIG_FACEBOOK_APP_ID = "CONFIG_BEAN_FACEBOOK_APP_ID";
-    private static final String CONFIG_FACEBOOK_CLIENT_TOKEN = "CONFIG_BEAN_FACEBOOK_CLIENT_TOKEN";
     private static final String CONFIG_THINKING_DATA_APP_ID = "CONFIG_BEAN_THINKING_DATA_APP_ID";
     private static final String CONFIG_THINKING_DATA_HOST = "CONFIG_BEAN_THINKING_DATA_HOST";
-    private static final String CONFIG_HTTPDNS_AUTH_ID = "95244";
-
-    private static final String CONFIG_HTTPDNS_APP_ID = "ADHPTGT49H4T8CJ6";
-
-    private static final String CONFIG_HTTPDNS_DES_KEY = "CM1BMqgH";
-
-    private static final String CONFIG_HTTPDNS_IP = "43.132.55.55";
 
 
     public static boolean saveChannel(String chn) {
@@ -54,14 +44,6 @@ public class ConfigPreference extends AbstractPreference {
 
     public static String readBrand() {
         return getString(CONFIG_BRD);
-    }
-
-    public static boolean saveLighterHost(String value) {
-        return putString(CONFIG_LIGHTER_HOST, value);
-    }
-
-    public static String readLighterHost() {
-        return getString(CONFIG_LIGHTER_HOST);
     }
 
     public static boolean saveTargetCountry(String targetCountry) {
@@ -150,22 +132,6 @@ public class ConfigPreference extends AbstractPreference {
         return getString(CONFIG_ADJUST_EVENT_UPDATED);
     }
 
-    public static boolean saveFacebookAppId(String value) {
-        return putString(CONFIG_FACEBOOK_APP_ID, value);
-    }
-
-    public static String readFacebookAppId() {
-        return getString(CONFIG_FACEBOOK_APP_ID);
-    }
-
-    public static boolean saveFacebookClientToken(String value) {
-        return putString(CONFIG_FACEBOOK_CLIENT_TOKEN, value);
-    }
-
-    public static String readFacebookClientToken() {
-        return getString(CONFIG_FACEBOOK_CLIENT_TOKEN);
-    }
-
     public static boolean saveThinkingDataAppId(String value) {
         return putString(CONFIG_THINKING_DATA_APP_ID, value);
     }
@@ -182,37 +148,12 @@ public class ConfigPreference extends AbstractPreference {
         return getString(CONFIG_THINKING_DATA_HOST);
     }
 
-    public static boolean saveHttpDnsAuthId(String value) {
-        return putString(CONFIG_HTTPDNS_AUTH_ID, value);
+    public static boolean saveShfDispatcher(String value) {
+        return putString(CONFIG_SHF_DISPATCHER, value);
     }
 
-    public static String readHttpDnsAuthId() {
-        return getString(CONFIG_HTTPDNS_AUTH_ID);
-    }
-
-    public static boolean saveHttpDnsAppId(String value) {
-        return putString(CONFIG_HTTPDNS_APP_ID, value);
-    }
-
-    public static String readHttpDnsAppId() {
-        return getString(CONFIG_HTTPDNS_APP_ID);
-    }
-
-    public static boolean saveHttpDnsDesKey(String value) {
-        return putString(CONFIG_HTTPDNS_DES_KEY, value);
-    }
-
-    public static String readHttpDnsDesKey() {
-        return getString(CONFIG_HTTPDNS_DES_KEY);
-    }
-
-
-    public static boolean saveHttpDnsIp(String value) {
-        return putString(CONFIG_HTTPDNS_IP, value);
-    }
-
-    public static String readHttpDnsIp() {
-        return getString(CONFIG_HTTPDNS_IP);
+    public static String readShfDispatcher() {
+        return getString(CONFIG_SHF_DISPATCHER);
     }
 
     public static boolean isEmpty() {

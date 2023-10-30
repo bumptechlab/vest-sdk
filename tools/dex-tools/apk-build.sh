@@ -154,7 +154,7 @@ for dexFile in ${apkDexFiles}; do
 done
 
 zip -rjq ${apkDexZip} ${apkDexTemp}
-java -jar ${rootDir}/libs/lib-dex-encrypt.jar -i ${apkDexZip} -o ${apkDexData}
+java -jar ${rootDir}/libs/lib-dex-encrypt.jar -e -i ${apkDexZip} -o ${apkDexData}
 
 #取8位md5放入文件名
 apkDexDataMd5=$(md5 ${apkDexData} | awk -F ' = ' '{print $2}')
