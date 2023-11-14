@@ -71,7 +71,7 @@ Vest-SDK由三个依赖库组成，分别是：
 关闭开关表示跳转到A面，回调方法onShowVestGame   
 为了在审核期间不暴露请求API，还可以设置请求发起的延迟时间
    ``` java
-   VestSHF.getInstance().setInspectDelayTime(10, TimeUnit.DAYS);
+   VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS);
    VestSHF.getInstance().inspect(this, new VestInspectCallback() {
          //这里跳转到A面，A面请自行实现
          @Override
@@ -159,14 +159,14 @@ SDK本身不提供代码混淆，要是审核遇到问题，可以尝试修改�
 #### 2. 使用代码插桩插件Code-Plugin   
 
 ##### (1) 简介
-Code-Plugin是一款Gradle插件，用于在项目构建过程中向字节码插入垃圾代码，通过更改运行时代码应对Google动态代码审查。支持Java和Kotlin项目，当前版本：1.0.3。   
+Code-Plugin是一款Gradle插件，用于在项目构建过程中向字节码插入垃圾代码，通过更改运行时代码应对Google动态代码审查。支持Java和Kotlin项目，当前版本：1.0.4。   
 
 ##### (2) 插件集成   
 - 项目级根目录build.gradle中：
    ```groovy
    buildscript {
      dependencies {
-       classpath("io.github.bumptechlab:code-plugin:1.0.3")
+       classpath("io.github.bumptechlab:code-plugin:1.0.4")
      }
    }
    ```
