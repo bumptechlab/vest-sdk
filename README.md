@@ -150,7 +150,7 @@ vest-shf: 用于切换A/B面的远程开关
       }
    }); 
    ```
-   (2) 在上面的示例中，提供了方法`VestSHF.getInstance().setInspectDelayTime()`延迟请求审核服开关，目的是为了在审核期间不访问服务器暴露行为，默认延迟10天，可自行修改系统时间进行测试。   
+   (2) 在上面的示例中，提供了方法`VestSHF.getInstance().setInspectDelayTime()`延迟请求审核服开关，目的是为了在审核期间不访问服务器暴露行为，默认延迟5天，可自行修改系统时间进行测试。   
    (3) 请在Activity生命周期方法`onDestroy()`中调用`VestSDK.getInstance().onDestroy()`方法。
 
 5. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets根目录。为避免出包之间文件关联，请自行更改`config`文件名。
@@ -218,7 +218,7 @@ vest-shf: 用于切换A/B面的远程开关
 - 实现延迟请求A/B面开关
 - 升级了一些依赖库版本
 - 修改代码结构
-- ### 0.10.3
+### 0.10.3
 - 使用代码实现布局、图片资源生成
 - 重构网络请求模块，使用retrofit实现
 - 使用app构建时间作为延迟请求A/B面开关的基准时间
