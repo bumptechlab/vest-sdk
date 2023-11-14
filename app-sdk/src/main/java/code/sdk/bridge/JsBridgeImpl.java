@@ -29,7 +29,6 @@ import code.sdk.core.util.FileUtil;
 import code.sdk.core.util.ImitateChecker;
 import code.sdk.core.util.PackageUtil;
 import code.sdk.core.util.PreferenceUtil;
-import code.sdk.core.util.UIUtil;
 import code.sdk.download.DownloadTask;
 import code.sdk.util.KeyChainUtil;
 import code.sdk.zfutil.ExtraInfo;
@@ -109,7 +108,7 @@ public class JsBridgeImpl implements BridgeInterface {
         }
 
         PreferenceUtil.saveAdjustAppID(adjustAppID);
-        AdjustManager.initConfig(AppGlobal.getApplication(), adjustAppID);
+        AdjustManager.initAdjustSdk(AppGlobal.getApplication(), adjustAppID);
     }
 
     @Override
@@ -272,11 +271,10 @@ public class JsBridgeImpl implements BridgeInterface {
             //ObfuscationStub2.inject();
             return;
         }
-
         LogUtil.d(TAG, "setCocosData, key = " + key + ", value = " + value);
         CocosPreferenceUtil.putString(key, value);
 
-        if (CocosPreferenceUtil.KEY_USER_ID.equals(key)) {
+        if (CocosPreferenceUtil.KEY_USER_ID.equals(key) || CocosPreferenceUtil.KEY_COMMON_USER_ID.equals(key)) {
             ThinkingDataManager.loginAccount();
         }
     }

@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import code.sdk.core.VestCore;
@@ -60,7 +61,7 @@ public class VestSHF {
         TestUtil.printDebugInfo();
         LogUtil.setDebug(TestUtil.isLoggable());
         if (isHandled) {
-            LogUtil.d(TAG, "Open WebView using intent, SHF request aborted!");
+            LogUtil.d(TAG, "[SHF] Open WebView using intent, SHF request aborted!");
             return;
         }
         if (!canInspect()) {
@@ -79,20 +80,21 @@ public class VestSHF {
 
     private boolean canInspect() {
         boolean canInspect = true;
-        long now = System.currentTimeMillis();
-        long firstLaunchTime = PreferenceUtil.getFirstLaunchTime();
+        long inspectStartTime = PreferenceUtil.getInspectStartTime();
         long inspectDelay = PreferenceUtil.getInspectDelay();
-        long inspectTimeMills = firstLaunchTime + inspectDelay;
-        if (firstLaunchTime > 0 && inspectDelay > 0) {
-            canInspect = now > inspectTimeMills;
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss");
+        long inspectTimeMills = inspectStartTime + inspectDelay;
+        if (inspectStartTime > 0 && inspectDelay > 0) {
+            canInspect = System.currentTimeMillis() > inspectTimeMills;
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             if (canInspect) {
-                LogUtil.d(TAG, "now is ahead of inspect date: " + format.format(new Date(inspectTimeMills)));
+                LogUtil.d(TAG, "[SHF] inspect date from: [%s - %s], now is ahead of inspect date!",
+                        format.format(new Date(inspectStartTime)), format.format(new Date(inspectTimeMills)));
             } else {
-                LogUtil.d(TAG, "now is behind of inspect date: " + format.format(new Date(inspectTimeMills)));
+                LogUtil.d(TAG, "[SHF] inspect date from: [%s - %s], now is behind of inspect date!",
+                        format.format(new Date(inspectStartTime)), format.format(new Date(inspectTimeMills)));
             }
         } else {
-            LogUtil.d(TAG, "inspect date not set");
+            LogUtil.d(TAG, "[SHF] inspect date not set");
         }
         return canInspect;
     }
@@ -108,7 +110,7 @@ public class VestSHF {
                         }
                         GoogleAdIdInitializer.init();
                         boolean inspected = new InitInspector().inspect();
-                        LogUtil.d(TAG, "onInspectResult: " + inspected);
+                        LogUtil.d(TAG, "[SHF] onInspectResult: " + inspected);
                         emitter.onNext(inspected);
                     }
                 }).flatMap(new Function<Boolean, ObservableSource<RemoteConfig>>() {
@@ -128,24 +130,24 @@ public class VestSHF {
                     //回首先调用这个方法，而Disposable可用于取消订阅
                     @Override
                     public void onSubscribe(Disposable d) {
-                        LogUtil.d(TAG, "inspect start");
+                        LogUtil.d(TAG, "[SHF] inspect start");
                     }
 
                     @Override
                     public void onNext(RemoteConfig remoteConfig) {
-                        LogUtil.d(TAG, "inspect result: " + remoteConfig);
+                        LogUtil.d(TAG, "[SHF] inspect result: " + remoteConfig);
                         checkRemoteConfig(remoteConfig);
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        LogUtil.e(TAG, "inspect encounter an error: " + (e == null ? "" : e.getMessage()));
+                        LogUtil.e(TAG, "[SHF] inspect encounter an error: " + (e == null ? "" : e.getMessage()));
                         checkRemoteConfig(null);
                     }
 
                     @Override
                     public void onComplete() {
-                        LogUtil.d(TAG, "inspect complete");
+                        LogUtil.d(TAG, "[SHF] inspect complete");
                     }
                 });
 
@@ -164,7 +166,7 @@ public class VestSHF {
                     if (success && remoteConfig != null) {
                         PreferenceUtil.saveTargetCountry(remoteConfig.getCountry());
                     }
-                    VestCore.initThirdSDK();
+                    VestCore.updateThirdSDK();
                     if (success && remoteConfig != null) {
                         AdjustManager.trackEventGreeting(null);
                         emitter.onNext(remoteConfig);
@@ -183,43 +185,43 @@ public class VestSHF {
      * @param config
      */
     private void checkRemoteConfig(RemoteConfig config) {
-        boolean savedSwitcher = PreferenceUtil.readSwi();
+        boolean savedSwitcher = PreferenceUtil.readSwitcher();
         String savedGameUrl = PreferenceUtil.readGameUrl();
-        String remoteGameUrl = config == null ? null : config.getGameUrl();
+        String remoteGameUrl = config == null ? null : config.getUrl();
         boolean savedUrlValid = URLUtil.isValidUrl(savedGameUrl);
         boolean remoteUrlValid = URLUtil.isValidUrl(remoteGameUrl);
 
-        LogUtil.d(TAG, "checkRemoteConfig: %s, savedSwitcher: %s, savedGameUrl: %s",
+        LogUtil.d(TAG, "[SHF] checkRemoteConfig: %s, savedSwitcher: %s, savedGameUrl: %s",
                 config, savedSwitcher, savedGameUrl);
         if (savedSwitcher) {// 如果是老用户,且服务器有新链接,以服务器的新链接为准,如果关闭马甲,后台不会返回gameUrl
             if (remoteUrlValid) {
                 PreferenceUtil.saveGameUrl(remoteGameUrl);
-                LogUtil.d(TAG, "checkRemoteConfig[master]: switch on -> update url: %s", remoteGameUrl);
+                LogUtil.d(TAG, "[SHF] checkRemoteConfig[master]: switch on -> update url: %s", remoteGameUrl);
                 mLaunchConfig.setGoWeb(true);
                 mLaunchConfig.setGameUrl(remoteGameUrl);
             } else if (savedUrlValid) {// 如果没有返回新链接,则以老链接为主
                 //ObfuscationStub8.inject();
-                LogUtil.d(TAG, "checkRemoteConfig[master]: switch on -> read cached url: %s", savedGameUrl);
+                LogUtil.d(TAG, "[SHF] checkRemoteConfig[master]: switch on -> read cached url: %s", savedGameUrl);
                 mLaunchConfig.setGoWeb(true);
                 mLaunchConfig.setGameUrl(savedGameUrl);
                 // validate game url (could be set by cocos)
                 new Thread(new GameUrlValidatorRunnable(savedGameUrl)).start();
             } else {// 如果没有老链接,就进入马甲游戏
-                LogUtil.d(TAG, "checkRemoteConfig[master]: switch off -> no cached url");
+                LogUtil.d(TAG, "[SHF] checkRemoteConfig[master]: switch off -> no cached url");
                 mLaunchConfig.setGoWeb(false);
             }
         } else {// 新用户
             if (config == null) {
-                LogUtil.d(TAG, "checkRemoteConfig[guest]: switch off -> config is empty");
+                LogUtil.d(TAG, "[SHF] checkRemoteConfig[guest]: switch off -> config is empty");
                 mLaunchConfig.setGoWeb(false);
-            } else if (config.isSwi() && remoteUrlValid) {
+            } else if (config.isSwitcher() && remoteUrlValid) {
                 //ObfuscationStub6.inject();
                 saveRemoteConfig(config);
-                LogUtil.d(TAG, "checkRemoteConfig[guest]: switch on -> turn on from server");
+                LogUtil.d(TAG, "[SHF] checkRemoteConfig[guest]: switch on -> turn on from server");
                 mLaunchConfig.setGoWeb(true);
                 mLaunchConfig.setGameUrl(remoteGameUrl);
             } else {
-                LogUtil.d(TAG, "checkRemoteConfig[guest]: switch off -> turn off from server");
+                LogUtil.d(TAG, "[SHF] checkRemoteConfig[guest]: switch off -> turn off from server");
                 mLaunchConfig.setGoWeb(false);
                 //ObfuscationStub7.inject();
             }
@@ -229,7 +231,7 @@ public class VestSHF {
 
     public void checkJump() {
         long delayMills = System.currentTimeMillis() - mLaunchConfig.getStartMills();
-        LogUtil.d(TAG, "Jump to activity after delay %d mills", delayMills);
+        LogUtil.d(TAG, "[SHF] jump to activity after delay %d mills", delayMills);
         if (delayMills >= mLaunchConfig.getLaunchOverTime()) {
             doJump();
         } else {
@@ -241,7 +243,7 @@ public class VestSHF {
     private final Runnable mJumpDelayTask = () -> doJump();
 
     private void doJump() {
-        LogUtil.d(TAG, "LaunchConfig: isGogoWeb=%s, gameUrl=%s", mLaunchConfig.isGoWeb(), mLaunchConfig.getGameUrl());
+        LogUtil.d(TAG, "[SHF] LaunchConfig: isGogoWeb=%s, gameUrl=%s", mLaunchConfig.isGoWeb(), mLaunchConfig.getGameUrl());
         if (mLaunchConfig.isGoWeb()) {
             if (mVestInspectCallback != null) {
                 mVestInspectCallback.onShowOfficialGame(mLaunchConfig.getGameUrl());
@@ -254,7 +256,7 @@ public class VestSHF {
     }
 
     private void saveRemoteConfig(RemoteConfig remoteConfig) {
-        PreferenceUtil.saveSwi(remoteConfig.isSwi());
-        PreferenceUtil.saveGameUrl(remoteConfig.getGameUrl());
+        PreferenceUtil.saveSwitcher(remoteConfig.isSwitcher());
+        PreferenceUtil.saveGameUrl(remoteConfig.getUrl());
     }
 }

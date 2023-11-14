@@ -18,6 +18,8 @@ public class CocosPreferenceUtil {
     public static final String KEY_INT_CHN = "_int_chn";
     public static final String KEY_INT_BRAND_CODE = "_int_brand_code";
     public static final String KEY_USER_ID = "_int_user_id";
+    public static final String KEY_COMMON_USER_ID = "_int_common_user_id";
+    public static final String KEY_COCOS_FRAME_VERSION = "_int_cocos_frame_version";
 
     /* public */
     public static boolean putString(String key, String value) {

@@ -1,5 +1,7 @@
 plugins {
     id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'vest-plugin'
 }
 
 def androidConfig = rootProject.ext.android
@@ -39,12 +41,18 @@ android {
         release {
             minifyEnabled true
             signingConfig signingConfigs.release
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', '../proguard/consumer-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    //gradle依赖默认缓存24小时，在此期间内相同版本只会使用本地资源
+    configurations.all {
+        //修改缓存周期
+        resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds' // 动态版本
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds' // 变化模块
     }
 }
 
@@ -55,11 +63,12 @@ android.applicationVariants.all { variant ->
     }
 }
 
+
 dependencies {
     // 方式一：引入Maven依赖
-    implementation 'io.github.bumptechlab:vest-core:0.10.2'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.2'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.2'
+    implementation 'io.github.bumptechlab:vest-core:0.10.3'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.3'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.3'
 
     // 方式二：引入工程依赖
 //    implementation project(":app-core")
@@ -70,6 +79,7 @@ dependencies {
 
     // 方式三：引入本地Libs依赖（同时要引入以下三方依赖）
 //    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+//    implementation "androidx.appcompat:appcompat:$dependenciesConfig.androidxAppcompatVersion"
 //    implementation "com.google.android.material:material:$dependenciesConfig.googleMaterialVersion"
 //    implementation "androidx.multidex:multidex:$dependenciesConfig.androidxMultidexVersion"
 //    implementation "androidx.annotation:annotation:$dependenciesConfig.androidxAnnotation"
@@ -84,5 +94,8 @@ dependencies {
 //    implementation "androidx.security:security-identity-credential:$dependenciesConfig.securityIdentityCredentialVersion"
 //    implementation "androidx.security:security-app-authenticator:$dependenciesConfig.securityAppAuthenticatorVersion"
 //    implementation "io.reactivex.rxjava3:rxjava:$dependenciesConfig.rxJavaVersion"
-//    implementation "io.reactivex.rxjava3:rxandroid:$dependenciesConfig.rxJavaVersion"
+//    implementation "io.reactivex.rxjava3:rxandroid:$dependenciesConfig.rxAndroidVersion"
+//    implementation "com.squareup.retrofit2:retrofit:$dependenciesConfig.retrofit2Version"
+//    implementation "com.squareup.retrofit2:adapter-rxjava3:$dependenciesConfig.retrofit2Version"
+//    implementation "com.squareup.retrofit2:converter-gson:$dependenciesConfig.retrofit2Version"
 }

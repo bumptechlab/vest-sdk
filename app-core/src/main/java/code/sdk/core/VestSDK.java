@@ -8,7 +8,6 @@ import code.util.LogUtil;
 public class VestSDK {
     private static String TAG = VestSDK.class.getSimpleName();
     public static VestSDK sInstance = null;
-    private Context mContext;
 
     public static VestSDK init(Context context, String configAssets) {
         if (sInstance == null) {
@@ -32,18 +31,6 @@ public class VestSDK {
         TestUtil.setLoggable(loggable);
         LogUtil.setDebug(TestUtil.isLoggable());
     }
-
-//    public void inspect(Context context, VestInspectCallback vestInspectCallback) {
-//        try {
-//            Class<?> vestSHFClz = Class.forName("code.sdk.shf.VestSHF");
-//            Object vestSHFInstance = vestSHFClz.newInstance();
-//            Method inspectMethod = vestSHFClz.getDeclaredMethod("inspect", Context.class, VestInspectCallback.class);
-//            inspectMethod.setAccessible(true);
-//            inspectMethod.invoke(vestSHFInstance, context, vestInspectCallback);
-//        } catch (Exception e) {
-//            LogUtil.e(TAG, e, "Fail on invoking VestSHF.inspect(), please import 'vest-shf' library");
-//        }
-//    }
 
     public void onCreate() {
         VestCore.onCreate();

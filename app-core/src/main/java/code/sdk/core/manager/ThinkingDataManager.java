@@ -22,10 +22,6 @@ public class ThinkingDataManager {
     private static ThinkingAnalyticsSDK mTDSdk;
 
     public static void init(Context context) {
-        initTDSdk(context);
-    }
-
-    private static void initTDSdk(Context context) {
         String appId = ConfigPreference.readThinkingDataAppId();
         String serverUrl = ConfigPreference.readThinkingDataHost();
         LogUtil.w(TAG, "[ThinkingData] init, appId = %s, serverUrl = %s", appId, serverUrl);
@@ -43,7 +39,7 @@ public class ThinkingDataManager {
         loginAccount();
     }
 
-    private static void initTDEvents() {
+    public static void initTDEvents() {
         // add Adjust session callback params
         // mTDSdk.enableThirdPartySharing(TDThirdPartyShareType.TD_ADJUST);
         // enable auto track
@@ -51,6 +47,7 @@ public class ThinkingDataManager {
         eventTypeList.add(ThinkingAnalyticsSDK.AutoTrackEventType.APP_INSTALL);
         eventTypeList.add(ThinkingAnalyticsSDK.AutoTrackEventType.APP_START);
         eventTypeList.add(ThinkingAnalyticsSDK.AutoTrackEventType.APP_END);
+        eventTypeList.add(ThinkingAnalyticsSDK.AutoTrackEventType.APP_CRASH);
         trackInitTrackEvent(eventTypeList);
     }
 
@@ -68,6 +65,7 @@ public class ThinkingDataManager {
             return;
         }
         String accountId = getAccountId();
+        LogUtil.d(TAG, "[ThinkingData] accountId = " + accountId);
         if (!TextUtils.isEmpty(accountId)) {
             LogUtil.d(TAG, "[ThinkingData] login = " + accountId);
             mTDSdk.login(accountId);
@@ -104,11 +102,17 @@ public class ThinkingDataManager {
     }
 
     public static String getAccountId() {
-        String userID = CocosPreferenceUtil.getString(CocosPreferenceUtil.KEY_USER_ID);
+        String userID = CocosManager.getUserId();
         if (TextUtils.isEmpty(userID)) {
             return "";
         }
-        return getTargetCountry() + "-" + userID;
+        //cocos frame version 不存在认为是1.0版本，返回${country}-${userId}的账号形式
+        //cocos frame version 是2.0.0及以上，值返回${userId}的账号形式
+        int cocosFrameVersion = CocosManager.getCocosFrameVersion();
+        if (cocosFrameVersion < 200) {
+            userID = getTargetCountry() + "-" + userID;
+        }
+        return userID;
     }
 
     public static String getTargetCountry() {

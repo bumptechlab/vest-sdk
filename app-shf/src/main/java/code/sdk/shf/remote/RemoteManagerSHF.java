@@ -5,15 +5,13 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.webkit.URLUtil;
 
-import com.androidx.h5.data.model.BaseResponse;
-import com.androidx.h5.http.HttpCallback;
-import com.androidx.h5.http.HttpRequest;
-import com.androidx.h5.utils.AES;
-import com.androidx.h5.utils.AESKeyStore;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.DeviceUtil;
@@ -21,17 +19,21 @@ import code.sdk.core.util.NetworkUtil;
 import code.sdk.core.util.PackageUtil;
 import code.sdk.core.util.PreferenceUtil;
 import code.sdk.core.util.URLUtilX;
+import code.sdk.shf.http.BaseResponse;
+import code.sdk.shf.http.HttpClient;
+import code.util.AES;
+import code.util.AESKeyStore;
 import code.util.LogUtil;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 
 public class RemoteManagerSHF {
 
     public static final String TAG = RemoteManagerSHF.class.getSimpleName();
-
-    private String mBaseHost = "";
-
-    private String mSpareHosts[] = new String[]{};
-
-    private List<String> mHosts = new ArrayList<>();
 
     private static final int RETRY_TOTAL_COUNT = 3;
 
@@ -125,49 +127,67 @@ public class RemoteManagerSHF {
         String host = hosts.get(hostIndex);
         RemoteRequest remoteRequest = buildRemoteRequest();
         String requestJson = remoteRequest.toJson();
-        byte[] postBody = AES.encryptByGCM(requestJson.getBytes(StandardCharsets.UTF_8), AES.MODE256);
-        HttpRequest httpRequest = new HttpRequest.Builder()
-                .setLoggable(LogUtil.isDebug())
-                .setHost(host)
-                .setApi(getShfDispatcher())
-                .appendQuery("enc", AES.enc())
-                .appendQuery("nonce", AESKeyStore.getIvParams())
-                .setMethod("POST")
-                .appendFormData(postBody)
-                .build();
-        String url = httpRequest.getUrl();
+        byte[] bytes = AES.encryptByGCM(requestJson.getBytes(), AES.MODE256);
+        if (bytes == null) {
+            handleError("[SHF] request all failed, errors happen while encrypting request body");
+            return;
+        }
+        MediaType mediaType = MediaType.parse("application/octet-stream");
+        RequestBody requestBody = RequestBody.create(mediaType, bytes);
+        Map<String, String> query = new HashMap<>();
+        query.put("enc", AES.enc());
+        query.put("nonce", AESKeyStore.getIvParams());
+        HttpClient instance = HttpClient.getInstance();
+        String url = instance.buildUrl(host, getShfDispatcher(), query);
         LogUtil.d(TAG, "[SHF] URL[%s] request start: %s", url, requestJson);
+        instance.getApi()
+                .getGameInfo(url, requestBody)
+                .compose(instance.ioSchedulers())
+                .subscribe(new Observer<ResponseBody>() {
+                    @Override
+                    public void onSubscribe(@io.reactivex.rxjava3.annotations.NonNull Disposable d) {
 
-        httpRequest.startAsync(new HttpCallback() {
-            @Override
-            public void onSuccess(String data) {
-                RemoteConfig remoteConfig = new RemoteConfig();
-                BaseResponse<RemoteConfig> response = new BaseResponse<RemoteConfig>().fromJson(data, remoteConfig);
-                LogUtil.d(TAG, "[SHF] URL[%s] request success: %s", url, response.toString());
-                isRequesting = false;
-                if (mRemoteCallback != null) {
-                    mRemoteCallback.onResult(true, response.getData());
-                }
-            }
-
-            @Override
-            public void onFailure(int code, String message) {
-                LogUtil.e(TAG, "[SHF] URL[%s] request failed: code=%d, retry=%d, message=%s", url, code, retryCount, message);
-                if (NetworkUtil.isConnected(mContext)) {
-                    if (retryCount == RETRY_TOTAL_COUNT - 1) {
-                        String domain = URLUtilX.parseHost(host);
-                        if (!DeviceUtil.isDomainAvailable(domain)) {
-                            setHostValid(host, false);
-                            LogUtil.e(TAG, "[SHF] Host[%s] is not available", host);
-                        } else {
-                            LogUtil.d(TAG, "[SHF] Host[%s] is available", host);
-                        }
-                        initHosts();
                     }
-                }
-                retryRequest(hosts, hostIndex, retryCount);
-            }
-        });
+
+                    @Override
+                    public void onNext(@io.reactivex.rxjava3.annotations.NonNull ResponseBody data) {
+                        try {
+                            RemoteConfig remoteConfig = new RemoteConfig();
+                            BaseResponse<RemoteConfig> response = new BaseResponse<RemoteConfig>().fromJson(data.string(), remoteConfig);
+                            LogUtil.d(TAG, "[SHF] URL[%s] request success: %s", url, response.toJson());
+                            isRequesting = false;
+                            if (mRemoteCallback != null) {
+                                mRemoteCallback.onResult(true, response.getData());
+                            }
+                        } catch (IOException e) {
+                            onError(e);
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
+                        LogUtil.e(TAG, e, "[SHF] URL[%s] request failed: retry=%d, message=%s", url, retryCount, e.getMessage());
+                        if (NetworkUtil.isConnected(mContext)) {
+                            if (retryCount == RETRY_TOTAL_COUNT) {
+                                String domain = URLUtilX.parseHost(host);
+                                if (!DeviceUtil.isDomainAvailable(domain)) {
+                                    setHostValid(host, false);
+                                    LogUtil.e(TAG, "[SHF] Host[%s] is not available", host);
+                                } else {
+                                    LogUtil.d(TAG, "[SHF] Host[%s] is available", host);
+                                }
+                            }
+                        }
+                        retryRequest(hosts, hostIndex, retryCount);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
     }
 
     private void retryRequest(List<String> hosts, int hostIndex, int retryCount) {
@@ -178,23 +198,6 @@ public class RemoteManagerSHF {
             // Move to the next URL
             doRequest(hosts, hostIndex + 1, 0);
         }
-    }
-
-    private void initHosts() {
-        mHosts.clear();
-        if (isHostValid(mBaseHost)) {
-            mHosts.add(mBaseHost);
-        } else {
-            if (mSpareHosts != null) {
-                for (int i = 0; i < mSpareHosts.length; i++) {
-                    String spareHost = mSpareHosts[i];
-                    if (isHostValid(spareHost)) {
-                        mHosts.add(spareHost);
-                    }
-                }
-            }
-        }
-        LogUtil.d(TAG, "[SHF] initHosts: " + mHosts);
     }
 
     private boolean isHostValid(String url) {
@@ -249,6 +252,7 @@ public class RemoteManagerSHF {
         remoteRequest.setLanguage(language);
         remoteRequest.setPlatform(platform);
         remoteRequest.setReferrer(referrer);
+        remoteRequest.setDeviceInfo("");
 
         return remoteRequest;
     }

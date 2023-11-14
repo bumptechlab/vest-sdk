@@ -1,16 +1,16 @@
 package code.sdk.shf.remote;
 
-import com.androidx.h5.data.model.BaseData;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import code.sdk.shf.http.BaseData;
 
 public class RemoteConfig implements BaseData {
     public static final String TAG = RemoteConfig.class.getSimpleName();
 
     private String url;
 
-    private boolean swi;
+    private boolean switcher;
 
     private String country;
 
@@ -20,16 +20,28 @@ public class RemoteConfig implements BaseData {
     }
 
     public RemoteConfig(boolean swi, String url, String country) {
-        this.swi = swi;
+        this.switcher = swi;
         this.url = url;
         this.country = country;
     }
 
-    public boolean isSwi() {
-        return swi;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    public String getGameUrl() {
+    public void setSwitcher(boolean swi) {
+        this.switcher = swi;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public boolean isSwitcher() {
+        return switcher;
+    }
+
+    public String getUrl() {
         return url;
     }
 
@@ -50,7 +62,8 @@ public class RemoteConfig implements BaseData {
     public String toString() {
         return "RemoteConfig{" +
                 "url='" + url + '\'' +
-                ", swi=" + swi +
+                ", switcher=" + switcher +
+                ", country='" + country + '\'' +
                 ", message='" + message + '\'' +
                 '}';
     }
@@ -59,9 +72,10 @@ public class RemoteConfig implements BaseData {
     public JSONObject toJSONObject() {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("h5_url", getGameUrl());
-            jsonObject.put("switch", isSwi());
+            jsonObject.put("switch", isSwitcher());
+            jsonObject.put("h5_url", getUrl());
             jsonObject.put("msg", getMessage());
+            jsonObject.put("country", getCountry());
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

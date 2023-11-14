@@ -15,7 +15,6 @@
             <option value="$PROJECT_DIR$/app-core" />
             <option value="$PROJECT_DIR$/app-sdk" />
             <option value="$PROJECT_DIR$/app-shf" />
-            <option value="$PROJECT_DIR$/lib-okhttp" />
             <option value="$PROJECT_DIR$/lib-util" />
           </set>
         </option>

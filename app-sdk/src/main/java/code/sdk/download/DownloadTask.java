@@ -5,18 +5,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import okhttp3.ResponseBody;
 
 
 public class DownloadTask {
     public static final String TAG = DownloadTask.class.getSimpleName();
 
     private static volatile DownloadTask mInstance;
-    private static final OkHttpClient sOkHttpClient = new OkHttpClient();
 
     public static DownloadTask getInstance() {
         if (mInstance == null) {
@@ -29,7 +27,7 @@ public class DownloadTask {
         return mInstance;
     }
 
-    private DownloadTask(){
+    private DownloadTask() {
 
     }
 
@@ -39,49 +37,71 @@ public class DownloadTask {
      * @param listener 下载监听
      */
     public void download(final String url, final String saveDir, final OnDownloadListener listener) {
-        Request request = new Request.Builder().url(url).build();
-        sOkHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                listener.onDownloadFailed();
-            }
+        DownloadClient instance = DownloadClient.getInstance();
+        instance.getApi().download(url)
+                .map(responseBody -> saveFile(responseBody, saveDir, listener))
+                .compose(instance.ioSchedulers())
+                .subscribe(new Observer<File>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                    }
 
-            @Override
-            public void onResponse(Call call, Response response) {
-                InputStream is = null;
-                byte[] buf = new byte[2048];
-                int len = 0;
-                FileOutputStream fos = null;
-                try {
-                    is = response.body().byteStream();
-                    long total = response.body().contentLength();
-                    File saveFile = new File(saveDir, System.currentTimeMillis() + ".jpg");
-                    fos = new FileOutputStream(saveFile);
-                    long sum = 0;
-                    while ((len = is.read(buf)) != -1) {
-                        fos.write(buf, 0, len);
-                        sum += len;
-                        int progress = (int) (sum * 1.0f / total * 100);
-                        listener.onDownloading(progress);
+                    @Override
+                    public void onNext(@NonNull File file) {
+                        if (file == null) {
+                            listener.onDownloadFailed();
+                        }else{
+                            listener.onDownloadSuccess(file);
+                        }
                     }
-                    fos.flush();
-                    listener.onDownloadSuccess(saveFile);
-                } catch (Exception e) {
-                    listener.onDownloadFailed();
-                } finally {
-                    try {
-                        if (is != null)
-                            is.close();
-                    } catch (IOException e) {
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        listener.onDownloadFailed();
                     }
-                    try {
-                        if (fos != null)
-                            fos.close();
-                    } catch (IOException e) {
-                    }
-                }
+
+                    @Override
+                    public void onComplete() {}
+
+                });
+    }
+
+
+    private File saveFile(ResponseBody responseBody, String saveDir, OnDownloadListener listener) {
+        File img = null;
+        InputStream is = null;
+        byte[] buf = new byte[2048];
+        int len = 0;
+        FileOutputStream fos = null;
+        try {
+            is = responseBody.byteStream();
+            long total = responseBody.contentLength();
+            File saveFile = new File(saveDir, System.currentTimeMillis() + ".jpg");
+            fos = new FileOutputStream(saveFile);
+            long sum = 0;
+            while ((len = is.read(buf)) != -1) {
+                fos.write(buf, 0, len);
+                sum += len;
+                int progress = (int) (sum * 1.0f / total * 100);
+                listener.onDownloading(progress);
             }
-        });
+            fos.flush();
+            img = saveFile;
+        } catch (Exception e) {
+
+        } finally {
+            try {
+                if (is != null)
+                    is.close();
+            } catch (IOException e) {
+            }
+            try {
+                if (fos != null)
+                    fos.close();
+            } catch (IOException e) {
+            }
+        }
+        return img;
     }
 
     /**

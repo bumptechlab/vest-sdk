@@ -1,10 +1,10 @@
 plugins {
     id 'com.android.library'
     id 'com.kezong.fat-aar'
-    id 'code-plugin'
 }
 apply from: './publish.gradle' //aar发布脚本
-apply from: '../pack.gradle'    //aar输出脚本
+apply from: '../plugins/pack.gradle'    //aar输出脚本
+apply from: '../plugins/code-plugin.gradle'
 
 def androidConfig = rootProject.ext.android
 def dependenciesConfig = rootProject.ext.dependencies
@@ -28,11 +28,6 @@ def execCommand(command) {
     commandProcess.in.eachLine { line -> println line }
     commandProcess.err.eachLine { line -> println line }
     commandProcess.waitFor()
-}
-
-code {
-    codeInjectEnable = androidConfig.codeInjectEnable
-    codeInjectPercentage = androidConfig.codeInjectPercentage
 }
 
 android {
@@ -72,8 +67,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     packagingAAR(project, android, mavenConfig.artifactIdShf)
@@ -113,11 +108,15 @@ android.libraryVariants.all { variant ->
 dependencies {
     compileOnly project(':app-core')
     compileOnly project(':lib-util')
-    compileOnly project(':lib-okhttp')
     implementation "androidx.appcompat:appcompat:$dependenciesConfig.androidxAppcompatVersion"
     implementation "com.google.android.material:material:$dependenciesConfig.googleMaterialVersion"
 
     //RxJava
     implementation "io.reactivex.rxjava3:rxjava:$dependenciesConfig.rxJavaVersion"
-    implementation "io.reactivex.rxjava3:rxandroid:$dependenciesConfig.rxJavaVersion"
+    implementation "io.reactivex.rxjava3:rxandroid:$dependenciesConfig.rxAndroidVersion"
+    implementation "com.squareup.retrofit2:retrofit:$dependenciesConfig.retrofit2Version"
+    implementation "com.squareup.retrofit2:adapter-rxjava3:$dependenciesConfig.retrofit2Version"
+    implementation "com.squareup.retrofit2:converter-gson:$dependenciesConfig.retrofit2Version"
+    implementation "com.squareup.okhttp3:okhttp:$dependenciesConfig.okhttpVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$dependenciesConfig.okhttpVersion"
 }

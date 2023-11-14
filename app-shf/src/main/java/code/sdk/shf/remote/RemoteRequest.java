@@ -1,5 +1,7 @@
 package code.sdk.shf.remote;
 
+import androidx.annotation.Keep;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 

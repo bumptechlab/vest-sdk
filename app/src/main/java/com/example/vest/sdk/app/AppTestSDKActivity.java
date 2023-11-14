@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import code.sdk.core.VestInspectCallback;
 import code.sdk.core.VestSDK;
+import code.sdk.core.util.UIUtil;
 import code.sdk.shf.VestSHF;
 
 public class AppTestSDKActivity extends Activity {
@@ -21,7 +23,7 @@ public class AppTestSDKActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_custom_splash);
-        VestSHF.getInstance().setInspectDelayTime(10, TimeUnit.DAYS);
+        VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS);
         VestSHF.getInstance().inspect(this, new VestInspectCallback() {
             //这里跳转到A面，A面请自行实现
             @Override

@@ -5,13 +5,14 @@ import android.content.SharedPreferences;
 import java.util.concurrent.TimeUnit;
 
 import code.util.AbstractPreference;
+import code.util.AssetsUtil;
 
 public class PreferenceUtil extends AbstractPreference {
     public static final String TAG = PreferenceUtil.class.getSimpleName();
 
     private static final String KEY_FIREBASE_INSPECTED = "key_firebase_inspected";
     private static final String KEY_LOGGABLE = "key_loggable";
-    private static final String KEY_SWI = "key_switcher";
+    private static final String KEY_SWITCHER = "key_switcher";
     private static final String KEY_GAME_URL = "key_game_url";
     private static final String KEY_DEVICE_ID = "key_device_ID";
     private static final String KEY_CHANNEL = "key_channel";
@@ -30,16 +31,15 @@ public class PreferenceUtil extends AbstractPreference {
     private static final String KEY_TEST_URL = "key_test_url";
     private static final String KEY_DOMAIN_VALID = "key_domain_valid_";
     private static final String KEY_INSPECT_DELAY = "key_inspect_delay";
-    private static final String KEY_FIRST_LAUNCH_TIME = "key_first_launch_time";
 
-    public static boolean saveSwi(boolean switcher) {
+    public static boolean saveSwitcher(boolean switcher) {
         //ObfuscationStub5.inject();
-        return putBoolean(KEY_SWI, switcher);
+        return putBoolean(KEY_SWITCHER, switcher);
     }
 
-    public static boolean readSwi() {
+    public static boolean readSwitcher() {
         //ObfuscationStub6.inject();
-        return getBoolean(KEY_SWI, false);
+        return getBoolean(KEY_SWITCHER, false);
     }
 
     public static boolean saveGameUrl(String gameUrl) {
@@ -221,19 +221,32 @@ public class PreferenceUtil extends AbstractPreference {
     }
 
     public static long getInspectDelay() {
-        long defaultDelay = TimeUnit.DAYS.toMillis(10);
+        long defaultDelay = TimeUnit.DAYS.toMillis(5);
         return getPreferences().getLong(KEY_INSPECT_DELAY, defaultDelay);
     }
 
-    public static boolean saveFirstLaunchTime(long firstLaunchTime) {
-        SharedPreferences.Editor editor = getPreferences().edit();
-        //ObfuscationStub1.inject();
-        return editor.putLong(KEY_FIRST_LAUNCH_TIME, firstLaunchTime).commit();
+    public static long getInspectStartTime() {
+        long time;
+        try {
+            time = Long.parseLong(AssetsUtil.getAssetData("system.property"));
+        } catch (Exception e) {
+            throw new IllegalStateException("Please check whether implement 'vest-plugin' in your project:\n" +
+                    "1.top-level build.gradle\n" +
+                    "buildscript {\n" +
+                    "    repositories {\n" +
+                    "        mavenCentral()\n" +
+                    "    }\n" +
+                    "    dependencies {\n" +
+                    "        classpath 'io.github.bumptechlab:vest-plugin:1.0.6'\n" +
+                    "    }\n" +
+                    "}\n\n" +
+                    "2.app/build.gradle\n" +
+                    "plugins {\n" +
+                    "    id 'com.android.application'\n" +
+                    "    id 'vest-plugin'\n" +
+                    "}");
+        }
+        return time;
     }
-
-    public static long getFirstLaunchTime() {
-        return getPreferences().getLong(KEY_FIRST_LAUNCH_TIME, 0);
-    }
-
 
 }

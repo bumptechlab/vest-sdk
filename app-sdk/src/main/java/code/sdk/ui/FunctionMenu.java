@@ -3,13 +3,14 @@ package code.sdk.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -17,6 +18,8 @@ import androidx.appcompat.widget.AppCompatImageView;
 import code.sdk.R;
 import code.sdk.core.Constant;
 import code.sdk.common.ScreenUtil;
+import code.sdk.drawable.Drawables;
+import code.sdk.util.ImageUtil;
 
 
 public class FunctionMenu extends RelativeLayout implements View.OnTouchListener {
@@ -56,21 +59,43 @@ public class FunctionMenu extends RelativeLayout implements View.OnTouchListener
     }
 
     private void init(Context context) {
-        LayoutInflater.from(context).inflate(R.layout.view_hover_menu, this);
-        initView();
+        View view = createView(context);
+        mMenuLayout = view;
+        addView(view);
         //ObfuscationStub2.inject();
 
         updateMenuByState();
     }
 
-    private void initView() {
-        mMenuLayout = findViewById(R.id.menu_layout);
-        mMenuButton = findViewById(R.id.menu_button);
-        mMenuPlaceholder = findViewById(R.id.menu_placeholder);
-        mMenuRefreshButton = findViewById(R.id.menu_refresh_button);
+    private View createView(Context context) {
+        LinearLayout linearLayout = new LinearLayout(context);
+        linearLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, MENU_BUTTON_SIZE));
+        linearLayout.setBackground(ImageUtil.base64ToDrawable(getResources(), Drawables.MENU_EXPANDED_BG));
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+        mMenuButton = createImageView(context, Drawables.MENU_SHRINKED);
+        linearLayout.addView(mMenuButton);
+
+        mMenuPlaceholder = new View(context);
+        mMenuPlaceholder.setLayoutParams(new LayoutParams(ScreenUtil.dp2px(10), 0));
+        linearLayout.addView(mMenuPlaceholder);
+
+        mMenuRefreshButton = createImageView(context, Drawables.MENU_REFRESH);
         mMenuRefreshButton.setOnClickListener(this::onRefreshClick);
-        mMenuCloseButton = findViewById(R.id.menu_close_button);
+        linearLayout.addView(mMenuRefreshButton);
+
+        mMenuCloseButton = createImageView(context, Drawables.MENU_CLOSE);
         mMenuCloseButton.setOnClickListener(this::onCloseClick);
+        linearLayout.addView(mMenuCloseButton);
+
+        return linearLayout;
+    }
+
+    private AppCompatImageView createImageView(Context context, String base64) {
+        AppCompatImageView imageView = new AppCompatImageView(context);
+        imageView.setImageBitmap(ImageUtil.base64ToBitmap(base64));
+        imageView.setLayoutParams(new LinearLayout.LayoutParams(MENU_BUTTON_SIZE, MENU_BUTTON_SIZE));
+        return imageView;
     }
 
     public void setMenuListener(OnMenuClickListener mListener) {
@@ -103,7 +128,7 @@ public class FunctionMenu extends RelativeLayout implements View.OnTouchListener
             case Constant.STATE_DRAGGING:
                 setScaleX(1);
                 mMenuLayout.setBackgroundResource(0);
-                mMenuButton.setImageResource(R.drawable.menu_shrinked);
+                mMenuButton.setImageBitmap(ImageUtil.base64ToBitmap(Drawables.MENU_SHRINKED));
                 mMenuPlaceholder.setVisibility(GONE);
                 mMenuRefreshButton.setVisibility(GONE);
                 mMenuCloseButton.setVisibility(GONE);
@@ -111,8 +136,8 @@ public class FunctionMenu extends RelativeLayout implements View.OnTouchListener
                 break;
             case Constant.STATE_EXPANDED:
                 setScaleX(Constant.DOCK_LEFT.equals(mMenuDockType) ? 1 : -1);
-                mMenuLayout.setBackgroundResource(R.drawable.menu_expanded_bg);
-                mMenuButton.setImageResource(R.drawable.menu_expanded);
+                mMenuLayout.setBackground(ImageUtil.base64ToDrawable(getResources(),Drawables.MENU_EXPANDED_BG));
+                mMenuButton.setImageBitmap(ImageUtil.base64ToBitmap(Drawables.MENU_EXPANDED));
                 mMenuPlaceholder.setVisibility(INVISIBLE);
                 mMenuRefreshButton.setVisibility(VISIBLE);
                 mMenuCloseButton.setVisibility(VISIBLE);

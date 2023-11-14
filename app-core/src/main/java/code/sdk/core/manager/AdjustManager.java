@@ -24,6 +24,7 @@ import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.PackageUtil;
 import code.sdk.core.util.PreferenceUtil;
+import code.sdk.core.util.TestUtil;
 import code.util.LogUtil;
 
 public class AdjustManager {
@@ -35,36 +36,39 @@ public class AdjustManager {
             adjustAppID = ConfigPreference.readAdjustAppId();
             PreferenceUtil.saveAdjustAppID(adjustAppID);
         }
-        LogUtil.d(TAG, "init Adjust with appId: " + adjustAppID);
-        initConfig(application, adjustAppID);
+        initAdjustSdk(application, adjustAppID);
         application.registerActivityLifecycleCallbacks(new AdjustLifecycleCallbacks());
-        configParams();
+        initDefaultParams();
+        initTDParams();
+        trackEventStart(null);
     }
 
-    /**
-     * config the params
-     */
-    public static void configParams() {
+    public static void initTDParams() {
+        Adjust.addSessionCallbackParameter("ta_distinct_id", ThinkingDataManager.getTDDistinctId());
+        Adjust.addSessionCallbackParameter("ta_account_id", ThinkingDataManager.getAccountId());
+    }
+
+
+    public static void initDefaultParams() {
         String deviceID = DeviceUtil.getDeviceID();
         Adjust.addSessionCallbackParameter("aid", deviceID);
         Adjust.addSessionCallbackParameter("app_chn", PackageUtil.getChannel());
         Adjust.addSessionCallbackParameter("app_brd", PackageUtil.getBrand());
-        Adjust.addSessionCallbackParameter("ta_distinct_id", ThinkingDataManager.getTDDistinctId());
-        Adjust.addSessionCallbackParameter("ta_account_id", ThinkingDataManager.getAccountId());
-
-        trackEventStart(null);
     }
 
-    public static void initConfig(Context context, String appToken) {
-        if (TextUtils.isEmpty(appToken)) {
-            LogUtil.w(TAG, "initConfig appToken empty");
+    public static void initAdjustSdk(Context context, String appId) {
+        if (TextUtils.isEmpty(appId)) {
+            LogUtil.w(TAG, "[Adjust] init aborted! appId empty");
             //ObfuscationStub0.inject();
             return;
         }
         String environment = BuildConfig.DEBUG ? AdjustConfig.ENVIRONMENT_SANDBOX : AdjustConfig.ENVIRONMENT_PRODUCTION;
-        LogUtil.d(TAG, "initConfig appToken: %s, environment: %s", appToken, environment);
+        LogLevel logLevel = TestUtil.isLoggable() ? LogLevel.VERBOSE : LogLevel.INFO;
+        LogUtil.d(TAG, "[Adjust] init with config [appId: %s, environment: %s, logLevel: %s]",
+                appId, environment, logLevel.name());
 
-        AdjustConfig config = new AdjustConfig(context, appToken, environment);
+        AdjustConfig config = new AdjustConfig(context, appId, environment);
+        config.setLogLevel(logLevel);
         config.setOnEventTrackingSucceededListener(new OnEventTrackingSucceededListener() {
             @Override
             public void onFinishedEventTrackingSucceeded(AdjustEventSuccess adjustEventSuccess) {
@@ -81,7 +85,6 @@ public class AdjustManager {
             public void onAttributionChanged(AdjustAttribution adjustAttribution) {
             }
         });
-        config.setLogLevel(BuildConfig.DEBUG ? LogLevel.VERBOSE : LogLevel.INFO);
         config.setSendInBackground(true);
 
         //ObfuscationStub1.inject();
@@ -104,7 +107,8 @@ public class AdjustManager {
             }
         }
 
-        LogUtil.d(TAG, "trackEvent = " + eventToken);
+        LogUtil.d(TAG, "[Adjust] trackEvent: %s, params: %s", eventToken,
+                s2sParams == null ? "" : s2sParams.toString());
         Adjust.trackEvent(adjustEvent);
     }
 

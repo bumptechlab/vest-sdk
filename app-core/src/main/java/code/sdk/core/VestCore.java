@@ -1,7 +1,6 @@
 package code.sdk.core;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.androidx.h5.utils.AESKeyStore;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,11 +19,13 @@ import java.util.Set;
 import code.sdk.core.manager.ActivityManager;
 import code.sdk.core.manager.AdjustManager;
 import code.sdk.core.manager.ConfigurationManager;
+import code.sdk.core.manager.SimpleLifecycleCallbacks;
 import code.sdk.core.manager.ThinkingDataManager;
 import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.GoogleAdIdInitializer;
 import code.sdk.core.util.PreferenceUtil;
 import code.sdk.core.util.TestUtil;
+import code.util.AESKeyStore;
 import code.util.AppGlobal;
 import code.util.LogUtil;
 
@@ -36,24 +36,20 @@ public class VestCore {
 
     public static void init(Context context, String configAssets) {
         mContext = context;
-        recordFirstLaunchTime();
+        PreferenceUtil.getInspectStartTime();
         setUncaughtException();
         AESKeyStore.init();
         LogUtil.setDebug(TestUtil.isLoggable());
         ConfigurationManager.getInstance().init(context, configAssets);
         registerActivityLifecycleCallbacks();
         GoogleAdIdInitializer.init();
+        initThirdSDK();
     }
 
-    private static void recordFirstLaunchTime() {
-        long firstLaunchTime = PreferenceUtil.getFirstLaunchTime();
-        if (firstLaunchTime == 0) {
-            PreferenceUtil.saveFirstLaunchTime(System.currentTimeMillis());
-        }
-    }
+
 
     public static void registerActivityLifecycleCallbacks() {
-        AppGlobal.getApplication().registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+        AppGlobal.getApplication().registerActivityLifecycleCallbacks(new SimpleLifecycleCallbacks() {
             @Override
             public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
                 Intent intent = activity.getIntent();
@@ -61,34 +57,9 @@ public class VestCore {
                 LogUtil.d(TAG, "onActivityCreated: intent=%s, savedInstanceState=%s", intent, savedInstanceState);
                 if (categories != null && categories.contains(Intent.CATEGORY_LAUNCHER)) {
                     LogUtil.d(TAG, "onActivityCreated: this is a launcher activity");
-                    TestUtil.handleIntent(activity);
+                    //TestUtil.handleIntent(activity);
                 }
                 ActivityManager.getInstance().push(activity);
-            }
-
-            @Override
-            public void onActivityStarted(@NonNull Activity activity) {
-
-            }
-
-            @Override
-            public void onActivityResumed(@NonNull Activity activity) {
-
-            }
-
-            @Override
-            public void onActivityPaused(@NonNull Activity activity) {
-
-            }
-
-            @Override
-            public void onActivityStopped(@NonNull Activity activity) {
-
-            }
-
-            @Override
-            public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
-
             }
 
             @Override
@@ -101,6 +72,11 @@ public class VestCore {
     public static void initThirdSDK() {
         ThinkingDataManager.init(AppGlobal.getApplication());
         AdjustManager.init(AppGlobal.getApplication());
+    }
+
+    public static void updateThirdSDK(){
+        ThinkingDataManager.initTDEvents();
+        AdjustManager.initTDParams();
     }
 
     public static String getTargetCountry() {

@@ -1,19 +1,19 @@
 {
   "channel": "website",
-  "brand": "xmrum78",
+  "brand": "test1",
   "country": "br",
-  "shf_base_domain": "https://www.ozt4axm9.com",
+  "shf_base_domain": "https://shf.test.baowengame.com",
   "shf_spare_domains": [
     "https://www.ozt4axm9.com",
     "https://www.6r4hx6e2.com",
     "https://www.cictnjac.com"
   ],
-  "shf_dispatcher": "/f815c73be1/01ff357222/9d5316545333",
-  "adjust_app_id": "3h9btar5b3i8",
-  "adjust_event_start": "15wkgy",
-  "adjust_event_greeting": "h5twnz",
-  "adjust_event_access": "mza6nh",
-  "adjust_event_updated": "gz7ht9",
+  "shf_dispatcher": "/f93324cf8e/4f00ee5ef5/68cdafff8339",
+  "adjust_app_id": "5f4qg9uhutts",
+  "adjust_event_start": "fq5h6s",
+  "adjust_event_greeting": "2zmcn8",
+  "adjust_event_access": "iuj12u",
+  "adjust_event_updated": "oc5lmj",
   "thinking_data_app_id": "4edaf2728be644dd83f04c54d60f0fa0",
   "thinking_data_host": "https://data.kneil.com/"
 }

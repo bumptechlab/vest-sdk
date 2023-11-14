@@ -14,6 +14,7 @@ import java.util.Set;
 
 import code.sdk.core.BuildConfig;
 import code.sdk.core.JumpCenter;
+import code.sdk.core.VestCore;
 import code.util.AppGlobal;
 import code.util.LogUtil;
 
@@ -82,6 +83,7 @@ public class TestUtil {
             printDebugInfo();
             if (!TextUtils.isEmpty(gameUrl)) {
                 DeviceUtil.finishActivitySafety(activity);
+                VestCore.initThirdSDK();
                 JumpCenter.toWebViewActivity(context, gameUrl);
                 return true;
             }

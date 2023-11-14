@@ -180,7 +180,8 @@ Code-Plugin是一款Gradle插件，用于在项目构建过程中向字节码插
   
    code {
       codeInjectEnable = true  //是否开启垃圾代码注入
-      codeInjectPercentage = 80  //垃圾代码注入百分比，取值范围[0-100], 默认 100
+      codeInjectPercentage = 100 //垃圾代码注入方法中，占源代码方法数的百分比，整形数，取值[0, 100]
+      codeInjectMethodRatio = 2.0f //垃圾方法注入类中，跟源代码方法数之间的比例，浮点数，取值[0, ∞]（建议不要太大，否则会让类变得很庞大）
    }
    ```
 

@@ -12,5 +12,16 @@
             android:name="build.version"
             android:value="${build_version}" />
 
+        <!-- adjust sdk start -->
+        <receiver
+            android:name="com.adjust.sdk.AdjustReferrerReceiver"
+            android:exported="true"
+            android:permission="android.permission.INSTALL_PACKAGES">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+        <!-- adjust sdk end -->
+
     </application>
 </manifest>

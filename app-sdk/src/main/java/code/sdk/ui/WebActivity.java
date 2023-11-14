@@ -12,14 +12,18 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.ClientCertRequest;
@@ -31,22 +35,30 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 
 import code.sdk.R;
 import code.sdk.SdkInit;
 import code.sdk.base.BaseWebActivity;
 import code.sdk.bridge.JsBridge;
 import code.sdk.command.AssetLoaderManager;
+import code.sdk.common.ScreenUtil;
 import code.sdk.core.Constant;
 import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.NetworkUtil;
 import code.sdk.core.util.PreferenceUtil;
+import code.sdk.drawable.Drawables;
 import code.sdk.util.AndroidBug5497Workaround;
+import code.sdk.util.ImageUtil;
 import code.sdk.util.PromotionImageSynthesizer;
 import code.util.LogUtil;
 
@@ -226,16 +238,11 @@ public class WebActivity extends BaseWebActivity {
 
     @Override
     protected void initView() {
-        setContentView(R.layout.activity_webview);
-        mErrorLayout = findViewById(R.id.layout_error);
-        mRefreshButton = findViewById(R.id.error_refresh_button);
+        setContentView(createView());
         mRefreshButton.setOnClickListener(view -> {
             mLoadingLayout.setVisibility(View.VISIBLE);
             mWebView.reload();
         });
-        mLoadingLayout = findViewById(R.id.layout_loading);
-
-        mWebView = findViewById(R.id.web_view);
 //        mWebView.initWebView(mWebViewClient, mWebChromeClient);
         setWebView();
 
@@ -244,6 +251,65 @@ public class WebActivity extends BaseWebActivity {
         mWebPresenter = new WebPresenter(WebActivity.this);
         mWebPresenter.init(isGame, mUrl);
         mWebView.loadUrl(mUrl);
+    }
+
+    private View createView() {
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        relativeLayout.setBackgroundColor(Color.BLACK);
+        relativeLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        relativeLayout.setKeepScreenOn(true);
+        mWebView = new WebView(this);
+        relativeLayout.addView(mWebView, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+
+
+        LinearLayout linearLayout = new LinearLayout(this);
+        mErrorLayout = linearLayout;
+        linearLayout.setGravity(Gravity.CENTER);
+        linearLayout.setBackgroundColor(Color.WHITE);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.setVisibility(View.INVISIBLE);
+
+        TextView textView = new TextView(this);
+        textView.setTextColor(ContextCompat.getColor(this,R.color.loading_error_text));
+        textView.setTextSize(18);
+        textView.setText(R.string.loading_error_tips);
+        textView.setTypeface(null, Typeface.BOLD);
+        linearLayout.addView(textView,new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        TextView refresh = new TextView(this);
+        mRefreshButton = refresh;
+        refresh.setTextColor(ContextCompat.getColor(this,R.color.loading_error_refresh_button));
+        refresh.setTextSize(18);
+        refresh.setText(R.string.refresh);
+        LinearLayout.LayoutParams refreshParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        refreshParams.topMargin = ScreenUtil.dp2px(32);
+        linearLayout.addView(refresh,refreshParams);
+        relativeLayout.addView(linearLayout, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+
+
+        LinearLayout loading = new LinearLayout(this);
+        mLoadingLayout = loading;
+        loading.setBackground(ImageUtil.base64ToDrawable(getResources(),Drawables.LOADING_BG));
+        loading.setGravity(Gravity.CENTER_VERTICAL);
+        ProgressBar progressBar = new ProgressBar(this);
+        progressBar.setIndeterminate(true);
+        LinearLayout.LayoutParams pbParams = new LinearLayout.LayoutParams(ScreenUtil.dp2px(25), ScreenUtil.dp2px(25));
+        pbParams.setMargins(ScreenUtil.dp2px(10),0,ScreenUtil.dp2px(10),0);
+        loading.addView(progressBar, pbParams);
+
+        TextView tvLoading = new TextView(this);
+        tvLoading.setText("loading");
+        tvLoading.setTextColor(Color.WHITE);
+        LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+        tvParams.setMarginEnd(ScreenUtil.dp2px(15));
+        loading.addView(tvLoading, tvParams);
+
+        RelativeLayout.LayoutParams loadingParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,ScreenUtil.dp2px(45));
+        loadingParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+        relativeLayout.addView(loading, loadingParams);
+
+        return relativeLayout;
     }
 
     private void doPageStart() {

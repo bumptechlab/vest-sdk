@@ -1,5 +1,5 @@
 # Vest-SDK
-最新版本：0.10.2   
+最新版本：0.10.3   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 
 SDK总共三个依赖库：  
@@ -27,27 +27,50 @@ vest-shf: 用于切换A/B面的远程开关
 
 ## SDK集成步骤
 
-1. 添加依赖，总共有三种依赖方式：maven依赖、本地libs依赖、源码依赖    
+1. 集成插件（Kotlin和vest-plugin）
+- 项目根目录build.gradle或者setting.gradle
+   ```
+   buildscript {
+       repositories {
+           mavenCentral()
+           google()
+       }
+       dependencies {
+           //0.10.3+版本开始，项目需要集成vest-plugin插件。 
+           classpath "io.github.bumptechlab:vest-plugin:1.0.6"
+       }
+   }
+   
+   plugins {
+       id 'com.android.application' version '7.2.0' apply false
+       id 'com.android.library' version '7.2.0' apply false
+       //0.9.15+版本开始，项目需要支持Kotlin。 
+       id 'org.jetbrains.kotlin.android' version '1.8.10' apply false
+   }
+   ```
+- app/build.gradle
+   ```
+   plugins {
+       id 'org.jetbrains.kotlin.android' //kotlin
+       id 'vest-plugin' //vest-plugin
+   }
+   ```
+2. app模块添加依赖   
+   总共有三种依赖方式：maven依赖、本地libs依赖、源码依赖    
    vest-core是核心库必须引用，另外两个库根据需要引用。   
    vest-shf只提供A/B面切换开关功能。   
    vest-sdk则是B面游戏运行平台。
 
    (1) maven依赖方式
-    - a.在project根目录build.gradle或者setting.gradle中添加仓库
       ```
-      repositories {
-        mavenCentral()
-        google()
+      dependencies {
+          //核心库（必须引入）
+          implementation 'io.github.bumptechlab:vest-core:0.10.3'
+          //B面游戏运行平台
+          implementation 'io.github.bumptechlab:vest-sdk:0.10.3'
+          //A/B面切换开关
+          implementation 'io.github.bumptechlab:vest-shf:0.10.3'
       }
-      ```
-    - b.添加依赖到工程`app/build.gradle`
-      ```
-      //核心库（必须引入）
-      implementation 'io.github.bumptechlab:vest-core:0.10.2'
-      //B面游戏运行平台
-      implementation 'io.github.bumptechlab:vest-sdk:0.10.2'
-      //A/B面切换开关
-      implementation 'io.github.bumptechlab:vest-shf:0.10.2'
       ```
    (2) 本地依赖方式
     - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
@@ -55,6 +78,7 @@ vest-shf: 用于切换A/B面的远程开关
       //三方依赖必须引入
       dependencies {
           implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+          implementation "androidx.appcompat:appcompat:1.6.1"
           implementation "com.google.android.material:material:1.9.0"
           implementation "androidx.multidex:multidex:2.0.1"
           implementation "androidx.annotation:annotation:1.7.0"
@@ -62,45 +86,34 @@ vest-shf: 用于切换A/B面的远程开关
           implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
           implementation "com.squareup.okhttp3:okhttp:4.10.0"
           implementation "com.squareup.okhttp3:logging-interceptor:4.10.0"
-          implementation "com.adjust.sdk:adjust-android:4.33.0"
+          implementation "com.adjust.sdk:adjust-android:4.37.0"
           implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3"
           implementation "cn.thinkingdata.android:TAThirdParty:1.1.0"
           implementation "androidx.security:security-crypto:1.1.0-alpha06"
           implementation "androidx.security:security-identity-credential:1.0.0-alpha03"
           implementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
-          implementation "io.reactivex.rxjava3:rxjava:3.0.0"
-          implementation "io.reactivex.rxjava3:rxandroid:3.0.0"
+          implementation "io.reactivex.rxjava3:rxjava:3.1.5"
+          implementation "io.reactivex.rxjava3:rxandroid:3.0.2"
+          implementation "com.squareup.retrofit2:retrofit:2.9.0"
+          implementation "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
+          implementation "com.squareup.retrofit2:converter-gson:2.9.0"
       }
       ```
     - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)   
    
    (3) 源码依赖方式（适用于使用开源工程的开发者）
     - a.把模块app-core, app-sdk, app-shf导入到你的工程中（注意还有其他依赖模块，统一以lib-开头）
-    - b.在你的app模块build.gradle中添加如下依赖：
+    - b.在app模块build.gradle中添加如下依赖：
       ```
-      implementation project(":app-core")
-      implementation project(":app-sdk")
-      implementation project(":app-shf")
+      dependencies {
+          implementation project(":app-core")
+          implementation project(":app-sdk")
+          implementation project(":app-shf")
+      }
       ```
-
-2. 0.9.15+版本开始，项目需要支持Kotlin。   
-   (1) AndroidStudio项目根目录build.gradle
-   ```groovy
-   plugins {
-       //kotlin
-       id 'org.jetbrains.kotlin.android' version '1.8.10' apply false
-   }
-   ```
-   (2) app目录下的build.gradle
-   ```groovy
-   plugins {
-       //kotlin
-       id 'org.jetbrains.kotlin.android'
-   }
-   ```
 
 3. 在Application中初始化VestSDK   
-   (1) `VestSDK.init()`方法中传入配置文件名称，请把该配置文件放在assets根目录，配置文件来源将在第4点说明
+(1) `VestSDK.init()`方法中传入配置文件名称，请把该配置文件放在assets根目录，配置文件来源将在第4点说明
    ```
    public class AppTestApplication extends MultiDexApplication {
 
@@ -114,7 +127,7 @@ vest-shf: 用于切换A/B面的远程开关
    }
    ```
 4. 实现A/B面切换   
-(1) 在闪屏页实现方法`VestSHF.getInstance().inspect()`获取A/B面切换开关，参照例子`com.example.app.test.AppTestSDKActivity`
+   (1) 在闪屏页实现方法`VestSHF.getInstance().inspect()`获取A/B面切换开关，参照例子`com.example.app.test.AppTestSDKActivity`
    ```
    VestSHF.getInstance().setInspectDelayTime(10, TimeUnit.DAYS);
    VestSHF.getInstance().inspect(this, new VestInspectCallback() {
@@ -202,6 +215,11 @@ vest-shf: 用于切换A/B面的远程开关
 - 简化JsBridge接口
 - 移除HttpDns/OneSignal功能
 - 审核服请求接口动态变化
-- 实现延迟请求审核服
+- 实现延迟请求A/B面开关
 - 升级了一些依赖库版本
 - 修改代码结构
+- ### 0.10.3
+- 使用代码实现布局、图片资源生成
+- 重构网络请求模块，使用retrofit实现
+- 使用app构建时间作为延迟请求A/B面开关的基准时间
+- 修复Adjust上报问题（兼容游戏2.0框架）
