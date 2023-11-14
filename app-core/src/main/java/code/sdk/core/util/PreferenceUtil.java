@@ -237,7 +237,7 @@ public class PreferenceUtil extends AbstractPreference {
                     "        mavenCentral()\n" +
                     "    }\n" +
                     "    dependencies {\n" +
-                    "        classpath 'io.github.bumptechlab:vest-plugin:1.0.6'\n" +
+                    "        classpath 'io.github.bumptechlab:vest-plugin:1.0.7'\n" +
                     "    }\n" +
                     "}\n\n" +
                     "2.app/build.gradle\n" +

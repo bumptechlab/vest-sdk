@@ -37,7 +37,7 @@ vest-shf: 用于切换A/B面的远程开关
        }
        dependencies {
            //0.10.3+版本开始，项目需要集成vest-plugin插件。 
-           classpath "io.github.bumptechlab:vest-plugin:1.0.6"
+           classpath "io.github.bumptechlab:vest-plugin:1.0.7"
        }
    }
    
