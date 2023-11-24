@@ -79,7 +79,7 @@ vest-shf: 用于切换A/B面的远程开关
       dependencies {
           implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
           implementation "androidx.appcompat:appcompat:1.6.1"
-          implementation "com.google.android.material:material:1.9.0"
+          implementation "com.google.android.material:material:1.6.1"
           implementation "androidx.multidex:multidex:2.0.1"
           implementation "androidx.annotation:annotation:1.7.0"
           implementation "com.android.installreferrer:installreferrer:2.2"
@@ -129,7 +129,7 @@ vest-shf: 用于切换A/B面的远程开关
 4. 实现A/B面切换   
    (1) 在闪屏页实现方法`VestSHF.getInstance().inspect()`获取A/B面切换开关，参照例子`com.example.app.test.AppTestSDKActivity`
    ```
-   VestSHF.getInstance().setInspectDelayTime(10, TimeUnit.DAYS);
+   VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS);
    VestSHF.getInstance().inspect(this, new VestInspectCallback() {
       //这里跳转到A面，A面请自行实现
       @Override
@@ -155,6 +155,55 @@ vest-shf: 用于切换A/B面的远程开关
 
 5. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets根目录。为避免出包之间文件关联，请自行更改`config`文件名。
 6. 至此Vest-SDK集成完毕。
+
+## 使用快照
+上面集成的是release版本，稳定可靠，但是代码特征一成不变。为了及时更改SDK代码特征，我们会每天更新一个快照版本到快照仓库。
+快照版本是在每个稳定版本的基础上增加混淆代码，不影响正常功能使用。使用方法如下：
+1. 添加快照仓库
+- setting.gradle（Gradle Plugin版本7.x及以上）
+```
+dependencyResolutionManagement {
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+     google()
+     mavenCentral()
+     #添加快照仓库
+     maven { url("https://s01.oss.sonatype.org/content/repositories/snapshots/") }
+  }
+}
+```
+- 或者build.gradle（Gradle Plugin版本7.x以下）
+```
+allprojects {
+    repositories {
+      google()
+      mavenCentral()
+      #添加快照仓库
+      maven { url("https://s01.oss.sonatype.org/content/repositories/snapshots/") }
+    }
+}
+```
+2. 在sdk的依赖版本号后面加上-SNAPSHOT，则可以使用release版本的快照版本，从0.10.3开始才有快照版本。
+```
+ dependencies {
+    implementation 'io.github.bumptechlab:vest-core:0.10.3-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.3-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.3-SNAPSHOT'
+ }
+```
+3. 在build.gradle android节点下添加以下代码，可以帮助及时更新sdk版本依赖缓存。
+```
+    android{
+      ...
+      //gradle依赖默认缓存24小时，在此期间内相同版本只会使用本地资源
+      configurations.all {
+        //修改缓存周期
+        resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds' // 动态版本
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds' // 变化模块
+      }
+      ...
+    }
+```
 
 ## 测试说明
 - 游戏切换开关由厂商后台配置，测试时请联系厂商修改配置。
