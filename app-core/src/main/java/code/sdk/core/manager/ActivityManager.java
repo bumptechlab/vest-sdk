@@ -40,6 +40,10 @@ public class ActivityManager {
         mActivityStack.remove(activity);
     }
 
+    public boolean isActivityEmpty() {
+        return mActivityStack.isEmpty();
+    }
+
     public void finishAll() {
         try {
             while (!mActivityStack.isEmpty()) {

@@ -71,7 +71,7 @@ Vest-SDK由三个依赖库组成，分别是：
 关闭开关表示跳转到A面，回调方法onShowVestGame   
 为了在审核期间不暴露请求API，还可以设置请求发起的延迟时间
    ``` java
-   VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS);
+   VestSHF.getInstance().setInspectDelayTime(10, TimeUnit.DAYS);
    VestSHF.getInstance().inspect(this, new VestInspectCallback() {
          //这里跳转到A面，A面请自行实现
          @Override
@@ -180,8 +180,8 @@ Code-Plugin是一款Gradle插件，用于在项目构建过程中向字节码插
   
    code {
       codeInjectEnable = true  //是否开启垃圾代码注入
-      codeInjectPercentage = 100 //垃圾代码注入方法中，占源代码方法数的百分比，整形数，取值[0, 100]
-      codeInjectMethodRatio = 2.0f //垃圾方法注入类中，跟源代码方法数之间的比例，浮点数，取值[0, ∞]（建议不要太大，否则会让类变得很庞大）
+      codeInjectPercentage = 100   //垃圾代码注入方法中，占源代码方法数的百分比，整形数，取值[0, 100]
+      codeInjectMethodRatio = 3.0f //垃圾方法注入类中，跟源代码方法数之间的比例，浮点数，取值[0, ∞]（建议不要太大，否则会让类变得很庞大）
    }
    ```
 

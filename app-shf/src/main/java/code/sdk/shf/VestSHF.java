@@ -57,20 +57,27 @@ public class VestSHF {
 
     public void inspect(Context context, VestInspectCallback vestInspectCallback) {
         mVestInspectCallback = vestInspectCallback;
-        boolean isHandled = TestUtil.handleIntent(context);
+        boolean isTestIntentHandled = VestCore.isTestIntentHandled();
         TestUtil.printDebugInfo();
         LogUtil.setDebug(TestUtil.isLoggable());
-        if (isHandled) {
-            LogUtil.d(TAG, "[SHF] Open WebView using intent, SHF request aborted!");
+        if (isTestIntentHandled) {
+            LogUtil.d(TAG, "[SHF] open WebView using intent, SHF request aborted!");
             return;
         }
-        if (!canInspect()) {
-            if (vestInspectCallback != null) {
-                vestInspectCallback.onShowVestGame(VestGameReason.REASON_NOT_THE_TIME);
-            }
-            return;
-        }
-        startInspect();
+        Observable.create((ObservableOnSubscribe<Boolean>) emitter -> {
+                    emitter.onNext(canInspect());
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(canInspect -> {
+                    if (!canInspect) {
+                        if (vestInspectCallback != null) {
+                            vestInspectCallback.onShowVestGame(VestGameReason.REASON_NOT_THE_TIME);
+                        }
+                        return;
+                    }
+                    startInspect();
+                });
     }
 
     public void setInspectDelayTime(long time, TimeUnit timeUnit) {
@@ -80,6 +87,7 @@ public class VestSHF {
 
     private boolean canInspect() {
         boolean canInspect = true;
+        //读取assets目录下所有文件，找出特殊标记的文件读取数据时间
         long inspectStartTime = PreferenceUtil.getInspectStartTime();
         long inspectDelay = PreferenceUtil.getInspectDelay();
         long inspectTimeMills = inspectStartTime + inspectDelay;
@@ -119,7 +127,7 @@ public class VestSHF {
                         if (inspected) {
                             return createRemoteConfigObservable();
                         } else {
-                            return Observable.error(new IllegalStateException("inspect return false"));
+                            return Observable.error(new IllegalStateException("[SHF] inspect return false"));
                         }
                     }
                 })

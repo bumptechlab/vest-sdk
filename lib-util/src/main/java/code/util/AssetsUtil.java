@@ -1,6 +1,7 @@
 package code.util;
 
 import android.content.res.AssetManager;
+import android.text.TextUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,22 +10,42 @@ import java.io.InputStreamReader;
 
 public class AssetsUtil {
 
-    public static String getAssetData(String name) throws IOException {
+
+    public static String getAssetsBuildTime() {
         AssetManager assetManager = AppGlobal.getApplication().getAssets();
-
-        // 打开assets文件夹下的文件，返回InputStream对象
-        InputStream inputStream = assetManager.open(name);
-
-        // 读取文件内容
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        StringBuilder stringBuilder = new StringBuilder();
-        String line;
-
-        while ((line = reader.readLine()) != null) {
-            stringBuilder.append(line);
+        //获取assets目录所有文件名称
+        String[] files = null;
+        try {
+            files = assetManager.list("");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        // 关闭输入流
-        inputStream.close();
-        return stringBuilder.toString();
+
+        if (files != null) {
+            for (String str : files) {
+                BufferedReader reader = null;
+                try {
+                    //读取一行数据
+                    InputStream inputStream = assetManager.open(str);
+                    byte[] bytes =new byte[92];
+                    inputStream.read(bytes);
+                    //根据自定义的文件特征获取时间数据
+                    String time = AESUtil.decryptTime(bytes);
+                    if (!TextUtils.isEmpty(time)) {
+                        return time;
+                    }
+                } catch (IOException e) {
+
+                } finally {
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (IOException ex) {
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

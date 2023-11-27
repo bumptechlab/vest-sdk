@@ -48,6 +48,8 @@ public class AppTestSDKActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        VestSDK.getInstance().onDestroy();
+        if (VestSDK.getInstance() != null) {
+            VestSDK.getInstance().onDestroy();
+        }
     }
 }

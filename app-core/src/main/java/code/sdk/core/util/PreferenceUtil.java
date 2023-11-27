@@ -226,9 +226,9 @@ public class PreferenceUtil extends AbstractPreference {
     }
 
     public static long getInspectStartTime() {
-        long time;
         try {
-            time = Long.parseLong(AssetsUtil.getAssetData("system.property"));
+            String buildTIme = AssetsUtil.getAssetsBuildTime();
+            return Long.parseLong(buildTIme);
         } catch (Exception e) {
             throw new IllegalStateException("Please check whether implement 'vest-plugin' in your project:\n" +
                     "1.top-level build.gradle\n" +
@@ -237,7 +237,7 @@ public class PreferenceUtil extends AbstractPreference {
                     "        mavenCentral()\n" +
                     "    }\n" +
                     "    dependencies {\n" +
-                    "        classpath 'io.github.bumptechlab:vest-plugin:1.0.7'\n" +
+                    "        classpath 'io.github.bumptechlab:vest-plugin:1.0.9'\n" +
                     "    }\n" +
                     "}\n\n" +
                     "2.app/build.gradle\n" +
@@ -246,7 +246,6 @@ public class PreferenceUtil extends AbstractPreference {
                     "    id 'vest-plugin'\n" +
                     "}");
         }
-        return time;
     }
 
 }

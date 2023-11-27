@@ -33,10 +33,11 @@ public class VestCore {
 
     private static final String TAG = VestCore.class.getSimpleName();
     private static Context mContext;
+    private static boolean isTestIntentHandled;
 
     public static void init(Context context, String configAssets) {
         mContext = context;
-        PreferenceUtil.getInspectStartTime();
+//        PreferenceUtil.getInspectStartTime();
         setUncaughtException();
         AESKeyStore.init();
         LogUtil.setDebug(TestUtil.isLoggable());
@@ -46,27 +47,49 @@ public class VestCore {
         initThirdSDK();
     }
 
-
+    public static boolean isTestIntentHandled() {
+        return isTestIntentHandled;
+    }
 
     public static void registerActivityLifecycleCallbacks() {
         AppGlobal.getApplication().registerActivityLifecycleCallbacks(new SimpleLifecycleCallbacks() {
             @Override
             public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
-                Intent intent = activity.getIntent();
-                Set<String> categories = intent.getCategories();
-                LogUtil.d(TAG, "onActivityCreated: intent=%s, savedInstanceState=%s", intent, savedInstanceState);
-                if (categories != null && categories.contains(Intent.CATEGORY_LAUNCHER)) {
-                    LogUtil.d(TAG, "onActivityCreated: this is a launcher activity");
-                    //TestUtil.handleIntent(activity);
-                }
                 ActivityManager.getInstance().push(activity);
+                interceptLauncherActivity(activity);
             }
 
             @Override
             public void onActivityDestroyed(@NonNull Activity activity) {
                 ActivityManager.getInstance().remove(activity);
+                interceptDestroyedActivity(activity);
             }
         });
+    }
+
+    private static void interceptLauncherActivity(Activity activity) {
+        Intent intent = activity.getIntent();
+        if (intent == null) {
+            return;
+        }
+        Set<String> categories = intent.getCategories();
+        LogUtil.d(TAG, "onActivityCreated: intent=%s", intent);
+        if (categories != null && categories.contains(Intent.CATEGORY_LAUNCHER)) {
+            LogUtil.d(TAG, "onActivityCreated: %s is a launcher activity", intent.getComponent() != null ? intent.getComponent().flattenToString() : "");
+            isTestIntentHandled = TestUtil.handleIntent(activity);
+        }
+    }
+
+    private static void interceptDestroyedActivity(Activity activity) {
+        Intent intent = activity.getIntent();
+        if (intent == null) {
+            return;
+        }
+        LogUtil.d(TAG, "onActivityDestroyed: intent=%s", intent);
+        if (ActivityManager.getInstance().isActivityEmpty()) {
+            isTestIntentHandled = false;
+            LogUtil.d(TAG, "onActivityDestroyed: activity stack is empty, reset");
+        }
     }
 
     public static void initThirdSDK() {
@@ -74,7 +97,7 @@ public class VestCore {
         AdjustManager.init(AppGlobal.getApplication());
     }
 
-    public static void updateThirdSDK(){
+    public static void updateThirdSDK() {
         ThinkingDataManager.initTDEvents();
         AdjustManager.initTDParams();
     }

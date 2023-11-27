@@ -12,7 +12,7 @@ buildscript {
         // Kotlin Javadoc，非必须
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.6.20"
         classpath "io.github.bumptechlab:code-plugin:1.0.4"
-        classpath "io.github.bumptechlab:vest-plugin:1.0.7"
+        classpath "io.github.bumptechlab:vest-plugin:1.0.9"
     }
 }
 

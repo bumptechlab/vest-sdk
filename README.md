@@ -1,5 +1,5 @@
 # Vest-SDK
-最新版本：0.10.3   
+最新版本：0.10.5   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 
 SDK总共三个依赖库：  
@@ -37,7 +37,7 @@ vest-shf: 用于切换A/B面的远程开关
        }
        dependencies {
            //0.10.3+版本开始，项目需要集成vest-plugin插件。 
-           classpath "io.github.bumptechlab:vest-plugin:1.0.7"
+           classpath "io.github.bumptechlab:vest-plugin:1.0.9"
        }
    }
    
@@ -65,11 +65,11 @@ vest-shf: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:0.10.3'
+          implementation 'io.github.bumptechlab:vest-core:0.10.5'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:0.10.3'
+          implementation 'io.github.bumptechlab:vest-sdk:0.10.5'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:0.10.3'
+          implementation 'io.github.bumptechlab:vest-shf:0.10.5'
       }
       ```
    (2) 本地依赖方式
@@ -186,9 +186,9 @@ allprojects {
 2. 在sdk的依赖版本号后面加上-SNAPSHOT，则可以使用release版本的快照版本，从0.10.3开始才有快照版本。
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:0.10.3-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.3-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.3-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:0.10.5-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.5-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.5-SNAPSHOT'
  }
 ```
 3. 在build.gradle android节点下添加以下代码，可以帮助及时更新sdk版本依赖缓存。
@@ -272,3 +272,5 @@ allprojects {
 - 重构网络请求模块，使用retrofit实现
 - 使用app构建时间作为延迟请求A/B面开关的基准时间
 - 修复Adjust上报问题（兼容游戏2.0框架）
+### 0.10.5
+- 隐藏静默起始时间

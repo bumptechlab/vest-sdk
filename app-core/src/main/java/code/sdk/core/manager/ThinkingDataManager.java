@@ -24,6 +24,10 @@ public class ThinkingDataManager {
     public static void init(Context context) {
         String appId = ConfigPreference.readThinkingDataAppId();
         String serverUrl = ConfigPreference.readThinkingDataHost();
+        if (TextUtils.isEmpty(appId) || TextUtils.isEmpty(serverUrl)){
+            LogUtil.w(TAG, "[ThinkingData] init aborted! appId serverUrl empty");
+            return;
+        }
         LogUtil.w(TAG, "[ThinkingData] init, appId = %s, serverUrl = %s", appId, serverUrl);
         //时间校准
         ThinkingAnalyticsSDK.calibrateTimeWithNtp("time.apple.com");
@@ -52,6 +56,10 @@ public class ThinkingDataManager {
     }
 
     private static void trackInitTrackEvent(List<ThinkingAnalyticsSDK.AutoTrackEventType> eventTypeList) {
+        if (mTDSdk == null) {
+            LogUtil.w(TAG, "[ThinkingData] not inited!");
+            return;
+        }
         JSONObject extraProperties = new JSONObject();
         JSONUtil.putJsonValue(extraProperties, "region", getTargetCountry());
         JSONUtil.putJsonValue(extraProperties, "build_version", PackageUtil.getBuildVersion());

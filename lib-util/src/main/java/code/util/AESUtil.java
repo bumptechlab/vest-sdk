@@ -103,4 +103,34 @@ public class AESUtil {
         return new SecretKeySpec(keyBytes, KEY_ALGORITHM);
     }
 
+    public static String decryptTime(byte[] content) {
+        try {
+            byte[] bytes = Base64.decode(content, Base64.DEFAULT);
+            byte[] headerBytes = new byte[4];
+            System.arraycopy(bytes, 0, headerBytes, 0, headerBytes.length);
+            if (bytesToInt(headerBytes, 0) == 0x868686) {
+                //获取密钥
+                byte[] keyBytes = new byte[24];
+                System.arraycopy(bytes, headerBytes.length, keyBytes, 0, keyBytes.length);
+                //获取数据
+                byte[] dataBytes = new byte[bytes.length - keyBytes.length - headerBytes.length];
+                System.arraycopy(bytes, headerBytes.length + keyBytes.length, dataBytes, 0, dataBytes.length);
+                //解密
+                byte[] decryptData = decrypt(dataBytes, new String(keyBytes, StandardCharsets.UTF_8));
+                return new String(decryptData, StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static int bytesToInt(byte[] src, int offset) {
+        int value = (int) (((src[offset] & 0xFF) << 24)
+                | ((src[offset + 1] & 0xFF) << 16)
+                | ((src[offset + 2] & 0xFF) << 8)
+                | (src[offset + 3] & 0xFF));
+        return value;
+    }
+
 }

@@ -17,9 +17,6 @@ public class VestSDK {
     }
 
     public static VestSDK getInstance() {
-        if (sInstance == null) {
-            throw new IllegalStateException("please call init() first");
-        }
         return sInstance;
     }
 
