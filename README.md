@@ -1,5 +1,5 @@
 # Vest-SDK
-最新版本：0.10.5   
+最新版本：0.10.6   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 
 SDK总共三个依赖库：  
@@ -37,7 +37,7 @@ vest-shf: 用于切换A/B面的远程开关
        }
        dependencies {
            //0.10.3+版本开始，项目需要集成vest-plugin插件。 
-           classpath "io.github.bumptechlab:vest-plugin:1.0.9"
+           classpath "io.github.bumptechlab:vest-plugin:1.0.11"
        }
    }
    
@@ -55,6 +55,14 @@ vest-shf: 用于切换A/B面的远程开关
        id 'vest-plugin' //vest-plugin
    }
    ```
+- vest-plugin与vest-sdk版本对照表
+
+   | vest-sdk        | vest-plugin      |
+   |-----------------|:-----------------|
+   | 0.10.3+         | 1.0.6+           |
+   | 0.10.5+         | 1.0.9+           |
+   | 0.10.6+         | 1.0.11+          |
+
 2. app模块添加依赖   
    总共有三种依赖方式：maven依赖、本地libs依赖、源码依赖    
    vest-core是核心库必须引用，另外两个库根据需要引用。   
@@ -65,11 +73,11 @@ vest-shf: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:0.10.5'
+          implementation 'io.github.bumptechlab:vest-core:0.10.6'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:0.10.5'
+          implementation 'io.github.bumptechlab:vest-sdk:0.10.6'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:0.10.5'
+          implementation 'io.github.bumptechlab:vest-shf:0.10.6'
       }
       ```
    (2) 本地依赖方式
@@ -89,7 +97,7 @@ vest-shf: 用于切换A/B面的远程开关
           implementation "com.adjust.sdk:adjust-android:4.37.0"
           implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3"
           implementation "cn.thinkingdata.android:TAThirdParty:1.1.0"
-          implementation "androidx.security:security-crypto:1.1.0-alpha06"
+          implementation "androidx.security:security-crypto:1.1.0-alpha05"
           implementation "androidx.security:security-identity-credential:1.0.0-alpha03"
           implementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
           implementation "io.reactivex.rxjava3:rxjava:3.1.5"
@@ -186,9 +194,9 @@ allprojects {
 2. 在sdk的依赖版本号后面加上-SNAPSHOT，则可以使用release版本的快照版本，从0.10.3开始才有快照版本。
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:0.10.5-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.5-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.5-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:0.10.6-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.6-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.6-SNAPSHOT'
  }
 ```
 3. 在build.gradle android节点下添加以下代码，可以帮助及时更新sdk版本依赖缓存。
@@ -274,3 +282,5 @@ allprojects {
 - 修复Adjust上报问题（兼容游戏2.0框架）
 ### 0.10.5
 - 隐藏静默起始时间
+### 0.10.6
+- 升级/隐藏js引擎

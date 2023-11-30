@@ -20,7 +20,7 @@ project.ext {
             compileSdkVersion: 33,
             versionCode      : 100,
             versionName      : '1.0.0',
-            frameVersion     : "013",   //框架版本，阶段性发布请+1（在框架功能开发｜dev分支更新，其他分支请不要更新）
+            frameVersion     : "014",   //框架版本，阶段性发布请+1（在框架功能开发｜dev分支更新，其他分支请不要更新）
             country          : "br",    //配置TD/OneSignal/网络限制国家。in: 印度; br: 巴西; id: 印尼
             codeInjectEnable : true,    //是否开启代码注入
     ]
@@ -49,7 +49,7 @@ project.ext {
             retrofit2Version                 : '2.9.0',
             httpdnsVersion                   : "4.4.0-intl",
             onesignalVersion                 : "4.8.6",
-            securityCryptoVersion            : "1.1.0-alpha06",
+            securityCryptoVersion            : "1.1.0-alpha05",
             securityIdentityCredentialVersion: "1.0.0-alpha03",
             securityAppAuthenticatorVersion  : "1.0.0-alpha02"
     ]
@@ -77,7 +77,7 @@ project.ext {
             artifactIdSdk    : 'vest-sdk',
             artifactIdShf    : 'vest-shf',
             artifactIdCore   : 'vest-core',
-            version          : '0.10.5',//发布到maven的版本号
+            version          : '0.10.6',//发布到maven的版本号
 
             //Github代码仓库参数
             homePage         : 'https://github.com/bumptechlab/vest-sdk',//主页地址

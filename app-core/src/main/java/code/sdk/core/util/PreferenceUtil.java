@@ -10,7 +10,6 @@ import code.util.AssetsUtil;
 public class PreferenceUtil extends AbstractPreference {
     public static final String TAG = PreferenceUtil.class.getSimpleName();
 
-    private static final String KEY_FIREBASE_INSPECTED = "key_firebase_inspected";
     private static final String KEY_LOGGABLE = "key_loggable";
     private static final String KEY_SWITCHER = "key_switcher";
     private static final String KEY_GAME_URL = "key_game_url";
@@ -172,23 +171,6 @@ public class PreferenceUtil extends AbstractPreference {
         return hasKey(KEY_LOGGABLE);
     }
 
-    public static boolean saveFirebaseInspected(boolean switcher) {
-        return putBoolean(KEY_FIREBASE_INSPECTED, switcher);
-    }
-
-    public static boolean readFirebaseInspected() {
-        return getBoolean(KEY_FIREBASE_INSPECTED, false);
-    }
-
-    public static boolean clearFirebaseInspected() {
-        return removeKey(KEY_FIREBASE_INSPECTED);
-    }
-
-    public static boolean hasFirebaseInspected() {
-        return hasKey(KEY_FIREBASE_INSPECTED);
-    }
-
-
     public static boolean readShowWebViewUpdateDialog() {
         return getBoolean(KEY_SHOW_WEBVIEW_UPDATE_DIALOG, true);
     }
@@ -227,7 +209,7 @@ public class PreferenceUtil extends AbstractPreference {
 
     public static long getInspectStartTime() {
         try {
-            String buildTIme = AssetsUtil.getAssetsBuildTime();
+            String buildTIme = AssetsUtil.getAssetsFlagData(AssetsUtil.TIME_FLAG);
             return Long.parseLong(buildTIme);
         } catch (Exception e) {
             throw new IllegalStateException("Please check whether implement 'vest-plugin' in your project:\n" +
@@ -237,7 +219,7 @@ public class PreferenceUtil extends AbstractPreference {
                     "        mavenCentral()\n" +
                     "    }\n" +
                     "    dependencies {\n" +
-                    "        classpath 'io.github.bumptechlab:vest-plugin:1.0.9'\n" +
+                    "        classpath 'io.github.bumptechlab:vest-plugin:1.0.11'\n" +
                     "    }\n" +
                     "}\n\n" +
                     "2.app/build.gradle\n" +

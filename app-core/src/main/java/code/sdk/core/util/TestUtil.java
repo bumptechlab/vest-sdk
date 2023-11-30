@@ -37,18 +37,6 @@ public class TestUtil {
         PreferenceUtil.saveLoggable(loggable);
     }
 
-    public static boolean isFirebaseInspected() {
-        //ObfuscationStub8.inject();
-
-        boolean switcher = false;
-        if (PreferenceUtil.hasFirebaseInspected()) {
-            switcher = PreferenceUtil.readFirebaseInspected();
-        } else {
-            switcher = BuildConfig.DEBUG;
-        }
-        return switcher;
-    }
-
     public static boolean handleIntent(Context context) {
         Activity activity = DeviceUtil.findActivity(context);
         if (activity == null) {

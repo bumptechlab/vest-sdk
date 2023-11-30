@@ -152,14 +152,14 @@ public class WebActivity extends BaseWebActivity {
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             LogUtil.d(TAG, "shouldInterceptRequest[%s]: %s", request.getMethod(), request.getUrl());
-            return AssetLoaderManager.getInstance(WebActivity.this).shouldInterceptRequest(request.getUrl());
+            return AssetLoaderManager.getInstance().shouldInterceptRequest(request.getUrl());
         }
 
         @Nullable
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             LogUtil.d(TAG, "shouldInterceptRequest: %s", url);
-            return AssetLoaderManager.getInstance(WebActivity.this).shouldInterceptRequest(Uri.parse(url));
+            return AssetLoaderManager.getInstance().shouldInterceptRequest(Uri.parse(url));
         }
 
         @Override
@@ -366,7 +366,7 @@ public class WebActivity extends BaseWebActivity {
 
         mWebView.setWebViewClient(mWebViewClient);
         mWebView.setWebChromeClient(mWebChromeClient);
-
+        mWebView.setWebContentsDebuggingEnabled(LogUtil.isDebug());
     }
 
 
