@@ -48,6 +48,21 @@
     @android.webkit.JavascriptInterface <methods>;
 }
 
+# Proguard Apache HTTP for release
+-keep class org.apache.http.** { *; }
+-dontwarn org.apache.http.**
+
+# Proguard okhttp for release
+-keep class okhttp3.** { *; }
+-dontwarn okhttp3.**
+
+-keep class okio.** { *; }
+-dontwarn okio.**
+
+# Proguard rxJava for release
+-keep class io.reactivex.rxjava3.** { *; }
+-dontwarn io.reactivex.rxjava3.**
+
 # adjust SDK
 -keep class com.adjust.sdk.**{ *; }
 -keep class com.google.android.gms.common.ConnectionResult {

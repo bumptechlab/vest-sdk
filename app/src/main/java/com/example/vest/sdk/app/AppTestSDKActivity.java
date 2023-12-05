@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 
 import java.util.concurrent.TimeUnit;
 
+import code.sdk.core.VestGameReason;
 import code.sdk.core.VestInspectCallback;
 import code.sdk.core.VestSDK;
 import code.sdk.core.util.UIUtil;
@@ -23,9 +24,28 @@ public class AppTestSDKActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_custom_splash);
+
+        /**
+         * setup the date of apk build
+         * don't need to invoke this method if using vest-plugin, vest-plugin will setup release time automatically
+         * if not, you need to invoke this method to setup release time
+         * this method has the first priority when using both ways.
+         * time format: yyyy-MM-dd HH:mm:ss
+         */
+        VestSHF.getInstance().setReleaseTime("2023-11-29 10:23:20");
+
+        /**
+         * setup duration of silent period for requesting A/B switching starting from the date of apk build
+         */
         VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS);
+
+        /**
+         * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
+         */
         VestSHF.getInstance().inspect(this, new VestInspectCallback() {
-            //这里跳转到A面，A面请自行实现
+            /**
+             * showing A side
+             */
             @Override
             public void onShowVestGame(int reason) {
                 Log.d(TAG, "show vest game");
@@ -35,7 +55,9 @@ public class AppTestSDKActivity extends Activity {
                 AppTestSDKActivity.this.finish();
             }
 
-            //这里跳转到B面，B面由SDK提供，使用VestSDK.gotoGameActivity()方法跳转
+            /**
+             * showing B side
+             */
             @Override
             public void onShowOfficialGame(String url) {
                 Log.d(TAG, "show official game: " + url);

@@ -55,6 +55,12 @@ public class VestSHF {
 
     private VestInspectCallback mVestInspectCallback = null;
 
+    /**
+     * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
+     *
+     * @param context
+     * @param vestInspectCallback
+     */
     public void inspect(Context context, VestInspectCallback vestInspectCallback) {
         mVestInspectCallback = vestInspectCallback;
         boolean isTestIntentHandled = VestCore.isTestIntentHandled();
@@ -80,10 +86,29 @@ public class VestSHF {
                 });
     }
 
+    /**
+     * setup duration of silent period for requesting A/B switching starting from the date of apk build
+     *
+     * @param time     duration of time
+     * @param timeUnit time unit for example DAYS, HOURS, MINUTES, SECONDS
+     */
     public void setInspectDelayTime(long time, TimeUnit timeUnit) {
         long timeMills = timeUnit.toMillis(time);
         PreferenceUtil.saveInspectDelay(timeMills);
     }
+
+    /**
+     * setup the date of apk build
+     * don't need to invoke this method if using vest-plugin, vest-plugin will setup release time automatically
+     * if not, you need to invoke this method to setup release time
+     * this method has the first priority when using both ways.
+     *
+     * @param releaseTime time format：2023-12-04 16:27:20
+     */
+    public void setReleaseTime(String releaseTime) {
+        PreferenceUtil.saveReleaseTime(releaseTime);
+    }
+
 
     private boolean canInspect() {
         boolean canInspect = true;

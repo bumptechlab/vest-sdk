@@ -77,7 +77,7 @@ project.ext {
             artifactIdSdk    : 'vest-sdk',
             artifactIdShf    : 'vest-shf',
             artifactIdCore   : 'vest-core',
-            version          : '0.10.6',//发布到maven的版本号
+            version          : '0.10.7',//发布到maven的版本号
 
             //Github代码仓库参数
             homePage         : 'https://github.com/bumptechlab/vest-sdk',//主页地址

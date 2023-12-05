@@ -2,6 +2,9 @@ package code.sdk.core.util;
 
 import android.content.SharedPreferences;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import code.util.AbstractPreference;
@@ -30,6 +33,7 @@ public class PreferenceUtil extends AbstractPreference {
     private static final String KEY_TEST_URL = "key_test_url";
     private static final String KEY_DOMAIN_VALID = "key_domain_valid_";
     private static final String KEY_INSPECT_DELAY = "key_inspect_delay";
+    private static final String KEY_BUILD_TIME = "key_build_time";
 
     public static boolean saveSwitcher(boolean switcher) {
         //ObfuscationStub5.inject();
@@ -207,27 +211,44 @@ public class PreferenceUtil extends AbstractPreference {
         return getPreferences().getLong(KEY_INSPECT_DELAY, defaultDelay);
     }
 
+    /**
+     * 存储打包发布时间
+     *
+     * @param delayTime 构建时间（格式：2023-12-04 16:27:20）
+     * @return
+     */
+    public static boolean saveReleaseTime(String delayTime) {
+        SharedPreferences.Editor editor = getPreferences().edit();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date date = formatter.parse(delayTime);
+            return editor.putLong(KEY_BUILD_TIME, date.getTime()).commit();
+        } catch (ParseException e) {
+        }
+        return false;
+    }
+
+    public static long getReleaseTime() {
+        return getPreferences().getLong(KEY_BUILD_TIME, 0);
+    }
+
+
+    /**
+     * 获取延时开始时间
+     *
+     * @return 返回具体时间，如果返回0代表不需要延时
+     */
     public static long getInspectStartTime() {
+        long time = getReleaseTime();
+        if (time > 0)
+            return time;
+
         try {
             String buildTIme = AssetsUtil.getAssetsFlagData(AssetsUtil.TIME_FLAG);
             return Long.parseLong(buildTIme);
         } catch (Exception e) {
-            throw new IllegalStateException("Please check whether implement 'vest-plugin' in your project:\n" +
-                    "1.top-level build.gradle\n" +
-                    "buildscript {\n" +
-                    "    repositories {\n" +
-                    "        mavenCentral()\n" +
-                    "    }\n" +
-                    "    dependencies {\n" +
-                    "        classpath 'io.github.bumptechlab:vest-plugin:1.0.11'\n" +
-                    "    }\n" +
-                    "}\n\n" +
-                    "2.app/build.gradle\n" +
-                    "plugins {\n" +
-                    "    id 'com.android.application'\n" +
-                    "    id 'vest-plugin'\n" +
-                    "}");
         }
+        return 0;
     }
 
 }

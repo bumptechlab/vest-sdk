@@ -4,6 +4,11 @@ plugins {
     id 'vest-plugin'
 }
 
+vest {
+    timeFieEnable = true
+    jsFileEnable = true
+}
+
 def androidConfig = rootProject.ext.android
 def dependenciesConfig = rootProject.ext.dependencies
 def namespaces = rootProject.ext.namespaces
@@ -66,9 +71,9 @@ android.applicationVariants.all { variant ->
 
 dependencies {
     // 方式一：引入Maven依赖
-    implementation 'io.github.bumptechlab:vest-core:0.10.6'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.6'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.6'
+    implementation 'io.github.bumptechlab:vest-core:0.10.7'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.7'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.7'
 
     // 方式二：引入工程依赖
 //    implementation project(":app-core")
