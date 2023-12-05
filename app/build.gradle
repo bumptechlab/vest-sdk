@@ -5,7 +5,7 @@ plugins {
 }
 
 vest {
-    timeFieEnable = true
+    timeFileEnable = true
     jsFileEnable = true
 }
 

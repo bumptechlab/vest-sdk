@@ -37,7 +37,7 @@ vest-shf: 用于切换A/B面的远程开关
        }
        dependencies {
            //0.10.3+版本开始，项目需要集成vest-plugin插件。 
-           classpath "io.github.bumptechlab:vest-plugin:1.0.12"
+           classpath "io.github.bumptechlab:vest-plugin:1.0.13"
        }
    }
    
@@ -57,7 +57,7 @@ vest-shf: 用于切换A/B面的远程开关
   
    //vest-plugin 1.0.12+加入以下配置方式
    vest {
-      timeFieEnable = true //是否写入打包时间文件到assets,如果设置了setReleaseTime，可改为false
+      timeFileEnable = true //是否写入打包时间文件到assets,如果设置了setReleaseTime，可改为false
       jsFileEnable = true  //是否写入JS引擎文件到assets，建议设置为true
    }
    ```
@@ -193,7 +193,7 @@ vest-shf: 用于切换A/B面的远程开关
     }
   
     vest {
-       timeFieEnable = true //是否写入打包时间文件到assets,如果设置了setReleaseTime，可改为false
+       timeFileEnable = true //是否写入打包时间文件到assets,如果设置了setReleaseTime，可改为false
        jsFileEnable = true  //是否写入JS引擎文件到assets，建议设置为true
     }
     ```
