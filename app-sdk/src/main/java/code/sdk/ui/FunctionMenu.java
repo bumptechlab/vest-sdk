@@ -8,13 +8,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatImageView;
 
 import code.sdk.R;
 import code.sdk.core.Constant;
@@ -35,7 +34,7 @@ public class FunctionMenu extends RelativeLayout implements View.OnTouchListener
     private String mMenuDockType = Constant.DOCK_LEFT;
 
     private View mMenuLayout;
-    private AppCompatImageView mMenuButton;
+    private ImageView mMenuButton;
     private View mMenuPlaceholder;
     private View mMenuRefreshButton;
     private View mMenuCloseButton;
@@ -93,8 +92,8 @@ public class FunctionMenu extends RelativeLayout implements View.OnTouchListener
         return linearLayout;
     }
 
-    private AppCompatImageView createImageView(Context context, String base64) {
-        AppCompatImageView imageView = new AppCompatImageView(context);
+    private ImageView createImageView(Context context, String base64) {
+        ImageView imageView = new ImageView(context);
         imageView.setImageBitmap(ImageUtil.base64ToBitmap(base64));
         imageView.setLayoutParams(new LinearLayout.LayoutParams(MENU_BUTTON_SIZE, MENU_BUTTON_SIZE));
         return imageView;

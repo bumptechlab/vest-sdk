@@ -14,114 +14,10 @@ import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
 import android.webkit.MimeTypeMap
-import androidx.core.content.FileProvider
-import androidx.documentfile.provider.DocumentFile
 import code.sdk.SdkInit
 import java.io.*
 import java.net.URLConnection
 
-
-/**
- * @author DeMon
- * Created on 2020/10/23.
- * E-mail demonl@binarywalk.com
- * Desc:
- */
-
-
-/**
- * 将Uri转为File
- */
-fun Uri?.uriToFile(): File? {
-    this ?: return null
-    Log.i("FileExt", "uriToFile: $this")
-    return when (scheme) {
-        ContentResolver.SCHEME_FILE -> {
-            File(this.path)
-        }
-
-        ContentResolver.SCHEME_CONTENT -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                getFileFromUriQ()
-            } else {
-                getFileFromUriN()
-            }
-        }
-
-        else -> {
-            File(toString())
-        }
-    }
-}
-
-/**
- * 根据Uri获取File，AndroidQ及以上可用
- * AndroidQ中只有沙盒中的文件可以直接根据绝对路径获取File，非沙盒环境是无法根据绝对路径访问的
- * 因此先判断Uri是否是沙盒中的文件，如果是直接拼接绝对路径访问，否则使用[saveFileByUri]复制到沙盒中生成File
- */
-fun Uri.getFileFromUriQ(): File? {
-
-    var file: File? = getFileFromMedia()
-    if (file == null) {
-        file = getFileFromDocuments()
-    }
-    val flag = file?.exists() ?: false
-    return if (!flag) {
-        this.saveFileByUri()
-    } else {
-        file
-    }
-}
-
-/**
- * 根据Uri获取File，AndroidN~AndroidQ可用
- */
-fun Uri.getFileFromUriN(): File? {
-
-    var file = getFileFromMedia()
-    val uri = this
-    Log.i("FileExt", "getFileFromUriN: $uri ${uri.authority} ${uri.path}")
-    val authority = uri.authority
-    val path = uri.path
-    /**
-     * fileProvider{@xml/file_paths}授权的Uri
-     */
-    if (file == null && authority != null && authority.startsWith(SdkInit.mContext.packageName) && path != null) {
-        //这里的值来自你的provider_paths.xml，如果不同需要自己进行添加修改
-        val externals = mutableListOf(
-            "/external",
-            "/external_path",
-            "/beta_external_files_path",
-            "/external_cache_path",
-            "/beta_external_path",
-            "/external_files",
-            "/internal"
-        )
-        externals.forEach {
-            if (path.startsWith(it)) {
-                //如果你在provider_paths.xml中修改了path，需要自己进行修改
-                val newFile = File("${Environment.getExternalStorageDirectory().absolutePath}/${path.replace(it, "")}")
-                if (newFile.exists()) {
-                    file = newFile
-                }
-            }
-        }
-    }
-    /**
-     * Intent.ACTION_OPEN_DOCUMENT选择的文件Uri
-     */
-    if (file == null) {
-        file = getFileFromDocuments()
-    }
-    val flag = file?.exists() ?: false
-    return if (!flag) {
-        //形如content://com.android.providers.downloads.documents/document/582的下载内容中的文件
-        //无法根据Uri获取到真实路径的文件，统一使用saveFileByUri()方法获取File
-        uri.saveFileByUri()
-    } else {
-        file
-    }
-}
 
 /**
  * media类型的Uri，相册中选择得到的uri，
@@ -244,42 +140,6 @@ fun Uri?.getDataColumn(): String? {
     return str
 }
 
-/**
- * 根据Uri将文件保存File到沙盒中
- * 此方法能解决部分Uri无法获取到File的问题
- * 但是会造成文件冗余，可以根据实际情况，决定是否需要删除
- */
-fun Uri.saveFileByUri(): File? {
-
-    //文件夹uri，不复制直接return null
-    if (isDirectory()) return null
-    try {
-        val inputStream = SdkInit.mContext.contentResolver.openInputStream(this)
-        val fileName = this.getFileName() ?: "${System.currentTimeMillis()}.${getExtensionByUri()}"
-        val file = File(SdkInit.mContext.getCacheChildDir(null), fileName)
-        if (!file.exists()) {
-            file.createNewFile()
-        }
-        val fos = FileOutputStream(file)
-        val bis = BufferedInputStream(inputStream)
-        val bos = BufferedOutputStream(fos)
-        val byteArray = ByteArray(1024)
-        var bytes = bis.read(byteArray)
-        while (bytes > 0) {
-            bos.write(byteArray, 0, bytes)
-            bos.flush()
-            bytes = bis.read(byteArray)
-        }
-        bos.close()
-        fos.close()
-        return file
-    } catch (e: FileNotFoundException) {
-        e.printStackTrace()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    return null
-}
 
 /**
  * 将图片保存至相册，兼容AndroidQ
@@ -572,15 +432,6 @@ fun Uri.isDirectory(): Boolean {
     val paths: List<String> = pathSegments
     return paths.size >= 2 && "tree" == paths[0]
 
-}
-
-/**
- * 根据Uri获取文件名
- */
-fun Uri.getFileName(): String? {
-
-    val documentFile = DocumentFile.fromSingleUri(SdkInit.mContext, this)
-    return documentFile?.name
 }
 
 /**

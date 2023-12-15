@@ -22,6 +22,7 @@ import code.sdk.core.manager.SimpleLifecycleCallbacks;
 import code.sdk.core.manager.ThinkingDataManager;
 import code.sdk.core.util.GoogleAdIdInitializer;
 import code.sdk.core.util.PreferenceUtil;
+import code.sdk.core.util.ReflectionUtil;
 import code.sdk.core.util.TestUtil;
 import code.util.AESKeyStore;
 import code.util.AppGlobal;
@@ -113,6 +114,21 @@ public class VestCore {
 
     public static void onDestroy() {
         ThinkingDataManager.flush();
+        callVestSHFLifecycle("onDestroy");
+    }
+
+    public static void onPause() {
+        callVestSHFLifecycle("onPause");
+    }
+
+    public static void onResume() {
+        callVestSHFLifecycle("onResume");
+    }
+    public static void callVestSHFLifecycle(String methodName){
+        Object obj = ReflectionUtil.invokeMethod("code.sdk.shf.VestSHF", "getInstance", null);
+        if (obj != null) {
+            ReflectionUtil.invokeMethod("code.sdk.shf.VestSHF", methodName, obj);
+        }
     }
 
 

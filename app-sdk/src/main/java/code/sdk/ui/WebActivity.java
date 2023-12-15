@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -633,6 +634,8 @@ public class WebActivity extends BaseWebActivity {
                 mLastBackTs = System.currentTimeMillis();
             } else {
                 finish();
+                System.exit(0);
+                Process.killProcess(Process.myPid());
             }
             return true;
         }

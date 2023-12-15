@@ -109,8 +109,6 @@ dependencies {
     compileOnly project(':app-core')
     compileOnly project(':lib-util')
     implementation "androidx.appcompat:appcompat:$dependenciesConfig.androidxAppcompatVersion"
-    implementation "com.google.android.material:material:$dependenciesConfig.googleMaterialVersion"
-
     //RxJava
     implementation "io.reactivex.rxjava3:rxjava:$dependenciesConfig.rxJavaVersion"
     implementation "io.reactivex.rxjava3:rxandroid:$dependenciesConfig.rxAndroidVersion"

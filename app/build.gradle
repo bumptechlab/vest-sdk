@@ -72,9 +72,9 @@ android.applicationVariants.all { variant ->
 
 dependencies {
     // 方式一：引入Maven依赖
-//    implementation 'io.github.bumptechlab:vest-core:0.10.9'
-//    implementation 'io.github.bumptechlab:vest-sdk:0.10.9'
-//    implementation 'io.github.bumptechlab:vest-shf:0.10.9'
+//    implementation 'io.github.bumptechlab:vest-core:0.10.10'
+//    implementation 'io.github.bumptechlab:vest-sdk:0.10.10'
+//    implementation 'io.github.bumptechlab:vest-shf:0.10.10'
 
     // 方式二：引入工程依赖
     implementation project(":app-core")
@@ -86,7 +86,6 @@ dependencies {
     // 方式三：引入本地Libs依赖（同时要引入以下三方依赖）
 //    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
 //    implementation "androidx.appcompat:appcompat:$dependenciesConfig.androidxAppcompatVersion"
-//    implementation "com.google.android.material:material:$dependenciesConfig.googleMaterialVersion"
 //    implementation "androidx.multidex:multidex:$dependenciesConfig.androidxMultidexVersion"
 //    implementation "androidx.annotation:annotation:$dependenciesConfig.androidxAnnotation"
 //    implementation "com.android.installreferrer:installreferrer:$dependenciesConfig.installreferrerVersion"

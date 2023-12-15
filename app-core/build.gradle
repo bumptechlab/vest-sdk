@@ -86,7 +86,6 @@ android {
 dependencies {
     embed project(path: ':lib-util', configuration: 'default')
     implementation "androidx.appcompat:appcompat:$dependenciesConfig.androidxAppcompatVersion"
-    implementation "com.google.android.material:material:$dependenciesConfig.googleMaterialVersion"
     implementation "com.android.installreferrer:installreferrer:$dependenciesConfig.installreferrerVersion"
     implementation "com.adjust.sdk:adjust-android:$dependenciesConfig.adjustVersion"
     implementation "com.google.android.gms:play-services-ads-identifier:$dependenciesConfig.googlePlayServiceVersion"

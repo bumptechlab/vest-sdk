@@ -35,7 +35,7 @@ public class AppTestSDKActivity extends Activity {
          */
         VestSHF.getInstance().setInspectDelayTime(0, TimeUnit.DAYS);
         /**
-         * Check whether the url format is correct, default true
+         * set true to check the remote and local url, this could make effect on A/B switching
          */
         VestSHF.getInstance().setCheckUrl(true);
         /**
@@ -64,6 +64,22 @@ public class AppTestSDKActivity extends Activity {
                 AppTestSDKActivity.this.finish();
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (VestSDK.getInstance() != null) {
+            VestSDK.getInstance().onPause();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (VestSDK.getInstance() != null) {
+            VestSDK.getInstance().onResume();
+        }
     }
 
     @Override

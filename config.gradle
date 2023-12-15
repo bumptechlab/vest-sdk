@@ -26,9 +26,8 @@ project.ext {
 
     dependencies = [
             androidxMultidexVersion          : '2.0.1',
-            androidxAppcompatVersion         : '1.6.1',
+            androidxAppcompatVersion         : '1.4.1',
             androidxConstraintlayoutVersion  : '2.1.3',
-            googleMaterialVersion            : '1.5.0',
             androidxAnnotation               : '1.7.0',
             installreferrerVersion           : '2.2',
             okhttpVersion                    : '4.10.0',
@@ -62,7 +61,7 @@ project.ext {
             artifactIdSdk    : 'vest-sdk',
             artifactIdShf    : 'vest-shf',
             artifactIdCore   : 'vest-core',
-            version          : '0.10.9',//发布到maven的版本号
+            version          : '0.10.10',//发布到maven的版本号
 
             //Github代码仓库参数
             homePage         : 'https://github.com/bumptechlab/vest-sdk',//主页地址

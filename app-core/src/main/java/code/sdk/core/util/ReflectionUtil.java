@@ -149,4 +149,16 @@ public class ReflectionUtil {
         }
         return canReflection;
     }
+
+    public static Object invokeMethod(String className, String methodName, Object obj) {
+
+        try {
+            Class<?> clazz = Class.forName(className);
+            Method method = clazz.getMethod(methodName);
+            return method.invoke(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

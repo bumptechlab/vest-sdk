@@ -45,6 +45,13 @@ public class VestSDK {
         VestCore.onCreate();
     }
 
+    public void onResume() {
+        VestCore.onResume();
+    }
+    public void onPause() {
+        VestCore.onPause();
+    }
+
     public void onDestroy() {
         VestCore.onDestroy();
     }

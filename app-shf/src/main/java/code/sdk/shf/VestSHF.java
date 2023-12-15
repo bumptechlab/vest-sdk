@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.webkit.URLUtil;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 import java.text.SimpleDateFormat;
@@ -35,17 +36,23 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
 import io.reactivex.rxjava3.core.ObservableOnSubscribe;
 import io.reactivex.rxjava3.core.ObservableSource;
-import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.functions.Function;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
+@Keep
 public class VestSHF {
 
     private static final String TAG = VestSHF.class.getSimpleName();
     private LaunchConfig mLaunchConfig = new LaunchConfig();
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private boolean mIsCheckUrl = true;
+    private boolean mIsJump = false;
+    private boolean mIsPause = false;
+    private boolean mIsRunning = false;
+    private CompositeDisposable mDisposables = new CompositeDisposable();
 
     private VestSHF() {
     }
@@ -68,27 +75,40 @@ public class VestSHF {
      */
     public void inspect(Context context, VestInspectCallback vestInspectCallback) {
         mVestInspectCallback = vestInspectCallback;
+        inspect();
+    }
+
+    private void inspect() {
+        if (mIsRunning) {
+            LogUtil.w(TAG, "[SHF] vest-sdk inspecting, SHF request aborted!");
+            return;
+        }
+        mIsRunning = true;
         boolean isTestIntentHandled = VestCore.isTestIntentHandled();
         TestUtil.printDebugInfo();
         LogUtil.setDebug(TestUtil.isLoggable());
         if (isTestIntentHandled) {
             LogUtil.d(TAG, "[SHF] open WebView using intent, SHF request aborted!");
+            mIsRunning = false;
             return;
         }
-        Observable.create((ObservableOnSubscribe<Boolean>) emitter -> {
+        Disposable disposable = Observable.create((ObservableOnSubscribe<Boolean>) emitter -> {
                     emitter.onNext(canInspect());
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(canInspect -> {
                     if (!canInspect) {
-                        if (vestInspectCallback != null) {
-                            vestInspectCallback.onShowVestGame(VestGameReason.REASON_NOT_THE_TIME);
+                        mIsJump = true;
+                        mIsRunning = false;
+                        if (mVestInspectCallback != null) {
+                            mVestInspectCallback.onShowVestGame(VestGameReason.REASON_NOT_THE_TIME);
                         }
                         return;
                     }
                     startInspect();
                 });
+        mDisposables.add(disposable);
     }
 
     /**
@@ -125,6 +145,7 @@ public class VestSHF {
 
 
     private boolean canInspect() {
+        LogUtil.w(TAG, "[SHF] start canInspect");
         boolean canInspect = true;
         //读取assets目录下所有文件，找出特殊标记的文件读取数据时间
         long inspectStartTime = PreferenceUtil.getInspectStartTime();
@@ -147,7 +168,8 @@ public class VestSHF {
     }
 
     private void startInspect() {
-        Observable.create(new ObservableOnSubscribe<Boolean>() {
+        LogUtil.d(TAG, "[SHF] inspect start");
+        Disposable disposable = Observable.create(new ObservableOnSubscribe<Boolean>() {
                     @Override
                     public void subscribe(ObservableEmitter<Boolean> emitter) throws Exception {
                         mLaunchConfig.setStartMills(System.currentTimeMillis());
@@ -172,31 +194,20 @@ public class VestSHF {
                 })
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<RemoteConfig>() {
-                    //这是新加入的方法，在订阅后发送数据之前，
-                    //回首先调用这个方法，而Disposable可用于取消订阅
+                .subscribe(new Consumer<RemoteConfig>() {
                     @Override
-                    public void onSubscribe(Disposable d) {
-                        LogUtil.d(TAG, "[SHF] inspect start");
-                    }
-
-                    @Override
-                    public void onNext(RemoteConfig remoteConfig) {
+                    public void accept(RemoteConfig remoteConfig) throws Throwable {
                         LogUtil.d(TAG, "[SHF] inspect result: " + remoteConfig);
                         checkRemoteConfig(remoteConfig);
                     }
-
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void onError(Throwable e) {
+                    public void accept(Throwable e) throws Throwable {
                         LogUtil.e(TAG, "[SHF] inspect encounter an error: " + (e == null ? "" : e.getMessage()));
                         checkRemoteConfig(null);
                     }
-
-                    @Override
-                    public void onComplete() {
-                        LogUtil.d(TAG, "[SHF] inspect complete");
-                    }
                 });
+        mDisposables.add(disposable);
 
     }
 
@@ -241,17 +252,17 @@ public class VestSHF {
         if (mIsCheckUrl) {
             //list all urls including cached url for URL checking
             List<String> urlList = new ArrayList<>();
-            if (URLUtil.isValidUrl(savedGameUrl)) {
-                urlList.add(savedGameUrl);
-            }
             for (int i = 0; i < urls.length; i++) {
                 String url = urls[i];
                 if (URLUtil.isValidUrl(url) && !urlList.contains(url)) {
                     urlList.add(url);
                 }
             }
+            if (URLUtil.isValidUrl(savedGameUrl)) {
+                urlList.add(savedGameUrl);
+            }
             LogUtil.d(TAG, "[SHF] check url: %s, savedSwitcher: %s, savedGameUrl: %s", urlList, savedSwitcher, savedGameUrl);
-            Observable.create((ObservableOnSubscribe<String>) emitter -> {
+            Disposable disposable = Observable.create((ObservableOnSubscribe<String>) emitter -> {
                         for (String url : urlList) {
                             boolean isValid = UrlUtil.isValidUrl(url);
                             LogUtil.d(TAG, "[SHF] check url: %s, isValid：%b", url, isValid);
@@ -281,7 +292,7 @@ public class VestSHF {
                         }
                         checkJump();
                     });
-
+            mDisposables.add(disposable);
         } else {
             LogUtil.d(TAG, "[SHF] check url: skipping, switcher: %s", switcher);
             mLaunchConfig.setGoWeb(switcher);
@@ -315,5 +326,31 @@ public class VestSHF {
                 mVestInspectCallback.onShowVestGame(VestGameReason.REASON_OFF_ON_SERVER);
             }
         }
+        mIsJump = true;
+        mIsRunning = false;
+    }
+
+    public void onPause() {
+        mIsPause = true;
+        mIsRunning = false;
+        LogUtil.d(TAG, "[SHF] onPause mIsJump: %b", mIsJump);
+        try {
+            mDisposables.clear();
+        } catch (Exception e) {
+        }
+
+    }
+
+    public void onResume() {
+        LogUtil.d(TAG, "[SHF] onResume mIsJump: %b", mIsJump);
+        if (!mIsJump && mIsPause) {
+            inspect();
+        }
+        mIsPause = false;
+    }
+
+    public void onDestroy() {
+        mIsJump = false;
+        LogUtil.d(TAG, "[SHF] onDestroy mIsJump: %b", mIsJump);
     }
 }
