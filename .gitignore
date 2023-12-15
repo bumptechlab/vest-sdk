@@ -7,4 +7,7 @@ output-metadata.json
 .DS_Store
 /outputs
 */build
-
+/app-b
+maven.properties
+Maven仓库发布说明.md
+secring.gpg

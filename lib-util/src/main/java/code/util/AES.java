@@ -116,7 +116,6 @@ public class AES {
         for (byte key : keys) {
             s.append(String.format("%02x", key));
         }
-        System.out.println("加密秘钥: " + s);
         return keys;
     }
 

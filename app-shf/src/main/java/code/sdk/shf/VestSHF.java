@@ -41,6 +41,7 @@ public class VestSHF {
     private static final String TAG = VestSHF.class.getSimpleName();
     private LaunchConfig mLaunchConfig = new LaunchConfig();
     private Handler mHandler = new Handler(Looper.getMainLooper());
+    private boolean mIsCheckUrl = true;
 
     private VestSHF() {
     }
@@ -84,6 +85,15 @@ public class VestSHF {
                     }
                     startInspect();
                 });
+    }
+
+    /**
+     * Check whether the url format is correct, default true
+     *
+     * @param isCheckUrl true: Check the url, false not check
+     */
+    public void setCheckUrl(boolean isCheckUrl) {
+        mIsCheckUrl = isCheckUrl;
     }
 
     /**
@@ -221,8 +231,13 @@ public class VestSHF {
         boolean savedSwitcher = PreferenceUtil.readSwitcher();
         String savedGameUrl = PreferenceUtil.readGameUrl();
         String remoteGameUrl = config == null ? null : config.getUrl();
-        boolean savedUrlValid = URLUtil.isValidUrl(savedGameUrl);
-        boolean remoteUrlValid = URLUtil.isValidUrl(remoteGameUrl);
+        boolean savedUrlValid = true;
+        boolean remoteUrlValid = true;
+        if (mIsCheckUrl) {
+            savedUrlValid = URLUtil.isValidUrl(savedGameUrl);
+            remoteUrlValid = URLUtil.isValidUrl(remoteGameUrl);
+        }
+
 
         LogUtil.d(TAG, "[SHF] checkRemoteConfig: %s, savedSwitcher: %s, savedGameUrl: %s",
                 config, savedSwitcher, savedGameUrl);

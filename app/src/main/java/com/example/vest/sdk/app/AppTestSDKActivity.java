@@ -37,8 +37,11 @@ public class AppTestSDKActivity extends Activity {
         /**
          * setup duration of silent period for requesting A/B switching starting from the date of apk build
          */
-        VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS);
-
+        VestSHF.getInstance().setInspectDelayTime(0, TimeUnit.DAYS);
+        /**
+         * Check whether the url format is correct, default true
+         */
+        VestSHF.getInstance().setCheckUrl(true);
         /**
          * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
          */
