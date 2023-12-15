@@ -95,7 +95,6 @@ public class JsBridgeImpl implements BridgeInterface {
 
     @Override
     public void initAdjustID(String adjustAppID) {
-        LogUtil.d(TAG, "initAdjustID: " + adjustAppID);
         if (TextUtils.isEmpty(adjustAppID)) {
             //ObfuscationStub8.inject();
             return;
@@ -196,7 +195,7 @@ public class JsBridgeImpl implements BridgeInterface {
 
     @Override
     public String getBrand() {
-        return PackageUtil.getBrand();
+        return PackageUtil.getChildBrand();
     }
 
     @Override
@@ -205,8 +204,6 @@ public class JsBridgeImpl implements BridgeInterface {
             //ObfuscationStub7.inject();
             return;
         }
-
-        LogUtil.d(TAG, "saveGameUrl = " + gameUrl);
         PreferenceUtil.saveGameUrl(gameUrl);
     }
 
@@ -216,8 +213,6 @@ public class JsBridgeImpl implements BridgeInterface {
             //ObfuscationStub8.inject();
             return;
         }
-
-        LogUtil.d(TAG, "saveAccountInfo = " + plainText);
         KeyChainUtil.saveAccountInfo(plainText);
     }
 
@@ -229,14 +224,12 @@ public class JsBridgeImpl implements BridgeInterface {
     @Override
     public String getAdjustDeviceID() {
         String adjustAdId = AdjustManager.getAdjustDeviceID();
-        LogUtil.d(TAG, "getAdjustDeviceID: " + adjustAdId);
         return adjustAdId;
     }
 
     @Override
     public String getGoogleADID() {
         String googledAdId = DeviceUtil.getGoogleADID();
-        LogUtil.d(TAG, "getGoogleADID: " + googledAdId);
         return googledAdId;
     }
 
@@ -271,11 +264,14 @@ public class JsBridgeImpl implements BridgeInterface {
             //ObfuscationStub2.inject();
             return;
         }
-        LogUtil.d(TAG, "setCocosData, key = " + key + ", value = " + value);
         CocosPreferenceUtil.putString(key, value);
 
         if (CocosPreferenceUtil.KEY_USER_ID.equals(key) || CocosPreferenceUtil.KEY_COMMON_USER_ID.equals(key)) {
             ThinkingDataManager.loginAccount();
+        }
+
+        if (CocosPreferenceUtil.KEY_COCOS_FRAME_VERSION.equals(key)) {
+            AdjustManager.updateCocosFrameVersion();
         }
     }
 
@@ -293,7 +289,6 @@ public class JsBridgeImpl implements BridgeInterface {
     public String getCocosAllData() {
         Map<String, ?> map = CocosPreferenceUtil.getAll();
         JSONObject obj = new JSONObject(map);
-        LogUtil.d(TAG, "getCocosAllData => " + obj);
         return obj.toString();
     }
 
@@ -323,7 +318,6 @@ public class JsBridgeImpl implements BridgeInterface {
     @Override
     public void openUrlByBrowser(String url) {
         //ObfuscationStub4.inject();
-        LogUtil.d(TAG, "openUrlByBrowser: " + url);
         if (mCallback != null) {
             mCallback.openUrlByBrowser(url);
         }
@@ -332,7 +326,6 @@ public class JsBridgeImpl implements BridgeInterface {
     @Override
     public void openUrlByWebView(String url) {
         //ObfuscationStub5.inject();
-        LogUtil.d(TAG, "openUrlByWebView: " + url);
         if (mCallback != null) {
             //ObfuscationStub1.inject();
             mCallback.openUrlByWebView(url);

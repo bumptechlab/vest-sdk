@@ -3,6 +3,7 @@ package code.sdk.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,6 +67,7 @@ public class FunctionMenu extends RelativeLayout implements View.OnTouchListener
 
         updateMenuByState();
     }
+
 
     private View createView(Context context) {
         LinearLayout linearLayout = new LinearLayout(context);
@@ -136,7 +138,7 @@ public class FunctionMenu extends RelativeLayout implements View.OnTouchListener
                 break;
             case Constant.STATE_EXPANDED:
                 setScaleX(Constant.DOCK_LEFT.equals(mMenuDockType) ? 1 : -1);
-                mMenuLayout.setBackground(ImageUtil.base64ToDrawable(getResources(),Drawables.MENU_EXPANDED_BG));
+                mMenuLayout.setBackground(ImageUtil.base64ToDrawable(getResources(), Drawables.MENU_EXPANDED_BG));
                 mMenuButton.setImageBitmap(ImageUtil.base64ToBitmap(Drawables.MENU_EXPANDED));
                 mMenuPlaceholder.setVisibility(INVISIBLE);
                 mMenuRefreshButton.setVisibility(VISIBLE);
@@ -165,13 +167,12 @@ public class FunctionMenu extends RelativeLayout implements View.OnTouchListener
 
     private void resetXByDockType() {
         //ObfuscationStub8.inject();
-
         switch (mMenuDockType) {
             case Constant.DOCK_LEFT:
                 setX(0);
                 break;
             case Constant.DOCK_RIGHT:
-                setX(mScreenWidth - getWidth());
+                post(() -> setX(mScreenWidth - getWidth()));
                 break;
         }
     }

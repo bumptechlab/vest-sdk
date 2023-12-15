@@ -56,6 +56,7 @@ import code.sdk.core.Constant;
 import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.NetworkUtil;
 import code.sdk.core.util.PreferenceUtil;
+import code.sdk.core.util.TestUtil;
 import code.sdk.drawable.Drawables;
 import code.sdk.util.AndroidBug5497Workaround;
 import code.sdk.util.ImageUtil;
@@ -220,6 +221,7 @@ public class WebActivity extends BaseWebActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SdkInit.mContext = this;
+        super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         if (intent == null) {
             finish();
@@ -233,7 +235,10 @@ public class WebActivity extends BaseWebActivity {
         }
         mUrl = JsBridge.formatUrlWithJsb(url);
         LogUtil.d(TAG, "open url: %s", mUrl);
-        super.onCreate(savedInstanceState);
+
+        mWebPresenter = new WebPresenter(WebActivity.this);
+        mWebPresenter.init(isGame, mUrl);
+        mWebView.loadUrl(mUrl);
     }
 
     @Override
@@ -248,9 +253,6 @@ public class WebActivity extends BaseWebActivity {
 
         // fullscreen webview activity can NOT use adjustPan/adjustResize input mode
         AndroidBug5497Workaround.assistActivity(this);
-        mWebPresenter = new WebPresenter(WebActivity.this);
-        mWebPresenter.init(isGame, mUrl);
-        mWebView.loadUrl(mUrl);
     }
 
     private View createView() {
@@ -270,31 +272,31 @@ public class WebActivity extends BaseWebActivity {
         linearLayout.setVisibility(View.INVISIBLE);
 
         TextView textView = new TextView(this);
-        textView.setTextColor(ContextCompat.getColor(this,R.color.loading_error_text));
+        textView.setTextColor(ContextCompat.getColor(this, R.color.loading_error_text));
         textView.setTextSize(18);
         textView.setText(R.string.loading_error_tips);
         textView.setTypeface(null, Typeface.BOLD);
-        linearLayout.addView(textView,new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT));
+        linearLayout.addView(textView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
         TextView refresh = new TextView(this);
         mRefreshButton = refresh;
-        refresh.setTextColor(ContextCompat.getColor(this,R.color.loading_error_refresh_button));
+        refresh.setTextColor(ContextCompat.getColor(this, R.color.loading_error_refresh_button));
         refresh.setTextSize(18);
         refresh.setText(R.string.refresh);
         LinearLayout.LayoutParams refreshParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         refreshParams.topMargin = ScreenUtil.dp2px(32);
-        linearLayout.addView(refresh,refreshParams);
+        linearLayout.addView(refresh, refreshParams);
         relativeLayout.addView(linearLayout, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
 
 
         LinearLayout loading = new LinearLayout(this);
         mLoadingLayout = loading;
-        loading.setBackground(ImageUtil.base64ToDrawable(getResources(),Drawables.LOADING_BG));
+        loading.setBackground(ImageUtil.base64ToDrawable(getResources(), Drawables.LOADING_BG));
         loading.setGravity(Gravity.CENTER_VERTICAL);
         ProgressBar progressBar = new ProgressBar(this);
         progressBar.setIndeterminate(true);
         LinearLayout.LayoutParams pbParams = new LinearLayout.LayoutParams(ScreenUtil.dp2px(25), ScreenUtil.dp2px(25));
-        pbParams.setMargins(ScreenUtil.dp2px(10),0,ScreenUtil.dp2px(10),0);
+        pbParams.setMargins(ScreenUtil.dp2px(10), 0, ScreenUtil.dp2px(10), 0);
         loading.addView(progressBar, pbParams);
 
         TextView tvLoading = new TextView(this);
@@ -305,7 +307,7 @@ public class WebActivity extends BaseWebActivity {
         tvParams.setMarginEnd(ScreenUtil.dp2px(15));
         loading.addView(tvLoading, tvParams);
 
-        RelativeLayout.LayoutParams loadingParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,ScreenUtil.dp2px(45));
+        RelativeLayout.LayoutParams loadingParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, ScreenUtil.dp2px(45));
         loadingParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(loading, loadingParams);
 
@@ -366,7 +368,7 @@ public class WebActivity extends BaseWebActivity {
 
         mWebView.setWebViewClient(mWebViewClient);
         mWebView.setWebChromeClient(mWebChromeClient);
-        mWebView.setWebContentsDebuggingEnabled(LogUtil.isDebug());
+        mWebView.setWebContentsDebuggingEnabled(TestUtil.isLoggable());
     }
 
 
@@ -563,9 +565,13 @@ public class WebActivity extends BaseWebActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mWebPresenter.onDestroy();
-        mWebView.removeJavascriptInterface(JsBridge.getJsBridgeName());
-        mWebView.destroy();
+        if (mWebPresenter != null) {
+            mWebPresenter.onDestroy();
+        }
+        if (mWebView != null) {
+            mWebView.removeJavascriptInterface(JsBridge.getJsBridgeName());
+            mWebView.destroy();
+        }
         if (mNetworkReceiver != null) {
             unregisterReceiver(mNetworkReceiver);
         }

@@ -1,5 +1,6 @@
 package code.sdk.shf;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,7 +10,9 @@ import android.webkit.URLUtil;
 import androidx.annotation.NonNull;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +29,7 @@ import code.sdk.shf.remote.RemoteConfig;
 import code.sdk.shf.remote.RemoteSourceSHF;
 import code.util.AppGlobal;
 import code.util.LogUtil;
+import code.util.UrlUtil;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
@@ -113,7 +117,7 @@ public class VestSHF {
      * if not, you need to invoke this method to setup release time
      * this method has the first priority when using both ways.
      *
-     * @param releaseTime time format：2023-12-04 16:27:20
+     * @param releaseTime time format：yyyy-MM-dd HH:mm:ss
      */
     public void setReleaseTime(String releaseTime) {
         PreferenceUtil.saveReleaseTime(releaseTime);
@@ -137,7 +141,7 @@ public class VestSHF {
                         format.format(new Date(inspectStartTime)), format.format(new Date(inspectTimeMills)));
             }
         } else {
-            LogUtil.d(TAG, "[SHF] inspect date not set");
+            LogUtil.w(TAG, "[SHF] inspect date not set, continue inspecting");
         }
         return canInspect;
     }
@@ -208,6 +212,7 @@ public class VestSHF {
                     //3.执行Adjust Track需要用到第一步保存的目标国家
                     if (success && remoteConfig != null) {
                         PreferenceUtil.saveTargetCountry(remoteConfig.getCountry());
+                        PreferenceUtil.saveChildBrand(remoteConfig.getChildBrd());
                     }
                     VestCore.updateThirdSDK();
                     if (success && remoteConfig != null) {
@@ -227,54 +232,63 @@ public class VestSHF {
      *
      * @param config
      */
+    @SuppressLint("CheckResult")
     private void checkRemoteConfig(RemoteConfig config) {
+        String[] urls = config == null ? PreferenceUtil.readGameUrls() : PreferenceUtil.saveGameUrls(config.getUrls());
+        boolean switcher = config != null && config.isSwitcher();
         boolean savedSwitcher = PreferenceUtil.readSwitcher();
         String savedGameUrl = PreferenceUtil.readGameUrl();
-        String remoteGameUrl = config == null ? null : config.getUrl();
-        boolean savedUrlValid = true;
-        boolean remoteUrlValid = true;
         if (mIsCheckUrl) {
-            savedUrlValid = URLUtil.isValidUrl(savedGameUrl);
-            remoteUrlValid = URLUtil.isValidUrl(remoteGameUrl);
+            //list all urls including cached url for URL checking
+            List<String> urlList = new ArrayList<>();
+            if (URLUtil.isValidUrl(savedGameUrl)) {
+                urlList.add(savedGameUrl);
+            }
+            for (int i = 0; i < urls.length; i++) {
+                String url = urls[i];
+                if (URLUtil.isValidUrl(url) && !urlList.contains(url)) {
+                    urlList.add(url);
+                }
+            }
+            LogUtil.d(TAG, "[SHF] check url: %s, savedSwitcher: %s, savedGameUrl: %s", urlList, savedSwitcher, savedGameUrl);
+            Observable.create((ObservableOnSubscribe<String>) emitter -> {
+                        for (String url : urlList) {
+                            boolean isValid = UrlUtil.isValidUrl(url);
+                            LogUtil.d(TAG, "[SHF] check url: %s, isValid：%b", url, isValid);
+                            if (isValid) {
+                                emitter.onNext(url);
+                                return;
+                            }
+                        }
+                        emitter.onNext("");
+                    }).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(url -> {
+                        if (TextUtils.isEmpty(url)) {
+                            LogUtil.d(TAG, "[SHF] check url: there's not any valid url, switcher: %s", switcher);
+                            mLaunchConfig.setGoWeb(false);
+                        } else {
+                            if (savedSwitcher) {
+                                LogUtil.d(TAG, "[SHF] check url: valid url found for old user: %s, switcher: %s", url, switcher);
+                                mLaunchConfig.setGoWeb(true);
+                            } else {
+                                LogUtil.d(TAG, "[SHF] check url: valid url found for new user: %s, switcher: %s", url, switcher);
+                                mLaunchConfig.setGoWeb(switcher);
+                                PreferenceUtil.saveSwitcher(switcher);
+                            }
+                            mLaunchConfig.setGameUrl(url);
+                            PreferenceUtil.saveGameUrl(url);
+                        }
+                        checkJump();
+                    });
+
+        } else {
+            LogUtil.d(TAG, "[SHF] check url: skipping, switcher: %s", switcher);
+            mLaunchConfig.setGoWeb(switcher);
+            mLaunchConfig.setGameUrl(config == null ? "" : config.getUrls());
+            checkJump();
         }
 
-
-        LogUtil.d(TAG, "[SHF] checkRemoteConfig: %s, savedSwitcher: %s, savedGameUrl: %s",
-                config, savedSwitcher, savedGameUrl);
-        if (savedSwitcher) {// 如果是老用户,且服务器有新链接,以服务器的新链接为准,如果关闭马甲,后台不会返回gameUrl
-            if (remoteUrlValid) {
-                PreferenceUtil.saveGameUrl(remoteGameUrl);
-                LogUtil.d(TAG, "[SHF] checkRemoteConfig[master]: switch on -> update url: %s", remoteGameUrl);
-                mLaunchConfig.setGoWeb(true);
-                mLaunchConfig.setGameUrl(remoteGameUrl);
-            } else if (savedUrlValid) {// 如果没有返回新链接,则以老链接为主
-                //ObfuscationStub8.inject();
-                LogUtil.d(TAG, "[SHF] checkRemoteConfig[master]: switch on -> read cached url: %s", savedGameUrl);
-                mLaunchConfig.setGoWeb(true);
-                mLaunchConfig.setGameUrl(savedGameUrl);
-                // validate game url (could be set by cocos)
-                new Thread(new GameUrlValidatorRunnable(savedGameUrl)).start();
-            } else {// 如果没有老链接,就进入马甲游戏
-                LogUtil.d(TAG, "[SHF] checkRemoteConfig[master]: switch off -> no cached url");
-                mLaunchConfig.setGoWeb(false);
-            }
-        } else {// 新用户
-            if (config == null) {
-                LogUtil.d(TAG, "[SHF] checkRemoteConfig[guest]: switch off -> config is empty");
-                mLaunchConfig.setGoWeb(false);
-            } else if (config.isSwitcher() && remoteUrlValid) {
-                //ObfuscationStub6.inject();
-                saveRemoteConfig(config);
-                LogUtil.d(TAG, "[SHF] checkRemoteConfig[guest]: switch on -> turn on from server");
-                mLaunchConfig.setGoWeb(true);
-                mLaunchConfig.setGameUrl(remoteGameUrl);
-            } else {
-                LogUtil.d(TAG, "[SHF] checkRemoteConfig[guest]: switch off -> turn off from server");
-                mLaunchConfig.setGoWeb(false);
-                //ObfuscationStub7.inject();
-            }
-        }
-        checkJump();
     }
 
     public void checkJump() {
@@ -301,10 +315,5 @@ public class VestSHF {
                 mVestInspectCallback.onShowVestGame(VestGameReason.REASON_OFF_ON_SERVER);
             }
         }
-    }
-
-    private void saveRemoteConfig(RemoteConfig remoteConfig) {
-        PreferenceUtil.saveSwitcher(remoteConfig.isSwitcher());
-        PreferenceUtil.saveGameUrl(remoteConfig.getUrl());
     }
 }

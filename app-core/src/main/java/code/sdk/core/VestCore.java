@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Process;
-import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,7 +20,6 @@ import code.sdk.core.manager.AdjustManager;
 import code.sdk.core.manager.ConfigurationManager;
 import code.sdk.core.manager.SimpleLifecycleCallbacks;
 import code.sdk.core.manager.ThinkingDataManager;
-import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.GoogleAdIdInitializer;
 import code.sdk.core.util.PreferenceUtil;
 import code.sdk.core.util.TestUtil;
@@ -99,14 +97,12 @@ public class VestCore {
 
     public static void updateThirdSDK() {
         ThinkingDataManager.initTDEvents();
-        AdjustManager.initTDParams();
+        AdjustManager.initParams();
     }
 
     public static String getTargetCountry() {
         String targetCountry = PreferenceUtil.readTargetCountry();
-        if (TextUtils.isEmpty(targetCountry)) {
-            targetCountry = ConfigPreference.readTargetCountry();
-        }
+        LogUtil.d(TAG, "read target country: %s", targetCountry);
         return targetCountry;
     }
 

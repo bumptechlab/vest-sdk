@@ -311,7 +311,7 @@ public class WebPresenter {
             LogUtil.d(TAG, "check game feature: is not validate game page: %s", gameUrl);
             if (isSameBaseUrl(gameUrl, cacheGameUrl)) {
                 LogUtil.d(TAG, "check game feature: clear cached url: %s", cacheGameUrl);
-                PreferenceUtil.saveGameUrl(null);
+                //PreferenceUtil.saveGameUrl(null);
             } else {
                 LogUtil.d(TAG, "check game feature: abort clearing cached url: %s", cacheGameUrl);
             }

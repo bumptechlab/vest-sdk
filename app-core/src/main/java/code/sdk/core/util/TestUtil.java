@@ -61,7 +61,7 @@ public class TestUtil {
                 PreferenceUtil.saveChannel(channel);
             }
             if (!TextUtils.isEmpty(brand)) {
-                PreferenceUtil.saveBrand(brand);
+                PreferenceUtil.saveParentBrand(brand);
             }
             if (!TextUtils.isEmpty(installreferrer)) {
                 PreferenceUtil.saveInstallReferrer(installreferrer);
@@ -111,7 +111,7 @@ public class TestUtil {
                 PackageUtil.getPackageVersionCode(),
                 PackageUtil.getPackageVersionName(),
                 PackageUtil.getBuildVersion(),
-                PackageUtil.getBrand(),
+                PackageUtil.getParentBrand(),
                 PackageUtil.getChannel());
         LogUtil.i(TAG, "[Device] sdkInt: %d, sdkVersion: %s, isEmulator: %s",
                 Build.VERSION.SDK_INT,

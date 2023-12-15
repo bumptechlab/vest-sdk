@@ -8,25 +8,25 @@ import code.sdk.shf.http.BaseData;
 public class RemoteConfig implements BaseData {
     public static final String TAG = RemoteConfig.class.getSimpleName();
 
-    private String url;
+    private String urls;
 
     private boolean switcher;
 
     private String country;
+
+    private String childBrd;
 
     private String message;
 
     public RemoteConfig() {
     }
 
-    public RemoteConfig(boolean swi, String url, String country) {
-        this.switcher = swi;
-        this.url = url;
-        this.country = country;
+    public String getChildBrd() {
+        return childBrd;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setChildBrd(String childBrd) {
+        this.childBrd = childBrd;
     }
 
     public void setSwitcher(boolean swi) {
@@ -37,12 +37,16 @@ public class RemoteConfig implements BaseData {
         this.country = country;
     }
 
-    public boolean isSwitcher() {
-        return switcher;
+    public String getUrls() {
+        return urls;
     }
 
-    public String getUrl() {
-        return url;
+    public void setUrls(String urls) {
+        this.urls = urls;
+    }
+
+    public boolean isSwitcher() {
+        return switcher;
     }
 
     public String getCountry() {
@@ -59,23 +63,14 @@ public class RemoteConfig implements BaseData {
 
 
     @Override
-    public String toString() {
-        return "RemoteConfig{" +
-                "url='" + url + '\'' +
-                ", switcher=" + switcher +
-                ", country='" + country + '\'' +
-                ", message='" + message + '\'' +
-                '}';
-    }
-
-    @Override
     public JSONObject toJSONObject() {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("switch", isSwitcher());
-            jsonObject.put("h5_url", getUrl());
+            jsonObject.put("jump_urls", getUrls());
             jsonObject.put("msg", getMessage());
             jsonObject.put("country", getCountry());
+            jsonObject.put("child_brd", getChildBrd());
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -85,14 +80,24 @@ public class RemoteConfig implements BaseData {
     public RemoteConfig fromJSONObject(JSONObject jsonObject) {
         RemoteConfig remoteConfig = null;
         if (jsonObject != null) {
-            boolean switcher = jsonObject.optBoolean("switch");
-            String url = jsonObject.optString("h5_url");
-            String message = jsonObject.optString("msg");
-            String country = jsonObject.optString("country");
-            remoteConfig = new RemoteConfig(switcher, url, country);
-            remoteConfig.setMessage(message);
+            remoteConfig = new RemoteConfig();
+            remoteConfig.setSwitcher(jsonObject.optBoolean("switch"));
+            remoteConfig.setUrls(jsonObject.optString("jump_urls"));
+            remoteConfig.setMessage(jsonObject.optString("msg"));
+            remoteConfig.setCountry(jsonObject.optString("country"));
+            remoteConfig.setChildBrd(jsonObject.optString("child_brd"));
         }
         return remoteConfig;
     }
 
+    @Override
+    public String toString() {
+        return "RemoteConfig{" +
+                "urls='" + urls + '\'' +
+                ", switcher=" + switcher +
+                ", country='" + country + '\'' +
+                ", childBrd='" + childBrd + '\'' +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

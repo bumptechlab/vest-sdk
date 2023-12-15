@@ -36,7 +36,7 @@ public class ConfigurationManager {
 
     public void init(Context context, String configName) {
         if (TextUtils.isEmpty(configName)) {
-            LogUtil.e(TAG, "Config file is empty, init aborted");
+            LogUtil.w(TAG, "Config file is empty, init aborted");
             return;
         }
         try {
@@ -46,7 +46,7 @@ public class ConfigurationManager {
             configByBytes(assetsBytes);
         } catch (Exception e) {
             //ObfuscationStub4.inject();
-            LogUtil.e(TAG, e, "Fail to parse configuration");
+            LogUtil.w(TAG, "Fail to parse configuration: %s", e.getMessage());
         }
     }
 

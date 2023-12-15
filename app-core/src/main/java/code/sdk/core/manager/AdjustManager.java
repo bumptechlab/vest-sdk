@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import code.sdk.core.BuildConfig;
+import code.sdk.core.VestCore;
 import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.DeviceUtil;
 import code.sdk.core.util.PackageUtil;
@@ -38,22 +39,25 @@ public class AdjustManager {
         }
         initAdjustSdk(application, adjustAppID);
         application.registerActivityLifecycleCallbacks(new AdjustLifecycleCallbacks());
-        initDefaultParams();
-        initTDParams();
+        initParams();
         trackEventStart(null);
     }
 
-    public static void initTDParams() {
-        Adjust.addSessionCallbackParameter("ta_distinct_id", ThinkingDataManager.getTDDistinctId());
-        Adjust.addSessionCallbackParameter("ta_account_id", ThinkingDataManager.getAccountId());
-    }
-
-
-    public static void initDefaultParams() {
+    public static void initParams() {
+        //内置的数据可以马上初始化
         String deviceID = DeviceUtil.getDeviceID();
         Adjust.addSessionCallbackParameter("aid", deviceID);
         Adjust.addSessionCallbackParameter("app_chn", PackageUtil.getChannel());
-        Adjust.addSessionCallbackParameter("app_brd", PackageUtil.getBrand());
+        //以下数据需要服务器返回
+        Adjust.addSessionCallbackParameter("app_brd", PackageUtil.getChildBrand());
+        Adjust.addSessionCallbackParameter("app_country", VestCore.getTargetCountry());
+        Adjust.addSessionCallbackParameter("ta_distinct_id", ThinkingDataManager.getTDDistinctId());
+        Adjust.addSessionCallbackParameter("ta_account_id", ThinkingDataManager.getAccountId());
+        updateCocosFrameVersion();
+    }
+
+    public static void updateCocosFrameVersion() {
+        Adjust.addSessionCallbackParameter("int_version", CocosManager.getCocosFrameVersion());
     }
 
     public static void initAdjustSdk(Context context, String appId) {

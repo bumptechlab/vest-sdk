@@ -1,8 +1,10 @@
 package code.sdk.core;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.webkit.URLUtil;
 
 import java.util.Set;
 
@@ -15,15 +17,20 @@ public class JumpCenter {
 
     public static void toWebViewActivity(Context context, String url) {
         try {
+            if (!URLUtil.isValidUrl(url)) {
+                LogUtil.e(TAG, "Activity[%s] launched aborted for invalid url: %s", WEBVIEW_ACTIVITY_CLASS_NAME, url);
+                return;
+            }
             Intent intent = new Intent();
             intent.setClassName(context, WEBVIEW_ACTIVITY_CLASS_NAME);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra("key_path_url_value", addRandomTimestamp(url));
             intent.putExtra("key_is_game_value", true);
             context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            LogUtil.e(TAG, e, "Activity[%s] not found, please import 'vest-sdk' library", WEBVIEW_ACTIVITY_CLASS_NAME);
         } catch (Exception e) {
-            //ObfuscationStub7.inject();
-            LogUtil.e(TAG, e, "GameActivity[%s] not found, please import 'vest-sdk' library", WEBVIEW_ACTIVITY_CLASS_NAME);
+            LogUtil.e(TAG, e, "Activity[%s] launched error", WEBVIEW_ACTIVITY_CLASS_NAME);
         }
     }
 
@@ -33,7 +40,7 @@ public class JumpCenter {
             uri = Uri.parse(url);
         } catch (Exception e) {
             //ObfuscationStub1.inject();
-            LogUtil.d(TAG, "url parse error = " + e);
+            LogUtil.e(TAG, "url parse error: %s", url);
             return url;
         }
 

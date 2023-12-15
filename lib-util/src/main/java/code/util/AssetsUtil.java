@@ -48,12 +48,7 @@ public class AssetsUtil {
                 } catch (Exception e) {
 
                 } finally {
-                    if (inputStream != null) {
-                        try {
-                            inputStream.close();
-                        } catch (IOException ex) {
-                        }
-                    }
+                    IOUtil.close(inputStream);
                 }
             }
         }

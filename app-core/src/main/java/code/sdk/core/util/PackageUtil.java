@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import code.util.AppGlobal;
+import code.util.LogUtil;
 
 public class PackageUtil {
     public static final String TAG = PackageUtil.class.getSimpleName();
@@ -67,16 +67,21 @@ public class PackageUtil {
         return channel;
     }
 
-    public static String getBrand() {
-        String brand = PreferenceUtil.readBrand();
-        if (!TextUtils.isEmpty(brand)) {
+    public static String getParentBrand() {
+        String parentBrand = PreferenceUtil.readParentBrand();
+        if (!TextUtils.isEmpty(parentBrand)) {
             //ObfuscationStub6.inject();
-            return brand;
+            return parentBrand;
         }
-        brand = ConfigPreference.readBrand();
-//        brand = readMetaData("brd");
-        PreferenceUtil.saveBrand(brand);
-        return brand;
+        parentBrand = ConfigPreference.readBrand();
+        PreferenceUtil.saveParentBrand(parentBrand);
+        return parentBrand;
+    }
+
+    public static String getChildBrand() {
+        String childBrd = PreferenceUtil.readChildBrand();
+        LogUtil.d(TAG, "read child brand: %s", childBrd);
+        return childBrd;
     }
 
     public static String getBuildVersion() {

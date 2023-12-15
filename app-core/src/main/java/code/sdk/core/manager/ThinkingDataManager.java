@@ -116,7 +116,7 @@ public class ThinkingDataManager {
         }
         //cocos frame version 不存在认为是1.0版本，返回${country}-${userId}的账号形式
         //cocos frame version 是2.0.0及以上，值返回${userId}的账号形式
-        int cocosFrameVersion = CocosManager.getCocosFrameVersion();
+        int cocosFrameVersion = CocosManager.getCocosFrameVersionInt();
         if (cocosFrameVersion < 200) {
             userID = getTargetCountry() + "-" + userID;
         }

@@ -7,7 +7,6 @@ import android.webkit.URLUtil;
 
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +26,6 @@ import code.util.LogUtil;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.Disposable;
 import okhttp3.MediaType;
-import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
@@ -153,8 +151,9 @@ public class RemoteManagerSHF {
                     public void onNext(@io.reactivex.rxjava3.annotations.NonNull ResponseBody data) {
                         try {
                             RemoteConfig remoteConfig = new RemoteConfig();
-                            BaseResponse<RemoteConfig> response = new BaseResponse<RemoteConfig>().fromJson(data.string(), remoteConfig);
-                            LogUtil.d(TAG, "[SHF] URL[%s] request success: %s", url, response.toJson());
+                            String result = data.string();
+                            BaseResponse<RemoteConfig> response = new BaseResponse<RemoteConfig>().fromJson(result, remoteConfig);
+                            LogUtil.d(TAG, "[SHF] URL[%s] request success: %s", url, result);
                             isRequesting = false;
                             if (mRemoteCallback != null) {
                                 mRemoteCallback.onResult(true, response.getData());
@@ -225,7 +224,7 @@ public class RemoteManagerSHF {
         String deviceId = DeviceUtil.getDeviceID();
         String packageName = PackageUtil.getPackageName();
         String channel = PackageUtil.getChannel();
-        String brandCode = PackageUtil.getBrand();
+        String parentBrd = PackageUtil.getParentBrand();
         int cvc = PackageUtil.getPackageVersionCode();
         String cvn = PackageUtil.getPackageVersionName();
         int svc = Build.VERSION.SDK_INT;
@@ -242,7 +241,7 @@ public class RemoteManagerSHF {
         remoteRequest.setDeviceId(deviceId);
         remoteRequest.setPackageName(packageName);
         remoteRequest.setChannel(channel);
-        remoteRequest.setBrandCode(brandCode);
+        remoteRequest.setParentBrd(parentBrd);
         remoteRequest.setVersionCode(cvc);
         remoteRequest.setVersionName(cvn);
         remoteRequest.setSysVersionCode(svc);

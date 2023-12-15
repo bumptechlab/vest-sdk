@@ -62,9 +62,9 @@ public class ShareUtil {
 
     public static void shareToWhatsApp(Context context, String text, File file) {
         Uri uri = null;
-        if (file != null && file.exists()) {
-            uri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", file);
-        }
+//        if (file != null && file.exists()) {
+//            uri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", file);
+//        }
         Intent intent = new Intent();
         intent.setAction("android.intent.action.SEND");
         intent.putExtra("android.intent.extra.SUBJECT", "WhatsApp");

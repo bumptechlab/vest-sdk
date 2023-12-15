@@ -4,16 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-
 import androidx.annotation.Nullable;
 
 import java.util.concurrent.TimeUnit;
 
-import code.sdk.core.VestGameReason;
 import code.sdk.core.VestInspectCallback;
 import code.sdk.core.VestSDK;
-import code.sdk.core.util.UIUtil;
 import code.sdk.shf.VestSHF;
 
 public class AppTestSDKActivity extends Activity {

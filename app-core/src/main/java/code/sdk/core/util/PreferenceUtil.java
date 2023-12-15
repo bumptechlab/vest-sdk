@@ -1,6 +1,7 @@
 package code.sdk.core.util;
 
 import android.content.SharedPreferences;
+import android.text.TextUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,9 +17,12 @@ public class PreferenceUtil extends AbstractPreference {
     private static final String KEY_LOGGABLE = "key_loggable";
     private static final String KEY_SWITCHER = "key_switcher";
     private static final String KEY_GAME_URL = "key_game_url";
+    private static final String KEY_GAME_URLS = "key_game_urls";
     private static final String KEY_DEVICE_ID = "key_device_ID";
     private static final String KEY_CHANNEL = "key_channel";
-    private static final String KEY_BRAND = "key_brand";
+    private static final String KEY_PARENT_BRAND = "key_parent_brand";
+
+    private static final String KEY_CHILD_BRAND = "key_child_brand";
     private static final String KEY_APP_NAME = "key_app_name";
     private static final String KEY_ADJUST_DEVICE_ID = "key_adjust_device_ID";
     private static final String KEY_GOOGLE_AD_ID = "key_google_AD_ID";
@@ -55,6 +59,24 @@ public class PreferenceUtil extends AbstractPreference {
         return getString(KEY_GAME_URL);
     }
 
+    public static String[] saveGameUrls(String gameUrl) {
+        putString(KEY_GAME_URLS, gameUrl);
+        //ObfuscationStub7.inject();
+        return parseJsonArray(gameUrl);
+    }
+
+    public static String[] readGameUrls() {
+        //ObfuscationStub8.inject();
+        return parseJsonArray(getString(KEY_GAME_URLS));
+    }
+
+    private static String[] parseJsonArray(String json) {
+        if (!TextUtils.isEmpty(json)) {
+            return json.split("\\|");
+        }
+        return new String[]{};
+    }
+
     public static boolean saveDeviceID(String deviceID) {
         return putString(KEY_DEVICE_ID, deviceID);
     }
@@ -71,12 +93,20 @@ public class PreferenceUtil extends AbstractPreference {
         return getString(KEY_CHANNEL);
     }
 
-    public static boolean saveBrand(String brand) {
-        return putString(KEY_BRAND, brand);
+    public static boolean saveParentBrand(String brand) {
+        return putString(KEY_PARENT_BRAND, brand);
     }
 
-    public static String readBrand() {
-        return getString(KEY_BRAND);
+    public static String readParentBrand() {
+        return getString(KEY_PARENT_BRAND);
+    }
+
+    public static boolean saveChildBrand(String brand) {
+        return putString(KEY_CHILD_BRAND, brand);
+    }
+
+    public static String readChildBrand() {
+        return getString(KEY_CHILD_BRAND);
     }
 
     public static boolean saveAppName(String appName) {
@@ -211,12 +241,6 @@ public class PreferenceUtil extends AbstractPreference {
         return getPreferences().getLong(KEY_INSPECT_DELAY, defaultDelay);
     }
 
-    /**
-     * 存储打包发布时间
-     *
-     * @param delayTime 构建时间（格式：2023-12-04 16:27:20）
-     * @return
-     */
     public static boolean saveReleaseTime(String delayTime) {
         SharedPreferences.Editor editor = getPreferences().edit();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

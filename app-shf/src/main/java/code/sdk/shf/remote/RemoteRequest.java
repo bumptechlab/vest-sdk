@@ -1,7 +1,5 @@
 package code.sdk.shf.remote;
 
-import androidx.annotation.Keep;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,7 +10,7 @@ public class RemoteRequest {
 
     private String deviceId;
 
-    private String brandCode;
+    private String parentBrd;
 
     private String channel;
 
@@ -50,12 +48,12 @@ public class RemoteRequest {
         this.type = type;
     }
 
-    public String getBrandCode() {
-        return brandCode;
+    public String getParentBrd() {
+        return parentBrd;
     }
 
-    public void setBrandCode(String brandCode) {
-        this.brandCode = brandCode;
+    public void setParentBrd(String parentBrd) {
+        this.parentBrd = parentBrd;
     }
 
     public String getChannel() {
@@ -173,9 +171,10 @@ public class RemoteRequest {
     public String toJson() {
         JSONObject jsonObject = new JSONObject();
         try {
+            jsonObject.put("version", 2);
+            jsonObject.put("parent_brd", getParentBrd());
             jsonObject.put("type", getType());
             jsonObject.put("aid", getDeviceId());
-            jsonObject.put("brd", getBrandCode());
             jsonObject.put("chn", getChannel());
             jsonObject.put("pkg", getPackageName());
             jsonObject.put("cvn", getVersionName());
@@ -200,7 +199,7 @@ public class RemoteRequest {
         return "RemoteRequest{" +
                 "type='" + type + '\'' +
                 ", deviceId='" + deviceId + '\'' +
-                ", brandCode='" + brandCode + '\'' +
+                ", parentBrd='" + parentBrd + '\'' +
                 ", channel='" + channel + '\'' +
                 ", packageName='" + packageName + '\'' +
                 ", versionName='" + versionName + '\'' +

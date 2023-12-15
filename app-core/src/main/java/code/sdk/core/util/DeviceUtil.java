@@ -103,14 +103,12 @@ public class DeviceUtil {
         boolean isReadFromFile = pair.second;
 
         if (TextUtils.isEmpty(deviceID)) {
-            String googleADID = getGoogleADID();
-            deviceID = googleADID;
+            deviceID = getGoogleADID();
             LogUtil.d(TAG, "getDeviceId: GoogleADId: %s", deviceID);
         }
         //UUID
         if (TextUtils.isEmpty(deviceID)) {
-            String uuid = UUID.randomUUID().toString();
-            deviceID = uuid;
+            deviceID = UUID.randomUUID().toString();
             LogUtil.d(TAG, "getDeviceId: UUID: %s", deviceID);
         }
 
