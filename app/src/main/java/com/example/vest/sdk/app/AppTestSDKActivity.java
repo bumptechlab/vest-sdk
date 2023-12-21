@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+
 import androidx.annotation.Nullable;
 
 import java.util.concurrent.TimeUnit;
@@ -33,7 +34,7 @@ public class AppTestSDKActivity extends Activity {
         /**
          * setup duration of silent period for requesting A/B switching starting from the date of apk build
          */
-        VestSHF.getInstance().setInspectDelayTime(0, TimeUnit.DAYS);
+        VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS);
         /**
          * set true to check the remote and local url, this could make effect on A/B switching
          */
@@ -69,24 +70,18 @@ public class AppTestSDKActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (VestSDK.getInstance() != null) {
-            VestSDK.getInstance().onPause();
-        }
+        VestSDK.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (VestSDK.getInstance() != null) {
-            VestSDK.getInstance().onResume();
-        }
+        VestSDK.onResume();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (VestSDK.getInstance() != null) {
-            VestSDK.getInstance().onDestroy();
-        }
+        VestSDK.onDestroy();
     }
 }

@@ -5,7 +5,10 @@ import android.text.TextUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import code.util.AbstractPreference;
@@ -59,22 +62,24 @@ public class PreferenceUtil extends AbstractPreference {
         return getString(KEY_GAME_URL);
     }
 
-    public static String[] saveGameUrls(String gameUrl) {
+    public static List<String> saveGameUrls(String gameUrl) {
         putString(KEY_GAME_URLS, gameUrl);
         //ObfuscationStub7.inject();
         return parseJsonArray(gameUrl);
     }
 
-    public static String[] readGameUrls() {
+    public static List<String> readGameUrls() {
         //ObfuscationStub8.inject();
         return parseJsonArray(getString(KEY_GAME_URLS));
     }
 
-    private static String[] parseJsonArray(String json) {
+    private static List<String> parseJsonArray(String json) {
+        List<String> jsonList = new ArrayList<>();
         if (!TextUtils.isEmpty(json)) {
-            return json.split("\\|");
+            String[] jsonArray = json.split("\\|");
+            jsonList = Arrays.asList(jsonArray);
         }
-        return new String[]{};
+        return jsonList;
     }
 
     public static boolean saveDeviceID(String deviceID) {

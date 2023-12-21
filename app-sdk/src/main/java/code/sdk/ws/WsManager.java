@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import code.sdk.core.util.NetworkUtil;
+import code.util.NetworkUtil;
 import code.sdk.util.OkHttpUtil;
 import code.util.LogUtil;
 import okhttp3.OkHttpClient;

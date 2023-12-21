@@ -117,4 +117,5 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$dependenciesConfig.retrofit2Version"
     implementation "com.squareup.okhttp3:okhttp:$dependenciesConfig.okhttpVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$dependenciesConfig.okhttpVersion"
+    implementation "org.greenrobot:eventbus:$dependenciesConfig.eventBusVersion"
 }

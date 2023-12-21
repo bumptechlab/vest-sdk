@@ -94,4 +94,5 @@ dependencies {
     implementation "androidx.security:security-crypto:$dependenciesConfig.securityCryptoVersion"
     implementation "androidx.security:security-identity-credential:$dependenciesConfig.securityIdentityCredentialVersion"
     implementation "androidx.security:security-app-authenticator:$dependenciesConfig.securityAppAuthenticatorVersion"
+    implementation "org.greenrobot:eventbus:$dependenciesConfig.eventBusVersion"
 }

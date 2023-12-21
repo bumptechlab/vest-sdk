@@ -43,7 +43,6 @@ Vest-SDK由三个依赖库组成，分别是：
 |--------------------|---------------------------------------------------------|
 | channel            | 渠道号，功能上没有用到，但是也要按照厂商给的填写正确                              |
 | brand              | 品牌号，开关按照品牌独立返回                                          |
-| country            | 国家，用于区分统计数据来源                                           |
 | shf_base_domain    | 开关服务器主域名，每个品牌配置一个                                       |
 | shf_spare_domains  | 备用服务器域名，当主域名无法访问时，轮询访问备用域名，备用域名每个品牌都是一样，主要是为了减少域名的购买成本。 |
 | shf_dispatcher     | 开关请求API路径，是一个动态加密路径，由厂商后台提供                             |
@@ -159,14 +158,14 @@ SDK本身不提供代码混淆，要是审核遇到问题，可以尝试修改�
 #### 2. 使用代码插桩插件Code-Plugin   
 
 ##### (1) 简介
-Code-Plugin是一款Gradle插件，用于在项目构建过程中向字节码插入垃圾代码，通过更改运行时代码应对Google动态代码审查。支持Java和Kotlin项目，当前版本：1.0.4。   
+Code-Plugin是一款Gradle插件，用于在项目构建过程中向字节码插入垃圾代码，通过更改运行时代码应对Google动态代码审查。支持Java和Kotlin项目，当前版本：1.0.6。   
 
 ##### (2) 插件集成   
 - 项目级根目录build.gradle中：
    ```groovy
    buildscript {
      dependencies {
-       classpath("io.github.bumptechlab:code-plugin:1.0.4")
+       classpath("io.github.bumptechlab:code-plugin:1.0.6")
      }
    }
    ```

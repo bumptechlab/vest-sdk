@@ -55,7 +55,7 @@ import code.sdk.command.AssetLoaderManager;
 import code.sdk.common.ScreenUtil;
 import code.sdk.core.Constant;
 import code.sdk.core.util.DeviceUtil;
-import code.sdk.core.util.NetworkUtil;
+import code.util.NetworkUtil;
 import code.sdk.core.util.PreferenceUtil;
 import code.sdk.core.util.TestUtil;
 import code.sdk.drawable.Drawables;
@@ -634,8 +634,11 @@ public class WebActivity extends BaseWebActivity {
                 mLastBackTs = System.currentTimeMillis();
             } else {
                 finish();
-                System.exit(0);
-                Process.killProcess(Process.myPid());
+                if (isGame) {
+                    LogUtil.d(TAG, "kill process after exit game");
+                    System.exit(0);
+                    Process.killProcess(Process.myPid());
+                }
             }
             return true;
         }

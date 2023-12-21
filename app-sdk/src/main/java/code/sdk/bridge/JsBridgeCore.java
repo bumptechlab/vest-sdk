@@ -52,8 +52,10 @@ public class JsBridgeCore extends Bridge {
                 }
             }
             result = dispatchRequest(method, params);
-            LogUtil.d(TAG, "[JsBridge] --> %s(%s)", method, params == null ? "" : String.join(", ", params));
-            LogUtil.d(TAG, "[JsBridge] <-- %s", TextUtils.isEmpty(result) ? "void" : result);
+            LogUtil.d(TAG, "[JsBridge] %s(%s) --> %s",
+                    method,
+                    String.join(", ", params),
+                    TextUtils.isEmpty(result) ? "void" : result);
         } catch (JSONException e) {
             e.printStackTrace();
         }

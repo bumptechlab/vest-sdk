@@ -1,5 +1,5 @@
 # Vest-SDK
-最新版本：0.10.10   
+最新版本：0.10.11   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 
 SDK总共三个依赖库：  
@@ -79,11 +79,11 @@ vest-shf: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:0.10.10'
+          implementation 'io.github.bumptechlab:vest-core:0.10.11'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:0.10.10'
+          implementation 'io.github.bumptechlab:vest-sdk:0.10.11'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:0.10.10'
+          implementation 'io.github.bumptechlab:vest-shf:0.10.11'
       }
       ```
    (2) 本地依赖方式
@@ -110,6 +110,7 @@ vest-shf: 用于切换A/B面的远程开关
           implementation "com.squareup.retrofit2:retrofit:2.9.0"
           implementation "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
           implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+          implementation "org.greenrobot:eventbus:3.3.1"
       }
       ```
     - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)   
@@ -154,7 +155,7 @@ vest-shf: 用于切换A/B面的远程开关
      /**
       * setup duration of silent period for requesting A/B switching starting from the date of apk build
       */
-     VestSHF.getInstance().setInspectDelayTime(0, TimeUnit.DAYS);
+     VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS);
 
      /**
       * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
@@ -205,25 +206,19 @@ vest-shf: 用于切换A/B面的远程开关
     @Override
     protected void onPause() {
         super.onPause();
-        if (VestSDK.getInstance() != null) {
-            VestSDK.getInstance().onPause();
-        }
+        VestSDK.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (VestSDK.getInstance() != null) {
-            VestSDK.getInstance().onResume();
-        }
+        VestSDK.onResume();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (VestSDK.getInstance() != null) {
-            VestSDK.getInstance().onDestroy();
-        }
+        VestSDK.onDestroy();
     }
     ```
 5. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets根目录。为避免出包之间文件关联，请自行更改`config`文件名。
@@ -259,9 +254,9 @@ allprojects {
 2. 在sdk的依赖版本号后面加上-SNAPSHOT，则可以使用release版本的快照版本，从0.10.3开始才有快照版本。
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:0.10.10-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.10-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.10-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:0.10.11-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.11-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.11-SNAPSHOT'
  }
 ```
 3. 在build.gradle android节点下添加以下代码，可以帮助及时更新sdk版本依赖缓存。
@@ -363,3 +358,9 @@ allprojects {
 - 实现sdk生命周期
 - 退出WebView杀进程
 - 升级js引擎（vest-plugin升级到1.0.14）
+### 0.10.11
+- 修复退出客服页面导致整个程序退出的问题
+- 修复审核服备用跳转地址的逻辑问题
+- 加密审核服返回内容中的字段
+- 优先使用游戏链接中的品牌作为Adjust统计的品牌
+- 优化sdk生命周期方法

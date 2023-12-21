@@ -40,6 +40,7 @@ project.ext {
             retrofit2Version                 : '2.9.0',
             httpdnsVersion                   : "4.4.0-intl",
             onesignalVersion                 : "4.8.6",
+            eventBusVersion                  : "3.3.1",
             securityCryptoVersion            : "1.1.0-alpha05",
             securityIdentityCredentialVersion: "1.0.0-alpha03",
             securityAppAuthenticatorVersion  : "1.0.0-alpha02"
@@ -47,12 +48,12 @@ project.ext {
 
     //配置各个依赖库的命名空间
     namespaces = [
-            app       : "com.example.vest.sdk.app",
-            appb      : "com.example.app.test",
-            appsdk    : "code.sdk",
-            appshf    : "code.sdk.shf",
-            appcore   : "code.sdk.core",
-            util      : "code.util",
+            app    : "com.example.vest.sdk.app",
+            appb   : "com.example.app.test",
+            appsdk : "code.sdk",
+            appshf : "code.sdk.shf",
+            appcore: "code.sdk.core",
+            util   : "code.util",
     ]
 
     maven = [
@@ -61,7 +62,7 @@ project.ext {
             artifactIdSdk    : 'vest-sdk',
             artifactIdShf    : 'vest-shf',
             artifactIdCore   : 'vest-core',
-            version          : '0.10.10',//发布到maven的版本号
+            version          : '0.10.11',//发布到maven的版本号
 
             //Github代码仓库参数
             homePage         : 'https://github.com/bumptechlab/vest-sdk',//主页地址

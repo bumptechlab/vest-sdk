@@ -8,8 +8,12 @@ import code.sdk.core.util.GoogleAdIdInitializer;
 import code.sdk.core.util.PreferenceUtil;
 import code.util.LogUtil;
 
+/**
+ * check install referrer & googleAdId
+ */
 public class InitInspector {
     public static final String TAG = InitInspector.class.getSimpleName();
+    private static final long TIMEOUT = 3_000;
 
     public boolean inspect() {
         String installReferrer = InstallReferrerManager.getInstallReferrer();
@@ -17,8 +21,7 @@ public class InitInspector {
         while (TextUtils.isEmpty(installReferrer) || GoogleAdIdInitializer.needUpdateGoogleAdId()) {
             installReferrer = InstallReferrerManager.getInstallReferrer();
             GoogleAdIdInitializer.init();
-            //installReferrer最多检查20秒
-            if (System.currentTimeMillis() - startTime > 20_000) {
+            if (System.currentTimeMillis() - startTime > TIMEOUT) {
                 LogUtil.d(TAG, "[InitInspector] inspect timeout!");
                 break;
             }

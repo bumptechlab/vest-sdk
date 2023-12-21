@@ -63,7 +63,7 @@
 -keep class io.reactivex.rxjava3.** { *; }
 -dontwarn io.reactivex.rxjava3.**
 
-# adjust SDK
+# adjust sdk start
 -keep class com.adjust.sdk.**{ *; }
 -keep class com.google.android.gms.common.ConnectionResult {
     int SUCCESS;
@@ -76,6 +76,8 @@
     boolean isLimitAdTrackingEnabled();
 }
 -keep public class com.android.installreferrer.**{ *; }
+
+# adjust sdk end
 
 -dontwarn com.google.errorprone.annotations.Immutable
 -keep class com.google.errorprone.annotations.Immutable

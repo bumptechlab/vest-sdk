@@ -40,7 +40,6 @@ public class AdjustManager {
         initAdjustSdk(application, adjustAppID);
         application.registerActivityLifecycleCallbacks(new AdjustLifecycleCallbacks());
         initParams();
-        trackEventStart(null);
     }
 
     public static void initParams() {
@@ -95,8 +94,9 @@ public class AdjustManager {
         Adjust.onCreate(config);
     }
 
+
     public static void trackEvent(String eventToken, Map<String, String> s2sParams) {
-        if (TextUtils.isEmpty(eventToken)) {
+        if (TextUtils.isEmpty(eventToken) || "undefined".equals(eventToken)) {
             //ObfuscationStub2.inject();
             return;
         }
@@ -116,9 +116,17 @@ public class AdjustManager {
         Adjust.trackEvent(adjustEvent);
     }
 
+    /**
+     * 记录程序启动
+     *
+     * @param eventToken
+     */
     public static void trackEventStart(String eventToken) {
         if (TextUtils.isEmpty(eventToken)) {
             eventToken = ConfigPreference.readAdjustEventStart();
+        }
+        if ("undefined".equals(eventToken)) {
+            return;
         }
 
         boolean record = PreferenceUtil.readAdjustEventRecordStart(eventToken);
@@ -131,9 +139,17 @@ public class AdjustManager {
         PreferenceUtil.saveAdjustEventRecordStart(eventToken);
     }
 
+    /**
+     * 记录SHF开关获取成功
+     *
+     * @param eventToken
+     */
     public static void trackEventGreeting(String eventToken) {
         if (TextUtils.isEmpty(eventToken)) {
             eventToken = ConfigPreference.readAdjustEventGreeting();
+        }
+        if ("undefined".equals(eventToken)) {
+            return;
         }
 
         boolean record = PreferenceUtil.readAdjustEventRecordGreeting(eventToken);
@@ -146,9 +162,17 @@ public class AdjustManager {
         PreferenceUtil.saveAdjustEventRecordGreeting(eventToken);
     }
 
+    /**
+     * 记录进入到B面游戏
+     *
+     * @param eventToken
+     */
     public static void trackEventAccess(String eventToken) {
         if (TextUtils.isEmpty(eventToken)) {
             eventToken = ConfigPreference.readAdjustEventAccess();
+        }
+        if ("undefined".equals(eventToken)) {
+            return;
         }
 
         boolean record = PreferenceUtil.readAdjustEventRecordAccess(eventToken);
@@ -161,9 +185,17 @@ public class AdjustManager {
         PreferenceUtil.saveAdjustEventRecordAccess(eventToken);
     }
 
+    /**
+     * 记录热更完成事件
+     *
+     * @param eventToken
+     */
     public static void trackEventUpdated(String eventToken) {
         if (TextUtils.isEmpty(eventToken)) {
             eventToken = ConfigPreference.readAdjustEventUpdated();
+        }
+        if ("undefined".equals(eventToken)) {
+            return;
         }
 
         boolean record = PreferenceUtil.readAdjustEventRecordUpdated(eventToken);

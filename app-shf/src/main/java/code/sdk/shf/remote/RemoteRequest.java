@@ -6,6 +6,12 @@ import org.json.JSONObject;
 public class RemoteRequest {
     public static final String TAG = RemoteRequest.class.getSimpleName();
 
+    /**
+     * Api版本
+     * 1: 请求返回：switch + h5_url + country
+     * 2: 请求返回：switch + h5_url + country + child_brand + jump_urls
+     */
+    private int version;
     private String type;
 
     private String deviceId;
@@ -36,8 +42,21 @@ public class RemoteRequest {
 
     private String deviceInfo;
 
-    //是否替换响应body中的switch/h5_url这两个参数
-    //大于0为需要替换，小于等于0为不需要替换，默认为0.
+    /**
+     * 是否加密返回的字段
+     * rkey > 0时会替换响应中的Json key，替换规则如下：
+     * 假设pkg参数为：com.superquicklodi.okms
+     * MD5("com.superquicklodi.okms")="41b880285e306b7b5f273cf62272ba3f"，MD5使用全小写。
+     * switch：取“41b880285e306b7b5f273cf62272ba3f”的前4个字节并在前面加“s”为”s41b8”替换掉响应中的switch
+     * h5_url：取“41b880285e306b7b5f273cf62272ba3f”的最后4个字节并在前面加“u”为”uba3f”替换掉响应中的h5_url
+     * jump_urls：取“41b880285e306b7b5f273cf62272ba3f”的最后4个字节并在前面加“j”为”jba3f”替换掉响应中的jump_urls
+     * http_dns：取“41b880285e306b7b5f273cf62272ba3f”的5~8 4个字节并在前面加“t”为”t8028”替换掉响应中的http_dns
+     * native_addr：取“41b880285e306b7b5f273cf62272ba3f”的9~12 4个字节并在前面加“n”为”n5e30”替换掉响应中的native_addr
+     * hot_update_addr：取“41b880285e306b7b5f273cf62272ba3f”的13~16 4个字节并在前面加“h”为”h6b7b”替换掉响应中的hot_update_addr
+     * pem_addr：取“41b880285e306b7b5f273cf62272ba3f”的17~20 4个字节并在前面加“p”为”p5f27”替换掉响应中的pem_addr
+     * child_brd：取“41b880285e306b7b5f273cf62272ba3f”的25-28 4个字节并在前面加“b”为”b2272”替换掉响应中的child_brd
+     * country：取“41b880285e306b7b5f273cf62272ba3f”的21~24 4个字节并在前面加“c”为”c3cf6”替换掉响应中的country，取值范围:
+     */
     private int rkey = 0;
 
     public String getType() {
@@ -168,10 +187,18 @@ public class RemoteRequest {
         this.rkey = rkey;
     }
 
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
     public String toJson() {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("version", 2);
+            jsonObject.put("version", getVersion());
             jsonObject.put("parent_brd", getParentBrd());
             jsonObject.put("type", getType());
             jsonObject.put("aid", getDeviceId());

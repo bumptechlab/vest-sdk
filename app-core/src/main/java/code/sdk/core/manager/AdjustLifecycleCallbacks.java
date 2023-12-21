@@ -14,13 +14,11 @@ public class AdjustLifecycleCallbacks extends SimpleLifecycleCallbacks {
 
     @Override
     public void onActivityResumed(Activity activity) {
-        LogUtil.d(TAG, "[Adjust] onActivityResumed");
         Adjust.onResume();
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
-        LogUtil.d(TAG, "[Adjust] onActivityPaused");
         Adjust.onPause();
     }
 

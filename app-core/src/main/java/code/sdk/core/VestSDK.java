@@ -7,7 +7,6 @@ import code.util.LogUtil;
 
 public class VestSDK {
     private static String TAG = VestSDK.class.getSimpleName();
-    public static VestSDK sInstance = null;
 
     /**
      * init vest-sdk with this method at the main entrance of application
@@ -16,18 +15,8 @@ public class VestSDK {
      * @param configAssets
      * @return
      */
-    public static VestSDK init(Context context, String configAssets) {
-        if (sInstance == null) {
-            sInstance = new VestSDK(context, configAssets);
-        }
-        return sInstance;
-    }
-
-    public static VestSDK getInstance() {
-        return sInstance;
-    }
-
-    private VestSDK(Context context, String configAssets) {
+    public static void init(Context context, String configAssets) {
+        LogUtil.d(TAG, "[Vest-SDK] init");
         VestCore.init(context, configAssets);
     }
 
@@ -41,18 +30,23 @@ public class VestSDK {
         LogUtil.setDebug(TestUtil.isLoggable());
     }
 
-    public void onCreate() {
+    public static void onCreate() {
+        LogUtil.d(TAG, "[Vest-SDK] onCreate");
         VestCore.onCreate();
     }
 
-    public void onResume() {
+    public static void onResume() {
+        LogUtil.d(TAG, "[Vest-SDK] onResume");
         VestCore.onResume();
     }
-    public void onPause() {
+
+    public static void onPause() {
+        LogUtil.d(TAG, "[Vest-SDK] onPause");
         VestCore.onPause();
     }
 
-    public void onDestroy() {
+    public static void onDestroy() {
+        LogUtil.d(TAG, "[Vest-SDK] onDestroy");
         VestCore.onDestroy();
     }
 

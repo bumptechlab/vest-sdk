@@ -26,7 +26,22 @@
     @android.webkit.JavascriptInterface <methods>;
 }
 
-# adjust SDK
+# Proguard Apache HTTP for release
+-keep class org.apache.http.** { *; }
+-dontwarn org.apache.http.**
+
+# Proguard okhttp for release
+-keep class okhttp3.** { *; }
+-dontwarn okhttp3.**
+
+-keep class okio.** { *; }
+-dontwarn okio.**
+
+# Proguard rxJava for release
+-keep class io.reactivex.rxjava3.** { *; }
+-dontwarn io.reactivex.rxjava3.**
+
+# adjust sdk start
 -keep class com.adjust.sdk.**{ *; }
 -keep class com.google.android.gms.common.ConnectionResult {
     int SUCCESS;
@@ -40,6 +55,12 @@
 }
 -keep public class com.android.installreferrer.**{ *; }
 
+# adjust sdk end
+
 -dontwarn com.google.errorprone.annotations.Immutable
 -keep class com.google.errorprone.annotations.Immutable
+
+-dontwarn com.google.errorprone.annotations.CanIgnoreReturnValue
+-dontwarn com.google.errorprone.annotations.CheckReturnValue
+-dontwarn com.google.errorprone.annotations.RestrictedApi
 ```

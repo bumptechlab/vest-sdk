@@ -14,7 +14,7 @@ import java.util.Map;
 
 import code.sdk.core.util.ConfigPreference;
 import code.sdk.core.util.DeviceUtil;
-import code.sdk.core.util.NetworkUtil;
+import code.util.NetworkUtil;
 import code.sdk.core.util.PackageUtil;
 import code.sdk.core.util.PreferenceUtil;
 import code.sdk.core.util.URLUtilX;
@@ -235,8 +235,11 @@ public class RemoteManagerSHF {
         String language = DeviceUtil.getLanguage(mContext);
         String platform = "android";
         String referrer = PreferenceUtil.readInstallReferrer();
+        int apiVersion = 2; //api版本
+        int rKey = 1; //是否加密返回字段
 
         RemoteRequest remoteRequest = new RemoteRequest();
+        remoteRequest.setVersion(apiVersion);
         remoteRequest.setType(type);
         remoteRequest.setDeviceId(deviceId);
         remoteRequest.setPackageName(packageName);
@@ -251,6 +254,7 @@ public class RemoteManagerSHF {
         remoteRequest.setLanguage(language);
         remoteRequest.setPlatform(platform);
         remoteRequest.setReferrer(referrer);
+        remoteRequest.setRkey(rKey);
         remoteRequest.setDeviceInfo("");
 
         return remoteRequest;

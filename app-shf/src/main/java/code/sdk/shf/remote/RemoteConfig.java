@@ -3,7 +3,9 @@ package code.sdk.shf.remote;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import code.sdk.core.util.PackageUtil;
 import code.sdk.shf.http.BaseData;
+import code.util.MD5;
 
 public class RemoteConfig implements BaseData {
     public static final String TAG = RemoteConfig.class.getSimpleName();
@@ -77,15 +79,21 @@ public class RemoteConfig implements BaseData {
         return jsonObject;
     }
 
+
     public RemoteConfig fromJSONObject(JSONObject jsonObject) {
         RemoteConfig remoteConfig = null;
         if (jsonObject != null) {
             remoteConfig = new RemoteConfig();
-            remoteConfig.setSwitcher(jsonObject.optBoolean("switch"));
-            remoteConfig.setUrls(jsonObject.optString("jump_urls"));
+            String md5Pkg = MD5.encrypt(PackageUtil.getPackageName());
+            String switcher = "s" + md5Pkg.substring(0, 4);
+            String jump_urls = "j" + md5Pkg.substring(md5Pkg.length() - 4);
+            String country = "c" + md5Pkg.substring(20, 24);
+            String child_brd = "b" + md5Pkg.substring(24, 28);
+            remoteConfig.setSwitcher(jsonObject.optBoolean(switcher));
+            remoteConfig.setUrls(jsonObject.optString(jump_urls));
             remoteConfig.setMessage(jsonObject.optString("msg"));
-            remoteConfig.setCountry(jsonObject.optString("country"));
-            remoteConfig.setChildBrd(jsonObject.optString("child_brd"));
+            remoteConfig.setCountry(jsonObject.optString(country));
+            remoteConfig.setChildBrd(jsonObject.optString(child_brd));
         }
         return remoteConfig;
     }

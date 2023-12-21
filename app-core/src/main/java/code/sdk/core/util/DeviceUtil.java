@@ -171,7 +171,7 @@ public class DeviceUtil {
 
     public static List<String> getAllSimCountryIso(Context context) {
         List<String> countryIso = new ArrayList<>();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
             SubscriptionManager subManager = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
             int slotCount = subManager.getActiveSubscriptionInfoCountMax();
             for (int i = 0; i < slotCount; i++) {
@@ -196,7 +196,7 @@ public class DeviceUtil {
 
     private static int getSubIdBySlotId(Context context, int slotIndex) {
         int subId = -1;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
             SubscriptionManager sm = (SubscriptionManager) context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
             Object obj = ReflectionUtil.invokeMethod(sm, "android.telephony.SubscriptionManager", "getSubId", new Class[]{int.class}, slotIndex);
             int[] subIds = obj == null ? new int[]{} : (int[]) obj;
@@ -354,7 +354,7 @@ public class DeviceUtil {
     public static boolean isDomainAvailable(String host) {
         boolean isAvailable = false;
         try {
-            InetAddress ReturnStr = InetAddress.getByName(host);
+            InetAddress ReturnStr = java.net.InetAddress.getByName(host);
             String IPAddress = ReturnStr.getHostAddress();
             isAvailable = true;
         } catch (Exception e) {

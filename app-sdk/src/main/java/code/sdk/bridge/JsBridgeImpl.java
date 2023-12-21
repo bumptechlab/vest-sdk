@@ -42,7 +42,7 @@ public class JsBridgeImpl implements BridgeInterface {
     /**
      * 6: 支持HttpDns
      */
-    private static final int BRIDGE_VERSION = 6;
+    private static final int BRIDGE_VERSION = 7;
     public static final String DIR_IMAGES = "images";
     public static final String PROMOTION_MATERIAL_FILENAME = "promotion_material_%s_%s";
     public static final String PROMOTION_IMAGE_FILENAME = "promotion_%d.jpg";
