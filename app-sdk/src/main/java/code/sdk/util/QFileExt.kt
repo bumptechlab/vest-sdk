@@ -321,7 +321,7 @@ fun Context.getExternalOrCacheDirPath(): String {
  * 在缓存目录下新键子目录
  */
 fun Context.getCacheChildDir(child: String?): File {
-    val name = if (TextUtils.isEmpty(child)) {
+    val name = if (child.isNullOrEmpty()) {
         "app"
     } else {
         child

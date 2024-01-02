@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
     id 'com.kezong.fat-aar'
 }
 apply from: './publish.gradle' //aar发布脚本

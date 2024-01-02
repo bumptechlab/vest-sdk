@@ -11,7 +11,5 @@ import android.content.Context
  */
 @SuppressLint("StaticFieldLeak")
 object SdkInit {
-    @SuppressLint("StaticFieldLeak")
-    @JvmStatic
     lateinit var mContext: Context
 }

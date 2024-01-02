@@ -1,7 +1,8 @@
 plugins {
     id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
 }
-apply from: '../plugins/code-plugin.gradle'
+//apply from: '../plugins/code-plugin.gradle'
 
 def androidConfig = rootProject.ext.android
 def dependenciesConfig = rootProject.ext.dependencies

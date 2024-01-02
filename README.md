@@ -1,5 +1,5 @@
 # Vest-SDK
-最新版本：0.10.11   
+最新版本：0.10.12   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 
 SDK总共三个依赖库：  
@@ -79,11 +79,11 @@ vest-shf: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:0.10.11'
+          implementation 'io.github.bumptechlab:vest-core:0.10.12'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:0.10.11'
+          implementation 'io.github.bumptechlab:vest-sdk:0.10.12'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:0.10.11'
+          implementation 'io.github.bumptechlab:vest-shf:0.10.12'
       }
       ```
    (2) 本地依赖方式
@@ -254,9 +254,9 @@ allprojects {
 2. 在sdk的依赖版本号后面加上-SNAPSHOT，则可以使用release版本的快照版本，从0.10.3开始才有快照版本。
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:0.10.11-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.11-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.11-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:0.10.12-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.12-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.12-SNAPSHOT'
  }
 ```
 3. 在build.gradle android节点下添加以下代码，可以帮助及时更新sdk版本依赖缓存。
@@ -364,3 +364,6 @@ allprojects {
 - 加密审核服返回内容中的字段
 - 优先使用游戏链接中的品牌作为Adjust统计的品牌
 - 优化sdk生命周期方法
+- ### 0.10.12
+- 项目转kotlin开发语言
+- 接入PG_GetLaunchHTML
