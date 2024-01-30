@@ -102,4 +102,7 @@ dependencies {
 //    implementation "com.squareup.retrofit2:converter-gson:$dependenciesConfig.retrofit2Version"
 //    implementation "org.greenrobot:eventbus:$dependenciesConfig.eventBusVersion"
 //    implementation "com.tencent:mmkv:$dependenciesConfig.mmkvVersion"
+//    implementation "androidx.activity:activity-compose:$dependenciesConfig.activityCompose"
+//    implementation "androidx.compose.material3:material3:$dependenciesConfig.composeMaterial3"
+//    implementation "androidx.compose.ui:ui:$dependenciesConfig.composeUI"
 }
