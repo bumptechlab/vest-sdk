@@ -28,7 +28,7 @@ object DeviceMacUtil {
             }
             return getMacFromCommand() ?: ""
         } catch (exception: Exception) {
-            val wifiManager = AppGlobal.getApplication().applicationContext?.getSystemService(
+            val wifiManager = AppGlobal.application?.applicationContext?.getSystemService(
                 Context.WIFI_SERVICE
             ) as? WifiManager
             return wifiManager?.connectionInfo?.macAddress ?: ""

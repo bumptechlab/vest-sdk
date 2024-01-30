@@ -7,7 +7,7 @@ import android.text.TextUtils
 import android.util.Base64
 import code.sdk.core.util.ConfigPreference.readBrand
 import code.sdk.core.util.ConfigPreference.readChannel
-import code.util.AppGlobal.getApplication
+import code.util.AppGlobal
 import code.util.LogUtil.d
 import java.security.MessageDigest
 
@@ -15,16 +15,16 @@ object PackageUtil {
    private val TAG = PackageUtil::class.java.simpleName
     fun getLaunchIntentForPackage(packageName: String): Intent? {
         //ObfuscationStub2.inject();
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         val pm = context.packageManager
         return pm.getLaunchIntentForPackage(packageName)
     }
 
 
-    fun getPackageName(): String = getApplication().packageName
+    fun getPackageName(): String = AppGlobal.application!!.packageName
 
     fun getPackageVersionName(): String {
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         val pm = context.packageManager
         try {
             val pi = pm.getPackageInfo(context.packageName, 0)
@@ -36,7 +36,7 @@ object PackageUtil {
     }
 
     fun getPackageVersionCode(): Int {
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         val pm = context.packageManager
         try {
             val pi = pm.getPackageInfo(context.packageName, 0)
@@ -84,7 +84,7 @@ object PackageUtil {
     }
 
     fun readMetaData(key: String?): String {
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         val pm = context.packageManager
         var value = ""
         try {
@@ -115,7 +115,7 @@ object PackageUtil {
             //ObfuscationStub3.inject();
             return appName
         }
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         val pm = context.packageManager
         try {
             val pi = pm.getPackageInfo(

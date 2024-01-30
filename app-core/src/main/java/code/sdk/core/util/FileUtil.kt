@@ -2,7 +2,7 @@ package code.sdk.core.util
 
 import android.content.Context
 import android.graphics.Bitmap
-import code.util.AppGlobal.getApplication
+import code.util.AppGlobal
 import code.util.IOUtil.close
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -23,7 +23,7 @@ object FileUtil {
    private val TAG = FileUtil::class.java.simpleName
     private const val READ_CACHE_LENGTH = 8192
     fun getSelfApkFile(): File {
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         return File(context.packageResourcePath)
     }
 

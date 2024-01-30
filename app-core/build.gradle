@@ -92,8 +92,6 @@ dependencies {
     implementation "com.google.android.gms:play-services-ads-identifier:$dependenciesConfig.googlePlayServiceVersion"
     implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:$dependenciesConfig.thinkingDataSdkVersion"
     implementation "cn.thinkingdata.android:TAThirdParty:$dependenciesConfig.thinkingDataThirdPartyVersion"
-    implementation "androidx.security:security-crypto:$dependenciesConfig.securityCryptoVersion"
-    implementation "androidx.security:security-identity-credential:$dependenciesConfig.securityIdentityCredentialVersion"
-    implementation "androidx.security:security-app-authenticator:$dependenciesConfig.securityAppAuthenticatorVersion"
     implementation "org.greenrobot:eventbus:$dependenciesConfig.eventBusVersion"
+    implementation "com.tencent:mmkv:$dependenciesConfig.mmkvVersion"
 }

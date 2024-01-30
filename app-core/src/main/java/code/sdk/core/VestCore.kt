@@ -13,10 +13,12 @@ import code.sdk.core.manager.SimpleLifecycleCallbacks
 import code.sdk.core.manager.ThinkingDataManager
 import code.sdk.core.util.GoogleAdIdInitializer
 import code.sdk.core.util.PreferenceUtil.readTargetCountry
+import code.sdk.core.util.TestUtil
 import code.sdk.core.util.TestUtil.handleIntent
 import code.sdk.core.util.TestUtil.isLoggable
 import code.util.AESKeyStore
-import code.util.AppGlobal.getApplication
+import code.util.AbstractPreference
+import code.util.AppGlobal
 import code.util.LogUtil.d
 import code.util.LogUtil.e
 import code.util.LogUtil.i
@@ -30,7 +32,12 @@ object VestCore {
 
     private var isTestIntentHandled = false
 
-    fun init(context: Context, configAssets: String?) {
+    fun init(context: Context, configAssets: String?, loggable: Boolean?) {
+        AbstractPreference.init(context)
+        if (loggable != null){
+            TestUtil.setLoggable(loggable)
+            setDebug(isLoggable())
+        }
 //        PreferenceUtil.getInspectStartTime();
         setUncaughtException()
         AESKeyStore.init()
@@ -46,7 +53,7 @@ object VestCore {
     }
 
     fun registerActivityLifecycleCallbacks() {
-        getApplication().registerActivityLifecycleCallbacks(object : SimpleLifecycleCallbacks() {
+        AppGlobal.application?.registerActivityLifecycleCallbacks(object : SimpleLifecycleCallbacks() {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
                 ActivityManager.mInstance.push(activity)
                 interceptLauncherActivity(activity)
@@ -80,8 +87,8 @@ object VestCore {
     }
 
     fun initThirdSDK() {
-        ThinkingDataManager.init(getApplication())
-        init(getApplication())
+        ThinkingDataManager.init(AppGlobal.application)
+        init(AppGlobal.application!!)
     }
 
     fun updateThirdSDK() {

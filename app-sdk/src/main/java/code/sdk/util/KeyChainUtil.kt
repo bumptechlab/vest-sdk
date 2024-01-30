@@ -5,7 +5,7 @@ import android.os.Environment
 import code.sdk.core.util.FileUtil
 import code.util.AESUtil.decrypt
 import code.util.AESUtil.encrypt
-import code.util.AppGlobal.getApplication
+import code.util.AppGlobal
 import code.util.LogUtil.e
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -43,9 +43,9 @@ object KeyChainUtil {
     }
 
     private fun getAccountFile(): File {
-        val context: Context = getApplication()
-        val dir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-        val fileName = context.packageName + "-act.dat"
+        val context: Context? = AppGlobal.application
+        val dir = context?.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+        val fileName = context?.packageName + "-act.dat"
         return File(dir, fileName)
     }
 }

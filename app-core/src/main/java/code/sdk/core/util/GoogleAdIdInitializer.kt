@@ -1,7 +1,7 @@
 package code.sdk.core.util
 
 import android.text.TextUtils
-import code.util.AppGlobal.getApplication
+import code.util.AppGlobal
 import code.util.LogUtil.d
 import com.adjust.sdk.Adjust
 
@@ -24,7 +24,7 @@ object GoogleAdIdInitializer {
     }
 
     private fun startGetAdjustGoogleAdId() {
-        Adjust.getGoogleAdId(getApplication()) { s ->
+        Adjust.getGoogleAdId(AppGlobal.application) { s ->
             d(TAG, "onGoogleAdIdRead: %s", s)
             PreferenceUtil.saveGoogleADID(s)
             isWaitingGoogleAdId = false

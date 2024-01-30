@@ -27,6 +27,11 @@ object AdjustManager {
             adjustAppID = ConfigPreference.readAdjustAppId()
             PreferenceUtil.saveAdjustAppID(adjustAppID)
         }
+        if (TextUtils.isEmpty(adjustAppID)) {
+            w(TAG, "[Adjust] init aborted! appId empty")
+            //ObfuscationStub0.inject();
+            return
+        }
         initAdjustSdk(application, adjustAppID)
         application.registerActivityLifecycleCallbacks(AdjustLifecycleCallbacks())
         initParams()

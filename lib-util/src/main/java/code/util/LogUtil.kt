@@ -6,16 +6,16 @@ import android.util.Log
  * 日志开关
  */
 object LogUtil {
-   private val TAG = String(byteArrayOf(83, 104, 101, 108, 108))
+    private val TAG = "Shell"
 
     private var isDebug = true
 
-    
+
     fun isDebug(): Boolean {
         return isDebug
     }
 
-    
+
     fun setDebug(debug: Boolean) {
         isDebug = debug
         Log.d(TAG, ">>>> Log Enable: $debug <<<<")
@@ -33,42 +33,42 @@ object LogUtil {
         }
     }
 
-    
+
     fun d(tag: String, format: String, vararg args: Any?) {
         if (isDebug) {
             Log.d(TAG, buildMsg(tag, String.format(format, *args)))
         }
     }
 
-    
+
     fun d(tag: String, msg: String) {
         if (isDebug) {
             Log.d(TAG, buildMsg(tag, msg))
         }
     }
 
-    
+
     fun i(tag: String, format: String, vararg args: Any?) {
         if (isDebug) {
             Log.i(TAG, buildMsg(tag, String.format(format, *args)))
         }
     }
 
-    
+
     fun i(tag: String, msg: String) {
         if (isDebug) {
             Log.i(TAG, buildMsg(tag, msg))
         }
     }
 
-    
+
     fun w(tag: String, format: String, vararg args: Any?) {
         if (isDebug) {
             Log.w(TAG, buildMsg(tag, String.format(format, *args)))
         }
     }
 
-    
+
     fun w(tag: String, msg: String) {
         if (isDebug) {
             Log.w(TAG, buildMsg(tag, msg))
@@ -87,35 +87,35 @@ object LogUtil {
         }
     }
 
-    
+
     fun e(tag: String, format: String, vararg args: Any?) {
         if (isDebug) {
             Log.e(TAG, buildMsg(tag, String.format(format, *args)))
         }
     }
 
-    
+
     fun e(tag: String, msg: String) {
         if (isDebug) {
             Log.e(TAG, buildMsg(tag, msg))
         }
     }
 
-    
+
     fun e(tag: String, throwable: Throwable?, format: String, vararg args: Any?) {
         if (isDebug) {
             Log.e(TAG, buildMsg(tag, String.format(format, *args)), throwable)
         }
     }
 
-    
+
     fun e(tag: String, throwable: Throwable?, msg: String) {
         if (isDebug) {
             Log.e(TAG, buildMsg(tag, msg), throwable)
         }
     }
 
-    
+
     fun e(tag: String, e: Throwable?) {
         if (isDebug) {
             Log.e(TAG, buildMsg(tag, getStackTraceString(e)))

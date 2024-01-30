@@ -3,14 +3,14 @@ package code.sdk.common
 import android.content.Context
 import android.os.Build
 import android.view.WindowManager
-import code.util.AppGlobal.getApplication
+import code.util.AppGlobal
 
 object ScreenUtil {
    private val TAG = ScreenUtil::class.java.simpleName
 
     
     fun getScreenSize(): IntArray {
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         val width: Int
         val height: Int
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -33,7 +33,7 @@ object ScreenUtil {
     
     fun dp2px(dp: Float): Int {
         //ObfuscationStub3.inject();
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         val scale = context.resources.displayMetrics.density
         return (dp * scale + 0.5f).toInt()
     }

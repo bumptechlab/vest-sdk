@@ -10,8 +10,6 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.Typeface
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.net.http.SslError
@@ -19,10 +17,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.text.TextUtils
-import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.ClientCertRequest
 import android.webkit.SslErrorHandler
@@ -33,26 +29,67 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.RelativeLayout
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import code.sdk.R
 import code.sdk.SdkInit
 import code.sdk.base.BaseWebActivity
 import code.sdk.bridge.JsBridgeCore
 import code.sdk.command.AssetLoaderManager
-import code.sdk.common.ScreenUtil.dp2px
+import code.sdk.common.ScreenUtil
 import code.sdk.core.Constant
 import code.sdk.core.Constant.ScreenOrientation
 import code.sdk.core.util.DeviceUtil
 import code.sdk.core.util.PreferenceUtil
 import code.sdk.core.util.TestUtil
 import code.sdk.drawable.Drawables
-import code.sdk.ui.FunctionMenu.OnMenuClickListener
 import code.sdk.util.AndroidBug5497Workaround
 import code.sdk.util.ImageUtil
 import code.sdk.util.PromotionImageSynthesizer
@@ -71,21 +108,28 @@ class WebActivity : BaseWebActivity() {
     val REQUEST_SAVE_IMAGE = 100
     val REQUEST_SYNTHESIZE_PROMOTION_IMAGE = 10001
     val REQUEST_CODE_FILE_CHOOSER = 10003
-    private var mShowHoverMenu = false
+    private var mIsShowWeb by mutableStateOf(true)
+    private var mIsShowLoading by mutableStateOf(true)
+    private var mIsShowHoverMenu by mutableStateOf(false)
+    private var mIsOpenMenu by mutableStateOf(false)
     private var mShowNavBar = false
     private var mSafeCutout = false
 
+    @Constant.HoverMenuDockType
+    private var mMenuDockType = Constant.DOCK_LEFT
+
     @ScreenOrientation
     private var mScreenOrientation = Constant.LANDSCAPE
-    lateinit var webView: WebView
-    private lateinit var mErrorLayout: View
-    private lateinit var mRefreshButton: View
-    private lateinit var mLoadingLayout: View
-    private var mHoverMenu: FunctionMenu? = null
+    lateinit var mWebView: WebView
     private var mWebViewUpdateDialog: AlertDialog? = null
     private var mLoadingError = false
     private var mLastBackTs: Long = 0
     private var mUploadMessage: ValueCallback<Array<Uri?>>? = null
+    private var mScreenWidth = 0
+    private var mScreenHeight = 0
+    private var mMaxWidth = 0
+    private var mMaxHeight = 0
+    private val mImageSize = 45.dp
 
     private val mWebChromeClient: WebChromeClient = object : WebChromeClient() {
         override fun onReceivedTitle(view: WebView, title: String) {
@@ -100,24 +144,6 @@ class WebActivity : BaseWebActivity() {
             super.onProgressChanged(view, newProgress)
             d(TAG, "onProgressChanged: $newProgress")
         }
-
-        // For [4.1, 5.0)
-//        fun openFileChooser(
-//            uploadMsg: ValueCallback<Uri?>?,
-//            acceptType: String?,
-//            capture: String?
-//        ) {
-//            mUploadMessage = uploadMsg
-//            val i = Intent(Intent.ACTION_GET_CONTENT)
-//            i.addCategory(Intent.CATEGORY_OPENABLE)
-//            val type = if (TextUtils.isEmpty(acceptType)) "*/*" else acceptType!!
-//            i.setType(type)
-//            startActivityForResult(
-//                Intent.createChooser(i, "File Chooser"),
-//                REQUEST_CODE_FILE_CHOOSER
-//            )
-//        }
-
 
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         override fun onShowFileChooser(
@@ -233,6 +259,19 @@ class WebActivity : BaseWebActivity() {
             finish()
             return
         }
+        setScreenSize()
+    }
+
+    private fun setScreenSize() {
+        val screenSize = ScreenUtil.getScreenSize()
+        mScreenWidth = screenSize[0]
+        mScreenHeight = screenSize[1]
+        mMaxWidth = mScreenWidth - ScreenUtil.dp2px(mImageSize.value)
+        mMaxHeight = mScreenHeight - ScreenUtil.dp2px(mImageSize.value)
+        mIsOpenMenu = false
+    }
+
+    private fun loadUrl() {
         isGame = intent.getBooleanExtra(KEY_GAME, false)
         val url = intent.getStringExtra(KEY_URL)
         if (url.isNullOrEmpty()) {
@@ -245,7 +284,7 @@ class WebActivity : BaseWebActivity() {
             //加载自己的url
             mUrl = JsBridgeCore.formatUrlWithJsb(url)
             mWebPresenter!!.init(isGame, mUrl)
-            webView.loadUrl(mUrl)
+            mWebView.loadUrl(mUrl)
         } else {
             //加载三方网址
             mUrl = url
@@ -258,103 +297,259 @@ class WebActivity : BaseWebActivity() {
             }
             if (type == Constant.OTHER_CODE) {
                 //加载三方HTML源代码
-                webView.loadDataWithBaseURL(null, mUrl, "text/html", "utf-8", null)
+                mWebView.loadDataWithBaseURL(null, mUrl, "text/html", "utf-8", null)
             } else {
                 //加载三方url
-                webView.loadUrl(mUrl)
+                mWebView.loadUrl(mUrl)
             }
         }
         d(TAG, "open url: %s", mUrl)
     }
 
     override fun initView() {
-        setContentView(createView())
-        mRefreshButton.setOnClickListener { view: View? ->
-            mLoadingLayout.visibility = View.VISIBLE
-            webView.reload()
+        setContent {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color.Black)
+            ) {
+                Web()
+                Error()
+                Loading(Modifier.align(Alignment.Center))
+                Menu()
+            }
         }
-        //        mWebView.initWebView(mWebViewClient, mWebChromeClient);
-        setWebView()
-
-        // fullscreen webview activity can NOT use adjustPan/adjustResize input mode
         AndroidBug5497Workaround.assistActivity(this)
     }
 
-    private fun createView(): View {
-        val relativeLayout = RelativeLayout(this)
-        relativeLayout.setBackgroundColor(Color.BLACK)
-        relativeLayout.layoutParams = ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-        relativeLayout.keepScreenOn = true
-        webView = WebView(this)
-        relativeLayout.addView(
-            webView,
-            RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT,
-                RelativeLayout.LayoutParams.MATCH_PARENT
-            )
-        )
-        val linearLayout = LinearLayout(this)
-        mErrorLayout = linearLayout
-        linearLayout.gravity = Gravity.CENTER
-        linearLayout.setBackgroundColor(Color.WHITE)
-        linearLayout.orientation = LinearLayout.VERTICAL
-        linearLayout.visibility = View.INVISIBLE
-        val textView = TextView(this)
-        textView.setTextColor(ContextCompat.getColor(this, R.color.loading_error_text))
-        textView.textSize = 18f
-        textView.setText(R.string.loading_error_tips)
-        textView.setTypeface(null, Typeface.BOLD)
-        linearLayout.addView(
-            textView,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        )
-        val refresh = TextView(this)
-        mRefreshButton = refresh
-        refresh.setTextColor(ContextCompat.getColor(this, R.color.loading_error_refresh_button))
-        refresh.textSize = 18f
-        refresh.setText(R.string.refresh)
-        val refreshParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        refreshParams.topMargin = dp2px(32f)
-        linearLayout.addView(refresh, refreshParams)
-        relativeLayout.addView(
-            linearLayout,
-            RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT,
-                RelativeLayout.LayoutParams.MATCH_PARENT
-            )
-        )
-        val loading = LinearLayout(this)
-        mLoadingLayout = loading
-        loading.background = ImageUtil.base64ToDrawable(resources, Drawables.LOADING_BG)
-        loading.gravity = Gravity.CENTER_VERTICAL
-        val progressBar = ProgressBar(this)
-        progressBar.isIndeterminate = true
-        val pbParams = LinearLayout.LayoutParams(dp2px(25f), dp2px(25f))
-        pbParams.setMargins(dp2px(10f), 0, dp2px(10f), 0)
-        loading.addView(progressBar, pbParams)
-        val tvLoading = TextView(this)
-        tvLoading.text = "loading"
-        tvLoading.setTextColor(Color.WHITE)
-        val tvParams = LinearLayout.LayoutParams(
-            RelativeLayout.LayoutParams.WRAP_CONTENT,
-            RelativeLayout.LayoutParams.WRAP_CONTENT
-        )
-        tvParams.marginEnd = dp2px(15f)
-        loading.addView(tvLoading, tvParams)
-        val loadingParams =
-            RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, dp2px(45f))
-        loadingParams.addRule(RelativeLayout.CENTER_IN_PARENT)
-        relativeLayout.addView(loading, loadingParams)
-        return relativeLayout
+    @Composable
+    private fun Web() {
+        if (mIsShowWeb) {
+            AndroidView(factory = {
+                mWebView = WebView(it).apply {
+                    val settings = settings
+                    settings.defaultTextEncodingName = "utf-8"
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.allowContentAccess = true
+                    settings.allowFileAccess = true
+                    settings.allowFileAccessFromFileURLs = true
+                    settings.allowUniversalAccessFromFileURLs = true
+                    settings.cacheMode = WebSettings.LOAD_DEFAULT
+                    settings.databaseEnabled = true
+                    settings.useWideViewPort = true //支持自动适配
+                    settings.loadWithOverviewMode = true
+                    settings.javaScriptCanOpenWindowsAutomatically = true //支持通过js打开新窗口
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        settings.safeBrowsingEnabled = false
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                    }
+                    webViewClient = mWebViewClient
+                    webChromeClient = mWebChromeClient
+                    WebView.setWebContentsDebuggingEnabled(TestUtil.isLoggable())
+                }
+                loadUrl()
+                mWebView
+            }, modifier = Modifier.fillMaxSize())
+            val lifecycleOwner = LocalLifecycleOwner.current
+            DisposableEffect(key1 = Unit) {
+                val observer = LifecycleEventObserver { source, event ->
+                    when (event) {
+                        Lifecycle.Event.ON_RESUME -> {
+                            mWebView.onResume()
+                            webViewEvaluatescript("typeof onGameResume === 'function' && onGameResume();")
+                        }
+
+                        Lifecycle.Event.ON_PAUSE -> {
+                            mWebView.onPause()
+                        }
+
+                        Lifecycle.Event.ON_DESTROY -> {
+                            mWebView.destroy()
+                        }
+
+                        else -> {}
+                    }
+                }
+                lifecycleOwner.lifecycle.addObserver(observer)
+                onDispose {
+                    lifecycleOwner.lifecycle.removeObserver(observer)
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun Error() {
+        if (!mIsShowWeb) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color.White),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(id = R.string.loading_error_tips),
+                    color = colorResource(id = R.color.loading_error_text),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = stringResource(id = R.string.refresh),
+                    color = colorResource(id = R.color.loading_error_refresh_button),
+                    fontSize = 18.sp,
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.clickable {
+                        mIsShowWeb = true
+                        mWebView.reload()
+                    }
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun Loading(modifier: Modifier) {
+        AnimatedVisibility(
+            visible = mIsShowLoading, modifier = modifier
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(45.dp),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Image(
+                    modifier = Modifier.matchParentSize(),
+                    bitmap = ImageUtil.base64ToBitmap(Drawables.LOADING_BG).asImageBitmap(),
+                    contentDescription = ""
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(
+                        color= Color.Blue,
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .size(25.dp)
+                    )
+                    Text(
+                        modifier = Modifier.padding(end = 15.dp),
+                        text = "loading",
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun Menu() {
+        var offsetX by remember { mutableIntStateOf(0) }
+        var offsetY by remember { mutableIntStateOf((mScreenHeight * 0.35f).toInt()) }
+        var menuWidth by remember { mutableIntStateOf(ScreenUtil.dp2px(mImageSize.value)) }
+        var scaleX by remember { mutableFloatStateOf(1f) }
+        val modifier = Modifier
+            .size(mImageSize)
+            .clip(CircleShape)
+        AnimatedVisibility(visible = mIsShowHoverMenu) {
+            Box(
+                modifier = Modifier
+                    .height(mImageSize)
+                    .offset {
+                        //防止越界
+                        if (offsetX < 0) {
+                            offsetX = 0
+                        }
+                        if (offsetY < 0) {
+                            offsetY = 0
+                        }
+                        if (offsetX > mMaxWidth) {
+                            offsetX = mMaxWidth
+                        }
+                        if (offsetY > mMaxHeight) {
+                            offsetY = mMaxHeight
+                        }
+                        IntOffset(offsetX, offsetY)
+                    }
+                    .graphicsLayer(scaleX = scaleX)
+                    .onGloballyPositioned {
+                        if (menuWidth != it.size.width) {
+                            menuWidth = it.size.width
+                            if (mMenuDockType == Constant.DOCK_RIGHT) {
+                                offsetX = mScreenWidth - menuWidth
+                            }
+                        }
+                    }
+                    .pointerInput(Unit) {
+                        detectDragGestures(onDragStart = {
+                            mIsOpenMenu = false
+                            scaleX = 1f
+                        }, onDrag = { change, offset ->
+                            offsetX += offset.x.toInt()
+                            offsetY += offset.y.toInt()
+                        }, onDragEnd = {
+                            offsetX = if (offsetX > (mScreenWidth / 2)) {
+                                mMenuDockType = Constant.DOCK_RIGHT
+                                scaleX = -1f
+                                mMaxWidth
+                            } else {
+                                mMenuDockType = Constant.DOCK_LEFT
+                                scaleX = 1f
+                                0
+                            }
+                        })
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                if (mIsOpenMenu) {
+                    Image(
+                        modifier = Modifier.matchParentSize(),
+                        bitmap = ImageUtil
+                            .base64ToBitmap(Drawables.MENU_EXPANDED_BG)
+                            .asImageBitmap(),
+                        contentDescription = null,
+                    )
+                }
+                Row {
+                    Image(
+                        bitmap = ImageUtil
+                            .base64ToBitmap(if (mIsOpenMenu) Drawables.MENU_EXPANDED else Drawables.MENU_SHRINKED)
+                            .asImageBitmap(),
+                        contentDescription = null,
+                        modifier = modifier
+                            .clickable {
+                                mIsOpenMenu = !mIsOpenMenu
+                            }
+                    )
+                    if (mIsOpenMenu) {
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Image(
+                            bitmap = ImageUtil
+                                .base64ToBitmap(Drawables.MENU_REFRESH)
+                                .asImageBitmap(),
+                            contentDescription = null,
+                            modifier = modifier.clickable {
+                                mIsShowLoading = true
+                                mIsOpenMenu = false
+                                mWebView.reload()
+                            }
+                        )
+                        Image(
+                            bitmap = ImageUtil
+                                .base64ToBitmap(Drawables.MENU_CLOSE)
+                                .asImageBitmap(),
+                            contentDescription = null,
+                            modifier = modifier.clickable {
+                                mIsOpenMenu = false
+                                finish()
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun doPageStart() {
@@ -368,18 +563,15 @@ class WebActivity : BaseWebActivity() {
             mLoadingError = titleError(title)
         }
         d(TAG, "onPageFinished: %s, title: %s,  loadingError: %s", url, title, mLoadingError)
-        mLoadingLayout.visibility = View.INVISIBLE
+        mIsShowLoading = false
         if (mLoadingError) {
-            mErrorLayout.visibility = View.VISIBLE
-            webView.visibility = View.INVISIBLE
+            mIsShowWeb = false
         } else {
-            mErrorLayout.visibility = View.INVISIBLE
-            webView.visibility = View.VISIBLE
+            mIsShowWeb = true
             // request focus ahead in case of any input behavior
-            webView.requestFocus()
-            webView.requestFocusFromTouch()
+            mWebView.requestFocus()
+            mWebView.requestFocusFromTouch()
         }
-        d(TAG, "Loading layout visibility: " + mLoadingLayout.visibility)
         mWebPresenter?.checkGameFeature(url)
         mWebPresenter?.checkWebViewCompatibility()
         if (mLoadingError) {
@@ -387,33 +579,8 @@ class WebActivity : BaseWebActivity() {
         }
     }
 
-    private fun setWebView() {
-        val settings = webView.settings
-        settings.defaultTextEncodingName = "utf-8"
-        settings.javaScriptEnabled = true
-        settings.domStorageEnabled = true
-        settings.allowContentAccess = true
-        settings.allowFileAccess = true
-        settings.allowFileAccessFromFileURLs = true
-        settings.allowUniversalAccessFromFileURLs = true
-        settings.cacheMode = WebSettings.LOAD_DEFAULT
-        settings.databaseEnabled = true
-        settings.useWideViewPort = true //支持自动适配
-        settings.loadWithOverviewMode = true
-        settings.javaScriptCanOpenWindowsAutomatically = true //支持通过js打开新窗口
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            settings.safeBrowsingEnabled = false
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        }
-        webView.webViewClient = mWebViewClient
-        webView.webChromeClient = mWebChromeClient
-        WebView.setWebContentsDebuggingEnabled(TestUtil.isLoggable())
-    }
-
     fun setShowHoverMenu(showHoverMenu: Boolean) {
-        mShowHoverMenu = showHoverMenu
+        mIsShowHoverMenu = showHoverMenu
     }
 
     fun setShowNavBar(showNavBar: Boolean) {
@@ -425,7 +592,7 @@ class WebActivity : BaseWebActivity() {
     }
 
     fun webViewEvaluatescript(script: String?) {
-        webView.evaluateJavascript(script!!, null)
+        mWebView.evaluateJavascript(script!!, null)
     }
 
     fun setScreenOrientation(screenOrientation: String) {
@@ -461,17 +628,7 @@ class WebActivity : BaseWebActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
     override fun doResume() {
-        // hover menu
-        if (mShowHoverMenu) {
-            showHoverMenu()
-        } else {
-            hideHoverMenu()
-        }
         // nav bar
         if (mShowNavBar) {
             showNavBar()
@@ -494,8 +651,6 @@ class WebActivity : BaseWebActivity() {
             window.attributes = layoutParams
         }
         setOrientation()
-        webView.onResume()
-        webView.evaluateJavascript("typeof onGameResume === 'function' && onGameResume();", null)
     }
 
     private fun setOrientation() {
@@ -507,26 +662,6 @@ class WebActivity : BaseWebActivity() {
         }
     }
 
-    private fun showHoverMenu() {
-        if (mHoverMenu == null) {
-            mHoverMenu = FunctionMenu(this)
-            mHoverMenu!!.setMenuListener(object : OnMenuClickListener {
-                override fun onRefresh() {
-                    mLoadingLayout.visibility = View.VISIBLE
-                    webView.reload()
-                }
-
-                override fun onClose() {
-                    finish()
-                }
-            })
-            mHoverMenu!!.show()
-        }
-    }
-
-    private fun hideHoverMenu() {
-        mHoverMenu?.hide()
-    }
 
     private fun showNavBar() {
         window.decorView.systemUiVisibility =
@@ -542,7 +677,7 @@ class WebActivity : BaseWebActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        mHoverMenu?.resetPositionDelayed()
+        setScreenSize()
     }
 
 
@@ -583,23 +718,10 @@ class WebActivity : BaseWebActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        webView?.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         if (mWebPresenter != null) {
             mWebPresenter!!.onDestroy()
-        }
-        if (webView != null) {
-            webView.removeJavascriptInterface(JsBridgeCore.getJsBridgeName())
-            webView.destroy()
         }
         if (mNetworkReceiver != null) {
             unregisterReceiver(mNetworkReceiver)
@@ -679,8 +801,8 @@ class WebActivity : BaseWebActivity() {
                     val isConnected = isConnected(context)
                     if (isConnected) {
                         d(TAG, "network connected!")
-                        mLoadingLayout.visibility = View.VISIBLE
-                        webView.reload()
+                        mIsShowLoading = true
+                        mWebView.reload()
                     }
                 }
                 networkListenerInit = true

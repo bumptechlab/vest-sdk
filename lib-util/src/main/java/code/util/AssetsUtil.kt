@@ -3,7 +3,6 @@ package code.util
 import android.text.TextUtils
 import code.util.AESUtil.decryptTime
 import code.util.AESUtil.isAESData
-import code.util.AppGlobal.getApplication
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -15,7 +14,7 @@ object AssetsUtil {
     const val JS_FLAG = 0x666666
     
     fun getAssetsFlagData(flag: Int): String? {
-        val assetManager = getApplication().assets
+        val assetManager = AppGlobal.application!!.assets
         //获取assets目录所有文件名称
         var files: Array<String?>? = null
         try {

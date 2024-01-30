@@ -150,6 +150,4 @@ object ConfigPreference : AbstractPreference() {
         return getString(CONFIG_SHF_DISPATCHER)
     }
 
-    val isEmpty: Boolean
-        get() = preferences.all.isEmpty()
 }

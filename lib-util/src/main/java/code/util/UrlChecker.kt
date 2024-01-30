@@ -1,7 +1,6 @@
 package code.util
 
 import android.webkit.URLUtil
-import code.util.AppGlobal.getApplication
 import code.util.NetworkUtil.isConnected
 import java.net.HttpURLConnection
 import java.net.URL
@@ -17,7 +16,7 @@ object UrlChecker {
     private const val TIMEOUT = 2000
 
     fun isUrlAvailable(url: String?): Boolean {
-        return if (!isConnected(getApplication())) {
+        return if (!isConnected(AppGlobal.application!!)) {
             URLUtil.isValidUrl(url)
         } else try {
             trustAllHttpsCertificates()

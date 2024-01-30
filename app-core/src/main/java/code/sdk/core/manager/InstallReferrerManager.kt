@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.RemoteException
 import android.text.TextUtils
 import code.sdk.core.util.PreferenceUtil
-import code.util.AppGlobal.getApplication
+import code.util.AppGlobal
 import code.util.LogUtil.d
 import code.util.LogUtil.e
 import com.android.installreferrer.api.InstallReferrerClient
@@ -16,7 +16,7 @@ object InstallReferrerManager {
     private var sInitStartTime: Long = 0
     fun initInstallReferrer() {
         sInitStartTime = System.currentTimeMillis()
-        val context: Context = getApplication()
+        val context: Context? = AppGlobal.application
         val referrerClient = InstallReferrerClient.newBuilder(context).build()
         startConnection(referrerClient)
     }

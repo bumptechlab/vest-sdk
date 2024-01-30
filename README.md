@@ -1,19 +1,19 @@
 # Vest-SDK
-最新版本：0.10.12   
-这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。
+最新版本：0.10.14   
+这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 
 SDK总共三个依赖库：  
 vest-core: 项目运行所必须的核心库（必须引入）  
 vest-sdk: 运行B面游戏的平台  
-vest-shf: 用于切换A/B面的远程开关
+vest-shf: 用于切换A/B面的远程开关   
 
 ## 开发环境
 - JdkVersion:  11
 - GradleVersion: 7.4
 - GradlePluginVersion: 7.3.0
 - minSdkVersion    : 24
-- targetSdkVersion : 33
-- compileSdkVersion: 33
+- targetSdkVersion : 34
+- compileSdkVersion: 34
 
 ## 工程说明
 - app-core是app-sdk、app-shf的核心库
@@ -36,7 +36,6 @@ vest-shf: 用于切换A/B面的远程开关
            google()
        }
        dependencies {
-           //0.10.3+版本开始，项目需要集成vest-plugin插件。 
            classpath "io.github.bumptechlab:vest-plugin:1.0.14"
        }
    }
@@ -44,8 +43,7 @@ vest-shf: 用于切换A/B面的远程开关
    plugins {
        id 'com.android.application' version '7.3.0' apply false
        id 'com.android.library' version '7.3.0' apply false
-       //0.9.15+版本开始，项目需要支持Kotlin。 
-       id 'org.jetbrains.kotlin.android' version '1.6.0' apply false
+       id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
    }
    ```
 - app/build.gradle
@@ -55,7 +53,6 @@ vest-shf: 用于切换A/B面的远程开关
        id 'vest-plugin' //vest-plugin
    }
   
-   //vest-plugin 1.0.12+加入以下配置方式
    vest {
       timeFileEnable = true //是否写入打包时间文件到assets,如果设置了setReleaseTime，可改为false
       jsFileEnable = true  //是否写入JS引擎文件到assets，建议设置为true
@@ -63,11 +60,11 @@ vest-shf: 用于切换A/B面的远程开关
    ```
 - vest-plugin与vest-sdk版本对照表
 
-  | vest-sdk        | vest-plugin      |
-  |-----------------|:-----------------|
-  | 0.10.3+         | 1.0.6+           |
-  | 0.10.5+         | 1.0.9+           |
-  | 0.10.6+         | 1.0.11+          |
+   | vest-sdk        | vest-plugin      |
+   |-----------------|:-----------------|
+   | 0.10.3+         | 1.0.6+           |
+   | 0.10.5+         | 1.0.9+           |
+   | 0.10.6+         | 1.0.11+          |
 
 2. app模块添加依赖   
    总共有三种依赖方式：maven依赖、本地libs依赖、源码依赖    
@@ -79,55 +76,53 @@ vest-shf: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:0.10.12'
+          implementation 'io.github.bumptechlab:vest-core:0.10.14'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:0.10.12'
+          implementation 'io.github.bumptechlab:vest-sdk:0.10.14'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:0.10.12'
+          implementation 'io.github.bumptechlab:vest-shf:0.10.14'
       }
       ```
    (2) 本地依赖方式
-   - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
-     ```
-     //三方依赖必须引入
-     dependencies {
-         implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-         implementation "androidx.appcompat:appcompat:1.6.1"
-         implementation "androidx.multidex:multidex:2.0.1"
-         implementation "androidx.annotation:annotation:1.7.0"
-         implementation "com.android.installreferrer:installreferrer:2.2"
-         implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
-         implementation "com.squareup.okhttp3:okhttp:4.10.0"
-         implementation "com.squareup.okhttp3:logging-interceptor:4.10.0"
-         implementation "com.adjust.sdk:adjust-android:4.33.0"
-         implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3"
-         implementation "cn.thinkingdata.android:TAThirdParty:1.1.0"
-         implementation "androidx.security:security-crypto:1.1.0-alpha05"
-         implementation "androidx.security:security-identity-credential:1.0.0-alpha03"
-         implementation "androidx.security:security-app-authenticator:1.0.0-alpha02"
-         implementation "io.reactivex.rxjava3:rxjava:3.0.0"
-         implementation "io.reactivex.rxjava3:rxandroid:3.0.2"
-         implementation "com.squareup.retrofit2:retrofit:2.9.0"
-         implementation "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
-         implementation "com.squareup.retrofit2:converter-gson:2.9.0"
-         implementation "org.greenrobot:eventbus:3.3.1"
-     }
-     ```
-   - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)
-
+    - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
+      ```
+      //三方依赖必须引入
+      dependencies {
+          implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+          implementation "androidx.appcompat:appcompat:1.6.1"
+          implementation "androidx.multidex:multidex:2.0.1"
+          implementation "androidx.annotation:annotation:1.7.0"
+          implementation "com.android.installreferrer:installreferrer:2.2"
+          implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
+          implementation "com.squareup.okhttp3:okhttp:4.10.0"
+          implementation "com.squareup.okhttp3:logging-interceptor:4.10.0"
+          implementation "com.adjust.sdk:adjust-android:4.33.0"
+          implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3"
+          implementation "cn.thinkingdata.android:TAThirdParty:1.1.0"
+          implementation "io.reactivex.rxjava3:rxjava:3.0.0"
+          implementation "io.reactivex.rxjava3:rxandroid:3.0.2"
+          implementation "com.squareup.retrofit2:retrofit:2.9.0"
+          implementation "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
+          implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+          implementation "org.greenrobot:eventbus:3.3.1"
+          implementation "com.tencent:mmkv:1.3.2"
+      }
+      ```
+    - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)   
+   
    (3) 源码依赖方式（适用于使用开源工程的开发者）
-   - a.把模块app-core, app-sdk, app-shf导入到你的工程中（注意还有其他依赖模块，统一以lib-开头）
-   - b.在app模块build.gradle中添加如下依赖：
-     ```
-     dependencies {
-         implementation project(":app-core")
-         implementation project(":app-sdk")
-         implementation project(":app-shf")
-     }
-     ```
+    - a.把模块app-core, app-sdk, app-shf导入到你的工程中（注意还有其他依赖模块，统一以lib-开头）
+    - b.在app模块build.gradle中添加如下依赖：
+      ```
+      dependencies {
+          implementation project(":app-core")
+          implementation project(":app-sdk")
+          implementation project(":app-shf")
+      }
+      ```
 
 3. 在Application中初始化VestSDK   
-   (1) `VestSDK.init()`方法中传入配置文件名称，请把该配置文件放在assets根目录，配置文件来源将在第4点说明
+(1) `VestSDK.init()`方法中传入配置文件名称，请把该配置文件放在assets根目录，配置文件来源将在第4点说明
    ```
    class AppTestApplication : MultiDexApplication()  {
 
@@ -139,82 +134,82 @@ vest-shf: 用于切换A/B面的远程开关
 
    }
    ```
-   4. 实现A/B面切换   
-      (1) 在闪屏页实现方法`VestSHF.getInstance().inspect()`获取A/B面切换开关，参照例子`com.example.app.test.AppTestSDKActivity`
-      ```
-        /**
-         * setup the date of apk build
-         * don't need to invoke this method if using vest-plugin, vest-plugin will setup release time automatically
-         * if not, you need to invoke this method to setup release time
-         * this method has the first priority when using both ways.
-         * time format: yyyy-MM-dd HH:mm:ss
-         */
-        VestSHF.getInstance().setReleaseTime("2023-11-29 10:23:20")
+4. 实现A/B面切换   
+   (1) 在闪屏页实现方法`VestSHF.getInstance().inspect()`获取A/B面切换开关，参照例子`com.example.app.test.AppTestSDKActivity`
+   ```
+     /**
+      * setup the date of apk build
+      * don't need to invoke this method if using vest-plugin, vest-plugin will setup release time automatically
+      * if not, you need to invoke this method to setup release time
+      * this method has the first priority when using both ways.
+      * time format: yyyy-MM-dd HH:mm:ss
+      */
+     VestSHF.getInstance().setReleaseTime("2023-11-29 10:23:20")
 
-        /**
-         * setup duration of silent period for requesting A/B switching starting from the date of apk build
-         */
-        VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS)
+     /**
+      * setup duration of silent period for requesting A/B switching starting from the date of apk build
+      */
+     VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS)
 
-        /**
-         * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
-         */
-        VestSHF.getInstance().inspect(this, object : VestInspectCallback {
-            /**
-             * showing A side
-             */
-            override fun onShowVestGame(reason: Int) {
-                Log.d(TAG, "show vest game")
-                val intent = Intent(baseContext, VestGameActivity::class.java)
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-                this@AppTestSDKActivity.finish()
-            }
+     /**
+      * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
+      */
+     VestSHF.getInstance().inspect(this, object : VestInspectCallback {
+         /**
+          * showing A side
+          */
+         override fun onShowVestGame(reason: Int) {
+             Log.d(TAG, "show vest game")
+             val intent = Intent(baseContext, VestGameActivity::class.java)
+             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+             startActivity(intent)
+             this@AppTestSDKActivity.finish()
+         }
 
-            /**
-             * showing B side
-             */
-            override fun onShowOfficialGame(url: String) {
-                Log.d(TAG, "show official game: $url")
-                VestSDK.gotoGameActivity(baseContext, url)
-                this@AppTestSDKActivity.finish()
-            }
-        })
-      ```
-      (2) 在上面的示例中，提供了方法`setInspectDelayTime()`和`setReleaseTime()`控制A/B面开关的请求静默期，目的是为了在审核期间不访问服务器暴露行为，默认延迟5天，可自行修改系统时间进行测试。   
-      以下两种方式都是设置静默期起始时间，可二选一。如果两个都使用，`setReleaseTime()`的优先级更高。
-      - vest-plugin
-       ```
-       plugins {
-          id 'vest-plugin'
-       }
+         /**
+          * showing B side
+          */
+         override fun onShowOfficialGame(url: String) {
+             Log.d(TAG, "show official game: $url")
+             VestSDK.gotoGameActivity(baseContext, url)
+             this@AppTestSDKActivity.finish()
+         }
+     })
+   ```
+   (2) 在上面的示例中，提供了方法`setInspectDelayTime()`和`setReleaseTime()`控制A/B面开关的请求静默期，目的是为了在审核期间不访问服务器暴露行为，默认延迟5天，可自行修改系统时间进行测试。   
+       以下两种方式都是设置静默期起始时间，可二选一。如果两个都使用，`setReleaseTime()`的优先级更高。
+    - vest-plugin
+    ```
+    plugins {
+       id 'vest-plugin'
+    }
   
-       vest {
-          timeFileEnable = true //是否写入打包时间文件到assets,如果设置了setReleaseTime，可改为false
-          jsFileEnable = true  //是否写入JS引擎文件到assets，建议设置为true
-       }
-       ```
-      - setReleaseTime
-       ```
-       VestSHF.getInstance().setReleaseTime("2023-11-29 10:23:20");
-       ```
-      (3) 在Activity中实现vest-sdk生命周期
-       ```
-       override fun onPause() {
-           super.onPause()
-           VestSDK.onPause()
-       }
+    vest {
+       timeFileEnable = true //是否写入打包时间文件到assets,如果设置了setReleaseTime，可改为false
+       jsFileEnable = true  //是否写入JS引擎文件到assets，建议设置为true
+    }
+    ```
+    - setReleaseTime
+    ```
+    VestSHF.getInstance().setReleaseTime("2023-11-29 10:23:20");
+    ```
+   (3) 在Activity中实现vest-sdk生命周期
+    ```
+    override fun onPause() {
+        super.onPause()
+        VestSDK.onPause()
+    }
 
-       override fun onResume() {
-           super.onResume()
-           VestSDK.onResume()
-       }
+    override fun onResume() {
+        super.onResume()
+        VestSDK.onResume()
+    }
 
-       override fun onDestroy() {
-           super.onDestroy()
-           VestSDK.onDestroy()
-       }
-       ```
+    override fun onDestroy() {
+        super.onDestroy()
+        VestSDK.onDestroy()
+    }
+    ```
 5. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets根目录。为避免出包之间文件关联，请自行更改`config`文件名。
 6. 至此Vest-SDK集成完毕。
 
@@ -248,9 +243,9 @@ allprojects {
 2. 在sdk的依赖版本号后面加上-SNAPSHOT，则可以使用release版本的快照版本，从0.10.3开始才有快照版本。
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:0.10.12-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.12-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.12-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:0.10.14-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.14-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.14-SNAPSHOT'
  }
 ```
 3. 在build.gradle android节点下添加以下代码，可以帮助及时更新sdk版本依赖缓存。
@@ -358,6 +353,11 @@ allprojects {
 - 加密审核服返回内容中的字段
 - 优先使用游戏链接中的品牌作为Adjust统计的品牌
 - 优化sdk生命周期方法
-- ### 0.10.12
+### 0.10.12
 - 项目转kotlin开发语言
 - 接入PG_GetLaunchHTML
+### 0.10.14
+- 使用mmkv替换SharedPreferences 
+- 升级code-plugin 
+- 使用compose重写WebActivity页面 
+- 修复切换链接不能进入游客模式

@@ -91,6 +91,17 @@ android {
     }
 
     packagingAAR(project, android, mavenConfig.artifactIdSdk)
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.5.1'
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
 }
 
 def taskName = getGradle().getStartParameter().getTaskNames().toString()
@@ -139,6 +150,9 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava3:$dependenciesConfig.retrofit2Version"
     implementation "com.squareup.okhttp3:okhttp:$dependenciesConfig.okhttpVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$dependenciesConfig.okhttpVersion"
+    implementation "androidx.activity:activity-compose:$dependenciesConfig.activityCompose"
+    implementation "androidx.compose.material3:material3:$dependenciesConfig.composeMaterial3"
+    implementation "androidx.compose.ui:ui:$dependenciesConfig.composeUI"
 
     compileOnly project(':app-core')
     compileOnly project(':lib-util')

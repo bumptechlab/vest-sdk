@@ -1,10 +1,10 @@
 package code.sdk.core.util
 
-import android.text.TextUtils
 import code.util.AbstractPreference
 import code.util.AssetsUtil
 import code.util.AssetsUtil.getAssetsFlagData
 import java.text.SimpleDateFormat
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 object PreferenceUtil : AbstractPreference() {
@@ -226,28 +226,27 @@ object PreferenceUtil : AbstractPreference() {
     }
 
     fun saveInspectDelay(delayTime: Long): Boolean {
-        val editor = preferences.edit()
         //ObfuscationStub1.inject();
-        return editor.putLong(KEY_INSPECT_DELAY, delayTime).commit()
+        return putLong(KEY_INSPECT_DELAY, delayTime)
     }
 
     fun getInspectDelay(): Long {
         val defaultDelay = TimeUnit.DAYS.toMillis(5)
-        return preferences.getLong(KEY_INSPECT_DELAY, defaultDelay)
+        return getLong(KEY_INSPECT_DELAY, defaultDelay)
     }
 
     fun saveReleaseTime(delayTime: String?): Boolean {
-        val editor = preferences.edit()
-        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault(Locale.Category.FORMAT))
         try {
             val date = formatter.parse(delayTime!!)
-            return editor.putLong(KEY_BUILD_TIME, date.time).commit()
+            return putLong(KEY_BUILD_TIME, date!!.time)
         } catch (_: Exception) {
         }
         return false
     }
 
-    private fun getReleaseTime(): Long = preferences.getLong(KEY_BUILD_TIME, 0)
+    private fun getReleaseTime(): Long = getLong(KEY_BUILD_TIME, 0)
 
     /**
      * 获取延时开始时间

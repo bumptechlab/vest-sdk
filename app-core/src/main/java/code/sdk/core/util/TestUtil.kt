@@ -131,6 +131,6 @@ object TestUtil {
         LogUtil.i(TAG, "[Constant] CHN: %s", ConfigPreference.readChannel())
         LogUtil.i(TAG, "[Constant] BRD: %s", ConfigPreference.readBrand())
         LogUtil.i(TAG, "Keystore Hash: %s",
-            java.lang.String.join(",", PackageUtil.getKeystoreHashes(AppGlobal.getApplication())))
+            java.lang.String.join(",", PackageUtil.getKeystoreHashes(AppGlobal.application!!)))
     }
 }

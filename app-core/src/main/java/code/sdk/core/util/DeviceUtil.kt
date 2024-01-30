@@ -1,5 +1,6 @@
 package code.sdk.core.util
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -12,12 +13,9 @@ import android.os.Environment
 import android.provider.Settings.Secure
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
-import android.text.TextUtils
 import android.util.Pair
-import code.util.AppGlobal.getApplication
-import code.util.LogUtil.d
-import code.util.LogUtil.e
-import code.util.LogUtil.w
+import code.util.AppGlobal
+import code.util.LogUtil
 import java.io.File
 import java.net.InetAddress
 import java.util.Locale
@@ -27,7 +25,7 @@ object DeviceUtil {
     private val TAG = DeviceUtil::class.java.simpleName
 
     /* public */
-    private const val XIAOMI_VIRTUAL_DEVICEID_NULL = "0000000000000000"
+    private const val XIAOMI_VIRTUAL_DEVICE_ID_NULL = "0000000000000000"
 
     /**
      * 判断是否有能同步获取到的设备ID（包括sp、file存储）
@@ -35,32 +33,31 @@ object DeviceUtil {
      * @return Pair <deviceId></deviceId>,isReadFromFile>
      */
     fun preGetDeviceID(): Pair<String?, Boolean> {
-        var deviceID :String?= PreferenceUtil.readDeviceID()
+        var deviceId: String? = PreferenceUtil.readDeviceID()
         var isReadFromFile = false
-        if (TextUtils.isEmpty(deviceID)) {
-            deviceID = readDeviceIDFromFile()
-            d(TAG, "getDeviceId: CacheFile: %s", deviceID)
-            isReadFromFile = !TextUtils.isEmpty(deviceID)
+        if (deviceId.isNullOrEmpty()) {
+            deviceId = readDeviceIDFromFile()
+            LogUtil.d(TAG, "getDeviceId: CacheFile: $deviceId")
+            isReadFromFile = !deviceId.isNullOrEmpty()
         }
-
         //GSF ID
-        if (TextUtils.isEmpty(deviceID)) {
-            deviceID = getGsfAndroidId()
-            d(TAG, "getDeviceId: GoogleServiceFrameworkId: %s", deviceID)
+        if (deviceId.isNullOrEmpty()) {
+            deviceId = gsfAndroidId
+            LogUtil.d(TAG, "getDeviceId: GoogleServiceFrameworkId: $deviceId")
         }
 
         //Android ID
-        if (TextUtils.isEmpty(deviceID)) {
-            deviceID = getAndroidID()
-            d(TAG, "getDeviceId: AndroidId: %s", deviceID)
-            if (XIAOMI_VIRTUAL_DEVICEID_NULL == deviceID) {
-                deviceID = null
+        if (deviceId.isNullOrEmpty()) {
+            deviceId = androidId
+            LogUtil.d(TAG, "getDeviceId: AndroidId: $deviceId")
+            if (XIAOMI_VIRTUAL_DEVICE_ID_NULL == deviceId) {
+                deviceId = null
             }
         }
-        if (!TextUtils.isEmpty(deviceID)) {
-            saveDeviceID(deviceID, isReadFromFile)
+        if (!deviceId.isNullOrEmpty()) {
+            saveDeviceID(deviceId, isReadFromFile)
         }
-        return Pair.create(deviceID, isReadFromFile)
+        return Pair.create(deviceId, isReadFromFile)
     }
 
     /**
@@ -77,29 +74,27 @@ object DeviceUtil {
      */
     fun getDeviceID(): String? {
         val pair = preGetDeviceID()
-        var deviceID = pair.first
+        var deviceId = pair.first
         val isReadFromFile = pair.second
-        if (TextUtils.isEmpty(deviceID)) {
-            deviceID = getGoogleADID()
-            d(TAG, "getDeviceId: GoogleADId: %s", deviceID)
+        if (deviceId.isNullOrEmpty()) {
+            deviceId = googleAdId
+            LogUtil.d(TAG, "getDeviceId: GoogleADId: $deviceId")
         }
         //UUID
-        if (TextUtils.isEmpty(deviceID)) {
-            deviceID = UUID.randomUUID().toString()
-            d(TAG, "getDeviceId: UUID: %s", deviceID)
+        if (deviceId.isNullOrEmpty()) {
+            deviceId = UUID.randomUUID().toString()
+            LogUtil.d(TAG, "getDeviceId: UUID: $deviceId")
         }
-        saveDeviceID(deviceID, isReadFromFile)
-        d(TAG, "device-id:$deviceID")
-        return deviceID
+        saveDeviceID(deviceId, isReadFromFile)
+        LogUtil.d(TAG, "getDeviceId: DeviceId: $deviceId")
+        return deviceId
     }
 
-    fun getGoogleADID(): String {
-        //ObfuscationStub2.inject();
-        val googleADID = PreferenceUtil.readGoogleADID()
-        return if (!TextUtils.isEmpty(googleADID)) {
-            googleADID
-        } else ""
-    }
+    var googleAdId: String? = null
+        get() {
+            field = PreferenceUtil.readGoogleADID() ?: ""
+            return field
+        }
 
     private fun saveDeviceID(deviceID: String?, isReadFromFile: Boolean) {
         PreferenceUtil.saveDeviceID(deviceID)
@@ -113,33 +108,45 @@ object DeviceUtil {
      *
      * @return gsf id
      */
-    private fun getGsfAndroidId(): String? {
-        return try {
-            val URI = Uri.parse("content://com.google.android.gsf.gservices")
-            val ID_KEY = "android_id"
-            val params = arrayOf(ID_KEY)
-            val c = getApplication().contentResolver.query(URI, null, null, params, null)
-            if (c == null || !c.moveToFirst() || c.columnCount < 2) return null
-            val id = c.getString(1)
-            if (TextUtils.isEmpty(id) || "null" == id) null else java.lang.Long.toHexString(id.toLong())
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
+    var gsfAndroidId: String? = null
+        get() {
+            if (field.isNullOrEmpty()) {
+                var cursor: Cursor? = null
+                try {
+                    val URI = Uri.parse("content://com.google.android.gsf.gservices")
+                    val ID_KEY = "android_id"
+                    val params = arrayOf(ID_KEY)
+                    cursor =
+                        AppGlobal.application?.contentResolver?.query(URI, null, null, params, null)
+                    if (cursor != null && cursor.moveToFirst() && cursor.columnCount >= 2) {
+                        val id = cursor.getString(1)
+                        field =
+                            if (id.isNullOrEmpty() || "null" == id) null else java.lang.Long.toHexString(
+                                id.toLong()
+                            )
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    cursor?.close()
+                }
+            }
+            return field
         }
-    }
 
     fun getSimCountryCode(context: Context): String {
         //ObfuscationStub7.inject();
         val telManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val simCountryCode = telManager.simCountryIso
-        return if (TextUtils.isEmpty(simCountryCode)) "" else simCountryCode
+        return if (simCountryCode.isNullOrEmpty()) "" else simCountryCode
     }
 
     fun getNetworkCountryCode(context: Context): String {
         //ObfuscationStub8.inject();
         val telManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val networkCountryCode = telManager.networkCountryIso
-        return if (TextUtils.isEmpty(networkCountryCode)) "" else networkCountryCode
+        return if (networkCountryCode.isNullOrEmpty()) "" else networkCountryCode
     }
 
     fun getAllSimCountryIso(context: Context): List<String> {
@@ -152,10 +159,10 @@ object DeviceUtil {
                 val subscriptionId = getSubIdBySlotId(context, i)
                 var curCountryIso = getSimCountryIsoBySubId(context, subscriptionId)
                 //get SimCountryIso by phoneId if can not get by subId
-                if (TextUtils.isEmpty(curCountryIso)) {
+                if (curCountryIso.isNullOrEmpty()) {
                     curCountryIso = getSimCountryIsoByPhoneId(context, i)
                 }
-                if (!TextUtils.isEmpty(curCountryIso)) {
+                if (!curCountryIso.isNullOrEmpty()) {
                     countryIso.add(curCountryIso)
                 }
             }
@@ -232,16 +239,16 @@ object DeviceUtil {
         if (locale != null) {
             language = locale.language
         }
-        if (TextUtils.isEmpty(language)) {
+        if (language.isNullOrEmpty()) {
             language = Locale.getDefault().language
         }
-        return if (TextUtils.isEmpty(language)) "" else language.lowercase(Locale.getDefault())
+        return if (language.isNullOrEmpty()) "" else language.lowercase(Locale.getDefault())
     }
 
     fun openMarket(context: Context, packageName: String): Boolean {
         var success = openGooglePlay(context, packageName)
         if (!success) {
-            d(TAG, "Open GooglePlay fail, use build-in market")
+            LogUtil.d(TAG, "Open GooglePlay fail, use build-in market")
             success = openBuildInMarket(context, packageName)
         }
         return success
@@ -273,11 +280,11 @@ object DeviceUtil {
                     context.startActivity(intent2)
                     success = true
                 } else {
-                    w(TAG, "Can not find any component to open GooglePlay")
+                    LogUtil.w(TAG, "Can not find any component to open GooglePlay")
                 }
             }
         } catch (e: Exception) {
-            e(TAG, "Open GooglePlay fail", e)
+            LogUtil.e(TAG, "Open GooglePlay fail", e)
         }
         return success
     }
@@ -291,7 +298,7 @@ object DeviceUtil {
             context.startActivity(intent)
             success = true
         } catch (e: Exception) {
-            e(TAG, "Open BuildIn Market fail", e)
+            LogUtil.e(TAG, "Open BuildIn Market fail", e)
         }
         return success
     }
@@ -318,7 +325,7 @@ object DeviceUtil {
         return hostAddress
     }
 
-    
+
     fun findActivity(context: Context?): Activity? {
         if (context is Activity) {
             return context
@@ -342,57 +349,27 @@ object DeviceUtil {
         return isAvailable
     }
 
-    fun gsfAndroidId(context: Context): String? {
-        var gsfId: String? = ""
-        try {
-            val URI = Uri.parse("content://com.google.android.gsf.gservices")
-            val ID_KEY = "android_id"
-            val params = arrayOf(ID_KEY)
-            val resolver = context.contentResolver
-            if (resolver != null) {
-                val cursor = resolver.query(
-                    URI, null as Array<String?>?, null as String?, params,
-                    null as String?
-                )
-                if (cursor != null) {
-                    val c: Cursor = cursor
-                    if (!c.moveToFirst() || c.columnCount < 2) {
-                        return null
-                    }
-                    val id = c.getString(1)
-                    if (!TextUtils.isEmpty(id) && id == "null") {
-                        gsfId = java.lang.Long.toHexString(id.toLong())
-                    }
-                }
-            }
-        } catch (var7: Exception) {
-            var7.printStackTrace()
-        }
-        return gsfId
-    }
-
     /* public */ /* private */
-    private fun saveDeviceIDToFile(deviceId: String?): Boolean {
-        return if (TextUtils.isEmpty(deviceId)) {
-            //ObfuscationStub4.inject();
-            false
-        } else FileUtil.writeFile(getDeviceIdFile(), deviceId)
+    private var deviceIdFile: File? = null
+        get() = File(
+            AppGlobal.application!!.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
+            "did.dat"
+        )
+
+    private fun saveDeviceIDToFile(deviceId: String?) {
+        if (deviceId?.isNotEmpty()!!) {
+            deviceIdFile?.writeText(deviceId, Charsets.UTF_8)
+        }
     }
 
     private fun readDeviceIDFromFile(): String? {
-        return FileUtil.readFile(getDeviceIdFile())
+        LogUtil.d(TAG, "getDeviceId: deviceIdFile=$deviceIdFile")
+        return if (deviceIdFile?.exists()!!) deviceIdFile?.readText(charset = Charsets.UTF_8) else null
     }
 
-    private fun getDeviceIdFile(): String {
-        val context: Context = getApplication()
-        val dir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-        val fileName = "did.dat"
-        val file = File(dir, fileName)
-        return file.absolutePath
-    }
 
-    private fun getAndroidID(): String {
-        val context: Context = getApplication()
-        return Secure.getString(context.contentResolver, Secure.ANDROID_ID)
-    } /* private */
+    private var androidId: String? = null
+        @SuppressLint("HardwareIds")
+        get() = Secure.getString(AppGlobal.application?.contentResolver, Secure.ANDROID_ID)
+    /* private */
 }

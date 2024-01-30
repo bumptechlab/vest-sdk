@@ -1,11 +1,11 @@
 package code.sdk.base
 
-import android.app.Activity
 import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
+import androidx.activity.ComponentActivity
 
-abstract class BaseWebActivity : Activity() {
+abstract class BaseWebActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setFullScreen()

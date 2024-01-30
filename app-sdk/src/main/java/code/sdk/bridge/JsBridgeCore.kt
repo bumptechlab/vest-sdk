@@ -4,10 +4,12 @@ import android.net.Uri
 import android.text.TextUtils
 import android.webkit.JavascriptInterface
 import code.sdk.core.util.PackageUtil
-import code.util.LogUtil.d
+import code.util.LogUtil
 import code.util.MD5.encrypt
 import org.json.JSONException
 import org.json.JSONObject
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 /**
  * JsBridge的父级实现类
@@ -39,8 +41,12 @@ open class JsBridgeCore(callback: BridgeCallback) : Bridge(JsBridgeImpl(callback
                 }
             }
             result = dispatchRequest(method, params)
-            d(TAG, "[JsBridge] %s(%s) --> %s", method, java.lang.String.join(", ",
-                *params), if (TextUtils.isEmpty(result)) "void" else result)
+            LogUtil.d(
+                TAG, "[JsBridge] %s(%s) --> %s", method, java.lang.String.join(
+                    ", ",
+                    *params
+                ), if (TextUtils.isEmpty(result)) "void" else result
+            )
         } catch (e: JSONException) {
             e.printStackTrace()
         }
@@ -49,22 +55,26 @@ open class JsBridgeCore(callback: BridgeCallback) : Bridge(JsBridgeImpl(callback
 
     companion object {
         private val TAG = JsBridgeCore::class.java.simpleName
+
         /**
          * 使用包名的md5后8位作为JsBridge命名空间
          *
          * @return
          */
 
-        fun getJsBridgeName(): String{
+        fun getJsBridgeName(): String {
             val pkgMd5 = encrypt(PackageUtil.getPackageName())
-            return pkgMd5.substring(pkgMd5.length - 8, pkgMd5.length)
+            //加入随机字母防止md5出现全数字的情况，全数字的命名空间无法正常运行
+            val randomCharCode = Random.nextInt(97..122) // 小写字母ASCII范围：97-122
+            return randomCharCode.toChar() + pkgMd5.substring(pkgMd5.length - 8, pkgMd5.length)
         }
+
         /**
          * 从JsBridge中找出第一个使用@JavascriptInterface注解的方法作为跟H5的交互入口
          *
          * @return
          */
-       private fun getJsBridgeInterface(): String {
+        private fun getJsBridgeInterface(): String {
             val jsBridgeClass: Class<*> = JsBridge::class.java
             val methods = jsBridgeClass.declaredMethods
             var javascriptInterface = ""
@@ -73,12 +83,16 @@ open class JsBridgeCore(callback: BridgeCallback) : Bridge(JsBridgeImpl(callback
                 val annotation: Annotation? = method.getAnnotation(JavascriptInterface::class.java)
                 if (annotation != null) {
                     javascriptInterface = method.name
-                    d(TAG, "[JsBridge] JavascriptInterface found in method: %s",
-                        jsBridgeClass.name + "." + method.name)
+                    LogUtil.d(
+                        TAG, "[JsBridge] JavascriptInterface found in method: %s",
+                        jsBridgeClass.name + "." + method.name
+                    )
                     break
                 } else {
-                    d(TAG, "[JsBridge] JavascriptInterface not found in method: %s",
-                        jsBridgeClass.name + "." + method.name)
+                    LogUtil.d(
+                        TAG, "[JsBridge] JavascriptInterface not found in method: %s",
+                        jsBridgeClass.name + "." + method.name
+                    )
                 }
             }
             return javascriptInterface

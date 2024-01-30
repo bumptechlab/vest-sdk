@@ -7,8 +7,6 @@
         <package android:name="com.whatsapp" />
     </queries>
 
-    <uses-sdk tools:overrideLibrary="androidx.security" />
-
     <application
         android:allowBackup="true"
         android:hasFragileUserData="true"

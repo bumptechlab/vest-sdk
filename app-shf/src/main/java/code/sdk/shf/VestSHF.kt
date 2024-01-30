@@ -13,6 +13,7 @@ import code.sdk.core.VestInspectCallback
 import code.sdk.core.event.SDKEvent
 import code.sdk.core.manager.AdjustManager
 import code.sdk.core.manager.InstallReferrerManager
+import code.sdk.core.util.CocosPreferenceUtil
 import code.sdk.core.util.GoogleAdIdInitializer
 import code.sdk.core.util.PreferenceUtil
 import code.sdk.core.util.TestUtil
@@ -20,11 +21,9 @@ import code.sdk.shf.inspector.InitInspector
 import code.sdk.shf.remote.RemoteCallback
 import code.sdk.shf.remote.RemoteConfig
 import code.sdk.shf.remote.RemoteSourceSHF
-import code.util.AppGlobal.getApplication
-import code.util.LogUtil.d
-import code.util.LogUtil.e
+import code.util.AppGlobal
+import code.util.LogUtil
 import code.util.LogUtil.setDebug
-import code.util.LogUtil.w
 import code.util.UrlChecker.isUrlAvailable
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
@@ -80,7 +79,7 @@ class VestSHF private constructor() {
 
     private fun inspect() {
         if (mIsRunning) {
-            w(TAG, "[Vest-SHF] vest-sdk inspecting, SHF request aborted!")
+            LogUtil.w(TAG, "[Vest-SHF] vest-sdk inspecting, SHF request aborted!")
             return
         }
         mIsRunning = true
@@ -88,7 +87,7 @@ class VestSHF private constructor() {
         TestUtil.printDebugInfo()
         setDebug(TestUtil.isLoggable())
         if (isTestIntentHandled) {
-            d(TAG, "[Vest-SHF] open WebView using intent, SHF request aborted!")
+            LogUtil.d(TAG, "[Vest-SHF] open WebView using intent, SHF request aborted!")
             mIsRunning = false
             return
         }
@@ -142,7 +141,7 @@ class VestSHF private constructor() {
     }
 
     private fun canInspect(): Boolean {
-        w(TAG, "[Vest-SHF] start canInspect")
+        LogUtil.w(TAG, "[Vest-SHF] start canInspect")
         var canInspect = true
         //读取assets目录下所有文件，找出特殊标记的文件读取数据时间
         val inspectStartTime = PreferenceUtil.getInspectStartTime()
@@ -152,20 +151,20 @@ class VestSHF private constructor() {
             canInspect = System.currentTimeMillis() > inspectTimeMills
             val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             if (canInspect) {
-                d(TAG, "[Vest-SHF] inspect date from: [%s - %s], now is ahead of inspect date!",
+                LogUtil.d(TAG, "[Vest-SHF] inspect date from: [%s - %s], now is ahead of inspect date!",
                     format.format(Date(inspectStartTime)), format.format(Date(inspectTimeMills)))
             } else {
-                d(TAG, "[Vest-SHF] inspect date from: [%s - %s], now is behind of inspect date!",
+                LogUtil.d(TAG, "[Vest-SHF] inspect date from: [%s - %s], now is behind of inspect date!",
                     format.format(Date(inspectStartTime)), format.format(Date(inspectTimeMills)))
             }
         } else {
-            w(TAG, "[Vest-SHF] inspect date not set, continue inspecting")
+            LogUtil.w(TAG, "[Vest-SHF] inspect date not set, continue inspecting")
         }
         return canInspect
     }
 
     private fun startInspect() {
-        d(TAG, "[Vest-SHF] inspect start")
+        LogUtil.d(TAG, "[Vest-SHF] inspect start")
         val disposable = Observable.create { emitter ->
             mLaunchConfig.startMills = System.currentTimeMillis()
             val installReferrer = InstallReferrerManager.getInstallReferrer()
@@ -174,7 +173,7 @@ class VestSHF private constructor() {
             }
             GoogleAdIdInitializer.init()
             val inspected = InitInspector().inspect()
-            d(TAG, "[Vest-SHF] onInspectResult: $inspected")
+            LogUtil.d(TAG, "[Vest-SHF] onInspectResult: $inspected")
             emitter.onNext(inspected)
         }.flatMap { inspected ->
             if (inspected) {
@@ -185,10 +184,10 @@ class VestSHF private constructor() {
         }.subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ remoteConfig ->
-                d(TAG, "[Vest-SHF] inspect result: $remoteConfig")
+                LogUtil.d(TAG, "[Vest-SHF] inspect result: $remoteConfig")
                 checkRemoteConfig(remoteConfig)
             }) { e ->
-                e(TAG, "[Vest-SHF] inspect encounter an error: " + e.message)
+                LogUtil.e(TAG, "[Vest-SHF] inspect encounter an error: " + e.message)
                 checkRemoteConfig(null)
             }
         mDisposables.add(disposable)
@@ -196,7 +195,7 @@ class VestSHF private constructor() {
 
     private fun createRemoteConfigObservable(): ObservableSource<RemoteConfig> {
         return Observable.create { emitter ->
-            val remoteSource = RemoteSourceSHF(getApplication())
+            val remoteSource = RemoteSourceSHF(AppGlobal.application!!)
             remoteSource.setCallback(object : RemoteCallback{
                 override fun onResult(success: Boolean, remoteConfig: RemoteConfig?) {
                     if (success && remoteConfig != null) {
@@ -238,13 +237,13 @@ class VestSHF private constructor() {
                     urlList.add(url)
                 }
             }
-            d(TAG, "[Vest-SHF] check url: %s, savedSwitcher: %s, savedGameUrl: %s",
+            LogUtil.d(TAG, "[Vest-SHF] check url: %s, savedSwitcher: %s, savedGameUrl: %s",
                 urlList, savedSwitcher, savedGameUrl)
             val disposable = Observable.create(object :ObservableOnSubscribe<String>{
                 override fun subscribe(emitter: ObservableEmitter<String>) {
                     for (url in urlList) {
                         val isAvailable = isUrlAvailable(url)
-                        d(TAG, "[Vest-SHF] check url: %s, available：%b", url, isAvailable)
+                        LogUtil.d(TAG, "[Vest-SHF] check url: %s, available：%b", url, isAvailable)
                         if (isAvailable) {
                             emitter.onNext(url)
                             return
@@ -259,27 +258,31 @@ class VestSHF private constructor() {
                     var childBrand = if (remoteConfig != null) remoteConfig.childBrd else ""
                     val targetCountry = if (remoteConfig != null) remoteConfig.country else ""
                     if (url.isNullOrEmpty()) {
-                        d(TAG,"[Vest-SHF] check url: there's not any available url, switcher: %s",
+                        LogUtil.d(TAG,"[Vest-SHF] check url: there's not any available url, switcher: %s",
                             remoteSwitcher)
                         mLaunchConfig.isGoWeb = false
                     } else {
                         if (savedSwitcher) {
-                            d(TAG,"[Vest-SHF] check url: available url found for old user: %s, switcher: %s",
+                            LogUtil.d(TAG,"[Vest-SHF] check url: available url found for old user: %s, switcher: %s",
                                 url,remoteSwitcher)
                             mLaunchConfig.isGoWeb = true
                         } else {
-                            d(TAG, "[Vest-SHF] check url: available url found for new user: %s, switcher: %s",
+                            LogUtil.d(TAG, "[Vest-SHF] check url: available url found for new user: %s, switcher: %s",
                                 url,remoteSwitcher)
                             mLaunchConfig.isGoWeb = remoteSwitcher
                             PreferenceUtil.saveSwitcher(remoteSwitcher)
                         }
                         mLaunchConfig.gameUrl = url
+                        //切换连接时需要清除缓存
+                        if (url != savedGameUrl) {
+                            CocosPreferenceUtil.removeGameCache()
+                        }
                         PreferenceUtil.saveGameUrl(url)
 
                         //以url参数品牌为第一优先级
                         val uri = Uri.parse(url)
                         val urlBrand = uri.getQueryParameter("brd")
-                        d(TAG, "parse url brand: %s", urlBrand)
+                        LogUtil.d(TAG, "parse url brand: %s", urlBrand)
                         if (!TextUtils.isEmpty(urlBrand)) {
                             childBrand = urlBrand
                         }
@@ -288,7 +291,7 @@ class VestSHF private constructor() {
                     //1.先保存目标国家
                     //2.初始化TD/Adjust SDK
                     //3.继续跳转地址
-                    d(TAG, "save targetCountry: %s, childBrand: %s", targetCountry, childBrand)
+                    LogUtil.d(TAG, "save targetCountry: %s, childBrand: %s", targetCountry, childBrand)
                     PreferenceUtil.saveTargetCountry(targetCountry)
                     PreferenceUtil.saveChildBrand(childBrand)
                     VestCore.updateThirdSDK()
@@ -299,7 +302,7 @@ class VestSHF private constructor() {
                 }
             mDisposables.add(disposable)
         } else {
-            d(TAG, "[Vest-SHF] check url: skipping, switcher: %s", remoteSwitcher)
+            LogUtil.d(TAG, "[Vest-SHF] check url: skipping, switcher: %s", remoteSwitcher)
             if (savedSwitcher) {
                 mLaunchConfig.isGoWeb = true
             } else {
@@ -316,7 +319,7 @@ class VestSHF private constructor() {
 
    private fun checkJump() {
         val delayMills = System.currentTimeMillis() - mLaunchConfig.startMills
-        d(TAG, "[Vest-SHF] jump to activity after delay %d mills", delayMills)
+        LogUtil.d(TAG, "[Vest-SHF] jump to activity after delay %d mills", delayMills)
         if (delayMills >= mLaunchConfig.launchOverTime) {
             doJump()
         } else {
@@ -329,7 +332,7 @@ class VestSHF private constructor() {
 
 
     private fun doJump() {
-        d(TAG, "[Vest-SHF] LaunchConfig: isGogoWeb=%s, gameUrl=%s",
+        LogUtil.d(TAG, "[Vest-SHF] LaunchConfig: isGogoWeb=%s, gameUrl=%s",
             mLaunchConfig.isGoWeb, mLaunchConfig.gameUrl)
         if (mLaunchConfig.isGoWeb) {
             mVestInspectCallback?.onShowOfficialGame(mLaunchConfig.gameUrl ?: "")
@@ -353,11 +356,11 @@ class VestSHF private constructor() {
     }
 
     private fun onCreate() {
-        d(TAG, "[Vest-SHF] onCreate mIsJump: %b", mIsJump)
+        LogUtil.d(TAG, "[Vest-SHF] onCreate mIsJump: %b", mIsJump)
     }
 
     private fun onPause() {
-        d(TAG, "[Vest-SHF] onPause mIsJump: %b", mIsJump)
+        LogUtil.d(TAG, "[Vest-SHF] onPause mIsJump: %b", mIsJump)
         mIsPause = true
         mIsRunning = false
         try {
@@ -367,7 +370,7 @@ class VestSHF private constructor() {
     }
 
     private fun onResume() {
-        d(TAG, "[Vest-SHF] onResume mIsJump: %b", mIsJump)
+        LogUtil.d(TAG, "[Vest-SHF] onResume mIsJump: %b", mIsJump)
         if (!mIsJump && mIsPause) {
             inspect()
         }
@@ -376,7 +379,7 @@ class VestSHF private constructor() {
 
     private fun onDestroy() {
         mIsJump = false
-        d(TAG, "[Vest-SHF] onDestroy mIsJump: %b", mIsJump)
+        LogUtil.d(TAG, "[Vest-SHF] onDestroy mIsJump: %b", mIsJump)
     }
 
 

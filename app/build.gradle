@@ -72,9 +72,9 @@ android.applicationVariants.all { variant ->
 
 dependencies {
     // 方式一：引入Maven依赖
-    implementation 'io.github.bumptechlab:vest-core:0.10.12'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.12'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.12'
+    implementation 'io.github.bumptechlab:vest-core:0.10.14'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.14'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.14'
 
     // 方式二：引入工程依赖
 //    implementation project(":app-core")
@@ -95,13 +95,11 @@ dependencies {
 //    implementation "com.adjust.sdk:adjust-android:$dependenciesConfig.adjustVersion"
 //    implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:$dependenciesConfig.thinkingDataSdkVersion"
 //    implementation "cn.thinkingdata.android:TAThirdParty:$dependenciesConfig.thinkingDataThirdPartyVersion"
-//    implementation "androidx.security:security-crypto:$dependenciesConfig.securityCryptoVersion"
-//    implementation "androidx.security:security-identity-credential:$dependenciesConfig.securityIdentityCredentialVersion"
-//    implementation "androidx.security:security-app-authenticator:$dependenciesConfig.securityAppAuthenticatorVersion"
 //    implementation "io.reactivex.rxjava3:rxjava:$dependenciesConfig.rxJavaVersion"
 //    implementation "io.reactivex.rxjava3:rxandroid:$dependenciesConfig.rxAndroidVersion"
 //    implementation "com.squareup.retrofit2:retrofit:$dependenciesConfig.retrofit2Version"
 //    implementation "com.squareup.retrofit2:adapter-rxjava3:$dependenciesConfig.retrofit2Version"
 //    implementation "com.squareup.retrofit2:converter-gson:$dependenciesConfig.retrofit2Version"
 //    implementation "org.greenrobot:eventbus:$dependenciesConfig.eventBusVersion"
+//    implementation "com.tencent:mmkv:$dependenciesConfig.mmkvVersion"
 }

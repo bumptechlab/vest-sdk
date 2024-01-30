@@ -13,7 +13,7 @@ import code.sdk.bridge.BridgeCallback
 import code.sdk.bridge.JsBridgeImpl
 import code.sdk.core.util.FileUtil
 import code.sdk.core.util.PackageUtil
-import code.util.AppGlobal.getApplication
+import code.util.AppGlobal
 import code.util.LogUtil.d
 import java.io.File
 
@@ -49,7 +49,7 @@ class PromotionImageSynthesizer(
 
         // synthesize
         val bitmapDrawables = arrayOfNulls<BitmapDrawable>(2)
-        val resources = getApplication().resources
+        val resources = AppGlobal.application?.resources
         bitmapDrawables[0] = BitmapDrawable(resources, materialBitmap)
         bitmapDrawables[1] = BitmapDrawable(resources, qrBitmap)
         val layerDrawable = LayerDrawable(bitmapDrawables)
@@ -79,7 +79,7 @@ class PromotionImageSynthesizer(
     private val promotionMaterial: Bitmap
         get() {
             //ObfuscationStub2.inject();
-            val context: Context = getApplication()
+            val context: Context = AppGlobal.application!!
             val dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
             val fileName = String.format(
                 JsBridgeImpl.PROMOTION_MATERIAL_FILENAME,

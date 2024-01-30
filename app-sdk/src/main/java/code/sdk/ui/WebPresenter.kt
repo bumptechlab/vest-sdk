@@ -8,13 +8,10 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.text.TextUtils
-import android.webkit.ValueCallback
 import androidx.core.app.ActivityCompat
 import code.sdk.R
 import code.sdk.bridge.BridgeCallback
 import code.sdk.bridge.JsBridge
-import code.sdk.bridge.JsBridgeCore
-import code.sdk.bridge.JsBridgeCore.Companion.getJsBridgeName
 import code.sdk.common.PermissionUtils.checkStoragePermissions
 import code.sdk.common.ShareUtil.sendText
 import code.sdk.common.ShareUtil.shareToWhatsApp
@@ -28,18 +25,14 @@ import code.sdk.core.util.UIUtil
 import code.sdk.core.util.URLUtilX
 import code.sdk.download.DownloadTask
 import code.sdk.download.DownloadTask.OnDownloadListener
-import code.sdk.ui.WebActivity
 import code.sdk.util.PromotionImageSynthesizer
 import code.util.IOUtil.readRawContent
 import code.util.ImageUtil.triggerScanning
-import code.util.LogUtil.d
-import code.util.LogUtil.e
-import code.util.LogUtil.i
-import code.util.LogUtil.w
+import code.util.LogUtil
 import java.io.File
 
 class WebPresenter(private val mWebViewActivity: WebActivity) {
-   private val TAG = WebPresenter::class.java.simpleName
+    private val TAG = WebPresenter::class.java.simpleName
 
     val PERMISSIONS_STORAGE = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     val systemWebViewPackage = "com.google.android.webview"
@@ -109,13 +102,13 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
 
         override fun loadUrl(url: String?) {
             if (!url.isNullOrEmpty())
-                UIUtil.runOnUiThread { mWebViewActivity.webView.loadUrl(url) }
+                UIUtil.runOnUiThread { mWebViewActivity.mWebView.loadUrl(url) }
         }
 
         override fun goBack() {
             UIUtil.runOnUiThread {
-                if (mWebViewActivity.webView.canGoBack()) {
-                    mWebViewActivity.webView.goBack()
+                if (mWebViewActivity.mWebView.canGoBack()) {
+                    mWebViewActivity.mWebView.goBack()
                 } else {
                     mWebViewActivity.finish()
                 }
@@ -127,11 +120,11 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
         }
 
         override fun refresh() {
-            UIUtil.runOnUiThread { mWebViewActivity.webView.reload() }
+            UIUtil.runOnUiThread { mWebViewActivity.mWebView.reload() }
         }
 
         override fun clearCache() {
-            UIUtil.runOnUiThread { mWebViewActivity.webView.clearCache(true) }
+            UIUtil.runOnUiThread { mWebViewActivity.mWebView.clearCache(true) }
         }
 
         override fun saveImage(url: String?) {
@@ -139,25 +132,28 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
             if (checkStoragePermissions(mWebViewActivity)) {
                 val dir = mWebViewActivity.getExternalFilesDir(Environment.DIRECTORY_DCIM)
                 FileUtil.ensureDirectory(dir)
-                DownloadTask.mInstance.download(url, dir!!.absolutePath, object : OnDownloadListener {
-                    override fun onDownloadSuccess(saveFile: File) {
-                        val succeed = saveFile.length() > 0
-                        if (succeed) {
-                            triggerScanning(saveFile)
+                DownloadTask.mInstance.download(
+                    url,
+                    dir!!.absolutePath,
+                    object : OnDownloadListener {
+                        override fun onDownloadSuccess(saveFile: File) {
+                            val succeed = saveFile.length() > 0
+                            if (succeed) {
+                                triggerScanning(saveFile)
+                            }
+                            LogUtil.d(TAG, "saveImage - download succeed = $succeed")
+                            saveImageDone(succeed)
                         }
-                        d(TAG, "saveImage - download succeed = $succeed")
-                        saveImageDone(succeed)
-                    }
 
-                    override fun onDownloading(progress: Int) {
-                        d(TAG, "saveImage - downloading = $progress%")
-                    }
+                        override fun onDownloading(progress: Int) {
+                            LogUtil.d(TAG, "saveImage - downloading = $progress%")
+                        }
 
-                    override fun onDownloadFailed() {
-                        w(TAG, "saveImage - download failed")
-                        saveImageDone(false)
-                    }
-                })
+                        override fun onDownloadFailed() {
+                            LogUtil.w(TAG, "saveImage - download failed")
+                            saveImageDone(false)
+                        }
+                    })
             } else {
                 ActivityCompat.requestPermissions(
                     mWebViewActivity,
@@ -169,7 +165,7 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
 
         override fun saveImageDone(succeed: Boolean) {
             UIUtil.runOnUiThread {
-                d(TAG, "saveImageDone = $succeed")
+                LogUtil.d(TAG, "saveImageDone = $succeed")
                 val script =
                     if (succeed) "Listener.send('SAVE_IMAGE_SUCCEED');" else "Listener.send('SAVE_IMAGE_FAILED');"
                 mWebViewActivity.webViewEvaluatescript(script)
@@ -178,7 +174,7 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
 
         override fun savePromotionMaterialDone(succeed: Boolean) {
             UIUtil.runOnUiThread {
-                d(TAG, "savePromotionMaterialDone = $succeed")
+                LogUtil.d(TAG, "savePromotionMaterialDone = $succeed")
                 val script =
                     if (succeed) "Listener.send('SAVE_PROMOTION_MATERIAL_SUCCEED');" else "Listener.send('SAVE_PROMOTION_MATERIAL_FAILED');"
                 mWebViewActivity.webViewEvaluatescript(script)
@@ -203,7 +199,7 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
 
         override fun synthesizePromotionImageDone(succeed: Boolean) {
             UIUtil.runOnUiThread {
-                d(TAG, "synthesizePromotionImageDone = $succeed")
+                LogUtil.d(TAG, "synthesizePromotionImageDone = $succeed")
                 val script =
                     if (succeed) "Listener.send('SYNTHESIZE_PROMOTION_IMAGE_SUCCEED');" else "Listener.send('SYNTHESIZE_PROMOTION_IMAGE_FAILED');"
                 mWebViewActivity.webViewEvaluatescript(script)
@@ -212,7 +208,7 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
 
         override fun onHttpDnsHttpResponse(requestId: String?, response: String?) {
             UIUtil.runOnUiThread {
-                d(TAG, "[HttpDns] onHttpDnsHttpResponse: %s", response)
+                LogUtil.d(TAG, "[HttpDns] onHttpDnsHttpResponse: %s", response)
                 val script =
                     String.format("Listener.send('HTTPDNS_HTTP_RESPONSE', '%s');", response)
                 mWebViewActivity.webViewEvaluatescript(script)
@@ -221,7 +217,7 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
 
         override fun onHttpDnsWsResponse(requestId: String?, response: String?) {
             UIUtil.runOnUiThread {
-                d(TAG, "[HttpDns] onHttpDnsWsResponse: %s", response)
+                LogUtil.d(TAG, "[HttpDns] onHttpDnsWsResponse: %s", response)
                 val script = String.format("Listener.send('HTTPDNS_WS_RESPONSE', '%s');", response)
                 mWebViewActivity.webViewEvaluatescript(script)
             }
@@ -235,7 +231,7 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
         override fun logoutFacebook() {}
         override fun preloadPromotionImageDone(succeed: Boolean) {
             UIUtil.runOnUiThread {
-                d(TAG, "preloadPromotionImageDone = $succeed")
+                LogUtil.d(TAG, "preloadPromotionImageDone = $succeed")
                 val script =
                     if (succeed) "Listener.send('PRELOAD_PROMOTION_IMAGE_SUCCEED');" else "Listener.send('PRELOAD_PROMOTION_IMAGE_FAILED');"
                 mWebViewActivity.webViewEvaluatescript(script)
@@ -251,10 +247,14 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
         this.isGame = isGame
         mUrl = url
         mWebGlScript = readRawContent(mWebViewActivity.baseContext, R.raw.webgl_script)
-        d(TAG, "WebGlScript=$mWebGlScript")
+        LogUtil.d(TAG, "WebGlScript=$mWebGlScript")
         val jsBridge = JsBridge(jsBridge)
-        mWebViewActivity.webView.addJavascriptInterface(jsBridge, JsBridgeCore.getJsBridgeName())
         val uri = Uri.parse(mUrl)
+        val jsb = uri.getQueryParameter("jsb")
+        val jsbNamespace =
+            if (jsb?.contains(".")!!) jsb?.substring(0, jsb.indexOf(".")) else "jsBridge"
+        LogUtil.d(TAG, "jsb: $jsb, namespace: $jsbNamespace")
+        mWebViewActivity.mWebView.addJavascriptInterface(jsBridge, jsbNamespace!!)
         // hover menu
         mWebViewActivity.setShowHoverMenu(
             uri.getBooleanQueryParameter(
@@ -311,7 +311,7 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
     private fun handleCheckGameFeature(gameUrl: String) {
         val chn = CocosPreferenceUtil.getString(CocosPreferenceUtil.KEY_INT_CHN)
         val brandCode = CocosPreferenceUtil.getString(CocosPreferenceUtil.KEY_INT_BRAND_CODE)
-        d(
+        LogUtil.d(
             TAG,
             "check game feature: %s=%s, %s=%s",
             CocosPreferenceUtil.KEY_INT_CHN,
@@ -322,15 +322,15 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
         if (TextUtils.isEmpty(chn) && TextUtils.isEmpty(brandCode)) { //特征值为空，不符合游戏特征(判定为不是我们自己的游戏)
             //当前加载的url跟缓存的url一样，并且不符合游戏特征，则清除掉缓存url
             val cacheGameUrl = PreferenceUtil.readGameUrl()
-            d(TAG, "check game feature: is not validate game page: %s", gameUrl)
+            LogUtil.d(TAG, "check game feature: is not validate game page: %s", gameUrl)
             if (isSameBaseUrl(gameUrl, cacheGameUrl)) {
-                d(TAG, "check game feature: clear cached url: %s", cacheGameUrl)
+                LogUtil.d(TAG, "check game feature: clear cached url: %s", cacheGameUrl)
                 //PreferenceUtil.saveGameUrl(null);
             } else {
-                d(TAG, "check game feature: abort clearing cached url: %s", cacheGameUrl)
+                LogUtil.d(TAG, "check game feature: abort clearing cached url: %s", cacheGameUrl)
             }
         } else {
-            d(TAG, "check game feature: is validate game page: %s", gameUrl)
+            LogUtil.d(TAG, "check game feature: is validate game page: %s", gameUrl)
         }
     }
     /* Check WebView Compatibility START */
@@ -358,14 +358,14 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
 
     private fun handleCheckWebViewCompatibility() {
         if (TextUtils.isEmpty(mWebGlScript)) {
-            d(TAG, "abort checking WebView compatibility, WebGlScript is empty")
+            LogUtil.d(TAG, "abort checking WebView compatibility, WebGlScript is empty")
             return
         }
-        d(TAG, "start checking WebView compatibility...")
+        LogUtil.d(TAG, "start checking WebView compatibility...")
         val isWebViewCompatible = isWebViewCompatible
-        mWebViewActivity.webView
+        mWebViewActivity.mWebView
             .evaluateJavascript(mWebGlScript!!) { value -> //js与native交互的回调函数
-                d(TAG, "isWebGlEnable = $value")
+                LogUtil.d(TAG, "isWebGlEnable = $value")
                 if ("false" == value || !isWebViewCompatible) {
                     UIUtil.runOnUiThread { mWebViewActivity.showWebViewUpdateDialog() }
                 }
@@ -380,19 +380,19 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
      * @return
     </bundle> */
     private val isWebViewCompatible: Boolean
-         get() {
+        get() {
             val packageInfo =
                 DeviceUtil.getPackageInfo(mWebViewActivity.baseContext, systemWebViewPackage)
             var compatible = false
             if (packageInfo != null) {
                 if (packageInfo.versionCode >= miniSystemWebViewVersionCode) {
                     compatible = true
-                    i(
+                    LogUtil.i(
                         TAG, "[Android System WebView] version: %s(%d) compatible for cocos game",
                         packageInfo.versionName, packageInfo.versionCode
                     )
                 } else {
-                    e(
+                    LogUtil.e(
                         TAG,
                         "[Android System WebView] version: %s(%d) not compatible for cocos game, need upgrade to %s(%d) or higher",
                         packageInfo.versionName,
@@ -402,7 +402,7 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
                     )
                 }
             } else {
-                i(TAG, "[Android System WebView] not installed")
+                LogUtil.i(TAG, "[Android System WebView] not installed")
             }
             return compatible
         }

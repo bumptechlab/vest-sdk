@@ -9,6 +9,7 @@ import code.util.LogUtil.setDebug
 
 object VestSDK {
     private val TAG = VestSDK::class.java.simpleName
+    private var mLoggable: Boolean? = null
 
     /**
      * init vest-sdk with this method at the main entrance of application
@@ -19,7 +20,7 @@ object VestSDK {
      */
     fun init(context: Context, configAssets: String?) {
         d(TAG, "[Vest-SDK] init")
-        VestCore.init(context, configAssets)
+        VestCore.init(context, configAssets,mLoggable)
     }
 
     /**
@@ -28,8 +29,12 @@ object VestSDK {
      * @param loggable
      */
     fun setLoggable(loggable: Boolean) {
-        TestUtil.setLoggable(loggable)
-        setDebug(isLoggable())
+        try {
+            TestUtil.setLoggable(loggable)
+            setDebug(isLoggable())
+        } catch (e: Exception) {
+            mLoggable = loggable
+        }
     }
 
     fun onCreate() {

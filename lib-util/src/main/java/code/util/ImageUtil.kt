@@ -2,7 +2,6 @@ package code.util
 
 import android.content.Intent
 import android.net.Uri
-import code.util.AppGlobal.getApplication
 import java.io.File
 
 object ImageUtil {
@@ -19,7 +18,7 @@ object ImageUtil {
             //ObfuscationStub8.inject();
             return
         }
-        getApplication().sendBroadcast(
+        AppGlobal.application!!.sendBroadcast(
             Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri)
         )
     }

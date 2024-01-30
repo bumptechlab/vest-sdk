@@ -1,8 +1,6 @@
 package code.sdk.core.util
 
-import android.content.Context
-import android.content.SharedPreferences
-import code.util.AppGlobal.getApplication
+import com.tencent.mmkv.MMKV
 
 /**
  * cocos存储专用，key由cocos层指定
@@ -19,19 +17,30 @@ object CocosPreferenceUtil {
     /* public */
     fun putString(key: String?, value: String?): Boolean {
         //ObfuscationStub0.inject();
-        val editor = preferences.edit()
-        return editor.putString(key, value).commit()
+        return preferences.encode(key, value)
     }
 
     fun getString(key: String?): String? {
         //ObfuscationStub1.inject();
-        return preferences.getString(key, "")
+        return preferences.decodeString(key, "")
     }
 
-    fun getAll(): Map<String, *> = preferences.all
-    private val preferences: SharedPreferences
+    fun removeGameCache(): Boolean {
+        preferences.clearAll()
+        return true
+    }
+
+    fun getAll(): Map<String, *> {
+        val allKeys = preferences.allKeys()
+        val map = hashMapOf<String, String?>()
+        allKeys?.forEach {
+            map[it] = getString(it)
+        }
+        return map
+    }
+
+    private val preferences: MMKV
         get() {
-            val context: Context = getApplication()
-            return context.getSharedPreferences("cocos", Context.MODE_PRIVATE)
+            return MMKV.mmkvWithID("cocos")
         }
 }

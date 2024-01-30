@@ -23,7 +23,7 @@ import code.sdk.download.DownloadTask
 import code.sdk.download.DownloadTask.OnDownloadListener
 import code.sdk.util.KeyChainUtil
 import code.sdk.zfutil.ExtraInfoReader
-import code.util.AppGlobal.getApplication
+import code.util.AppGlobal
 import code.util.LogUtil.d
 import code.util.LogUtil.e
 import code.util.LogUtil.i
@@ -59,14 +59,12 @@ class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
             //ObfuscationStub5.inject();
             return
         }
-        val manager = getApplication()
-            .getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val manager = AppGlobal.application?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         manager.setPrimaryClip(ClipData.newPlainText(null, text))
     }
 
     override fun getCopiedText(): String {
-        val manager = getApplication()
-            .getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val manager = AppGlobal.application?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         if (manager.hasPrimaryClip() && manager.primaryClip!!.itemCount > 0) {
             val clipData = manager.primaryClip!!.getItemAt(0)
             //ObfuscationStub6.inject();
@@ -77,7 +75,7 @@ class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
     }
 
     override fun showNativeToast(toast: String?) {
-        Toast.makeText(getApplication(), toast, Toast.LENGTH_SHORT).show()
+        Toast.makeText(AppGlobal.application, toast, Toast.LENGTH_SHORT).show()
     }
 
     override fun initAdjustID(adjustAppID: String?) {
@@ -91,7 +89,7 @@ class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
             return
         }
         PreferenceUtil.saveAdjustAppID(adjustAppID)
-        AdjustManager.initAdjustSdk(getApplication(), adjustAppID)
+        AdjustManager.initAdjustSdk(AppGlobal.application, adjustAppID)
     }
 
     override fun trackAdjustEvent(eventToken: String?, jsonData: String?) {
@@ -193,7 +191,7 @@ class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
     }
 
     override fun getGoogleADID(): String {
-        return DeviceUtil.getGoogleADID()
+        return DeviceUtil.googleAdId!!
     }
 
     override fun getIDFA(): String {
@@ -307,7 +305,7 @@ class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
 
     override fun savePromotionMaterial(materialUrl: String?) {
         //ObfuscationStub4.inject();
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         val dir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
         FileUtil.ensureDirectory(dir)
         DownloadTask.mInstance.download(
@@ -357,7 +355,7 @@ class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
     }
 
     override fun preloadPromotionImage(imageUrl: String?) {
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         val imagePath = File(context.filesDir, DIR_IMAGES)
         FileUtil.ensureDirectory(imagePath)
         DownloadTask.mInstance.download(
@@ -383,7 +381,7 @@ class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
     }
 
     override fun shareToWhatsApp(text: String?) {
-        val context: Context = getApplication()
+        val context: Context = AppGlobal.application!!
         val imagePath = File(context.filesDir, DIR_IMAGES)
         val destFile = File(imagePath, PROMOTION_SHARE_FILENAME)
         mCallback?.shareToWhatsApp(text, destFile)
@@ -431,7 +429,7 @@ class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
 
     override fun memoryInfo(): String {
         try {
-            val context: Context = getApplication()
+            val context: Context = AppGlobal.application!!
             val result = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             val mi = ActivityManager.MemoryInfo()
             result.getMemoryInfo(mi)
@@ -463,7 +461,7 @@ class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
         return try {
             val jsonObject = JSONObject()
             jsonObject.put("mac", getMacAddress())
-            jsonObject.put("gsf_id", DeviceUtil.gsfAndroidId(getApplication()))
+            jsonObject.put("gsf_id", DeviceUtil.gsfAndroidId)
             jsonObject.toString()
         } catch (exception: Exception) {
             ""
