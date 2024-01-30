@@ -361,3 +361,4 @@ allprojects {
 - 升级code-plugin 
 - 使用compose重写WebActivity页面 
 - 修复切换链接不能进入游客模式
+- 修复JsBridge命名空间出现纯数字字符串的问题
