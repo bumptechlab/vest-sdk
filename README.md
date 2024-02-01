@@ -1,5 +1,5 @@
 # Vest-SDK
-最新版本：0.10.14   
+最新版本：0.10.15   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 
 SDK总共三个依赖库：  
@@ -76,43 +76,43 @@ vest-shf: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:0.10.14'
+          implementation 'io.github.bumptechlab:vest-core:0.10.15'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:0.10.14'
+          implementation 'io.github.bumptechlab:vest-sdk:0.10.15'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:0.10.14'
+          implementation 'io.github.bumptechlab:vest-shf:0.10.15'
       }
       ```
    (2) 本地依赖方式
-   - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
-     ```
-     //三方依赖必须引入
-     dependencies {
-         implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-         implementation "androidx.appcompat:appcompat:1.6.1"
-         implementation "androidx.multidex:multidex:2.0.1"
-         implementation "androidx.annotation:annotation:1.7.0"
-         implementation "com.android.installreferrer:installreferrer:2.2"
-         implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
-         implementation "com.squareup.okhttp3:okhttp:4.10.0"
-         implementation "com.squareup.okhttp3:logging-interceptor:4.10.0"
-         implementation "com.adjust.sdk:adjust-android:4.33.0"
-         implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3"
-         implementation "cn.thinkingdata.android:TAThirdParty:1.1.0"
-         implementation "io.reactivex.rxjava3:rxjava:3.0.0"
-         implementation "io.reactivex.rxjava3:rxandroid:3.0.2"
-         implementation "com.squareup.retrofit2:retrofit:2.9.0"
-         implementation "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
-         implementation "com.squareup.retrofit2:converter-gson:2.9.0"
-         implementation "org.greenrobot:eventbus:3.3.1"
-         implementation "com.tencent:mmkv:1.3.2"
-         implementation "androidx.activity:activity-compose:1.8.2"
-         implementation "androidx.compose.material3:material3:1.1.2"
-         implementation "androidx.compose.ui:ui:1.6.0"
-     }
-     ```
-   - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)
-
+    - a.拷贝sdk目录下的aar文件（vest-core、vest-sdk、vest-shf）到app/libs文件夹，然后在app/build.gradle添加如下配置：
+      ```
+      //三方依赖必须引入
+      dependencies {
+          implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+          implementation "androidx.appcompat:appcompat:1.6.1"
+          implementation "androidx.multidex:multidex:2.0.1"
+          implementation "androidx.annotation:annotation:1.7.0"
+          implementation "com.android.installreferrer:installreferrer:2.2"
+          implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
+          implementation "com.squareup.okhttp3:okhttp:4.10.0"
+          implementation "com.squareup.okhttp3:logging-interceptor:4.10.0"
+          implementation "com.adjust.sdk:adjust-android:4.33.0"
+          implementation "cn.thinkingdata.android:ThinkingAnalyticsSDK:2.8.3"
+          implementation "cn.thinkingdata.android:TAThirdParty:1.1.0"
+          implementation "io.reactivex.rxjava3:rxjava:3.0.0"
+          implementation "io.reactivex.rxjava3:rxandroid:3.0.2"
+          implementation "com.squareup.retrofit2:retrofit:2.9.0"
+          implementation "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
+          implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+          implementation "org.greenrobot:eventbus:3.3.1"
+          implementation "com.tencent:mmkv:1.3.2"
+          implementation "androidx.activity:activity-compose:1.8.2"
+          implementation "androidx.compose.material3:material3:1.1.2"
+          implementation "androidx.compose.ui:ui:1.6.0"
+      }
+      ```
+    - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)   
+   
    (3) 源码依赖方式（适用于使用开源工程的开发者）
     - a.把模块app-core, app-sdk, app-shf导入到你的工程中（注意还有其他依赖模块，统一以lib-开头）
     - b.在app模块build.gradle中添加如下依赖：
@@ -246,9 +246,9 @@ allprojects {
 2. 在sdk的依赖版本号后面加上-SNAPSHOT，则可以使用release版本的快照版本，从0.10.3开始才有快照版本。
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:0.10.14-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.14-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.14-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:0.10.15-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.15-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.15-SNAPSHOT'
  }
 ```
 3. 在build.gradle android节点下添加以下代码，可以帮助及时更新sdk版本依赖缓存。
@@ -365,3 +365,5 @@ allprojects {
 - 使用compose重写WebActivity页面 
 - 修复切换链接不能进入游客模式
 - 修复JsBridge命名空间出现纯数字字符串的问题
+### 0.10.15
+- 优化java语言调用vest-sdk方法

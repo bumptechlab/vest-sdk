@@ -18,6 +18,7 @@ object VestSDK {
      * @param configAssets
      * @return
      */
+    @JvmStatic
     fun init(context: Context, configAssets: String?) {
         d(TAG, "[Vest-SDK] init")
         VestCore.init(context, configAssets,mLoggable)
@@ -28,6 +29,7 @@ object VestSDK {
      *
      * @param loggable
      */
+    @JvmStatic
     fun setLoggable(loggable: Boolean) {
         try {
             TestUtil.setLoggable(loggable)
@@ -36,22 +38,23 @@ object VestSDK {
             mLoggable = loggable
         }
     }
-
+    @JvmStatic
     fun onCreate() {
         d(TAG, "[Vest-SDK] onCreate")
         VestCore.onCreate()
     }
-
+    @JvmStatic
     fun onResume() {
         d(TAG, "[Vest-SDK] onResume")
         VestCore.onResume()
     }
 
+    @JvmStatic
     fun onPause() {
         d(TAG, "[Vest-SDK] onPause")
         VestCore.onPause()
     }
-
+    @JvmStatic
     fun onDestroy() {
         d(TAG, "[Vest-SDK] onDestroy")
         VestCore.onDestroy()
@@ -64,6 +67,7 @@ object VestSDK {
      * @param context
      * @param url
      */
+    @JvmStatic
     fun gotoGameActivity(context: Context, url: String) {
         toWebViewActivity(context, url)
     }

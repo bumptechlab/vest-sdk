@@ -72,9 +72,9 @@ android.applicationVariants.all { variant ->
 
 dependencies {
     // 方式一：引入Maven依赖
-    implementation 'io.github.bumptechlab:vest-core:0.10.14'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.14'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.14'
+    implementation 'io.github.bumptechlab:vest-core:0.10.15'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.15'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.15'
 
     // 方式二：引入工程依赖
 //    implementation project(":app-core")

@@ -59,6 +59,7 @@ class VestSHF private constructor() {
 
     companion object {
         private val TAG = VestSHF::class.java.simpleName
+        @JvmStatic
         fun getInstance(): VestSHF {
             return InstanceHolder.INSTANCE
         }
