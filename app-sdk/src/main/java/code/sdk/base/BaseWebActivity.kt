@@ -18,6 +18,8 @@ abstract class BaseWebActivity : ComponentActivity() {
     }
 
     private fun setFullScreen() {
+        //屏幕保持常亮
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         //设置无标题
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         //设置全屏

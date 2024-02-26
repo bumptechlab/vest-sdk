@@ -1,5 +1,5 @@
 # Vest-SDK
-最新版本：0.10.15   
+最新版本：0.10.16   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。   
 
 SDK总共三个依赖库：  
@@ -76,11 +76,11 @@ vest-shf: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:0.10.15'
+          implementation 'io.github.bumptechlab:vest-core:0.10.16'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:0.10.15'
+          implementation 'io.github.bumptechlab:vest-sdk:0.10.16'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:0.10.15'
+          implementation 'io.github.bumptechlab:vest-shf:0.10.16'
       }
       ```
    (2) 本地依赖方式
@@ -246,9 +246,9 @@ allprojects {
 2. 在sdk的依赖版本号后面加上-SNAPSHOT，则可以使用release版本的快照版本，从0.10.3开始才有快照版本。
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:0.10.15-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:0.10.15-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:0.10.15-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:0.10.16-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:0.10.16-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:0.10.16-SNAPSHOT'
  }
 ```
 3. 在build.gradle android节点下添加以下代码，可以帮助及时更新sdk版本依赖缓存。
@@ -367,3 +367,7 @@ allprojects {
 - 修复JsBridge命名空间出现纯数字字符串的问题
 ### 0.10.15
 - 优化java语言调用vest-sdk方法
+### 0.10.16
+- 使用stringfog插件加密项目中的字符串
+- 保持屏幕常亮
+- 修复客服页面白屏问题

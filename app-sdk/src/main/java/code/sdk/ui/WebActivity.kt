@@ -19,6 +19,7 @@ import android.os.Process
 import android.text.TextUtils
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.ClientCertRequest
 import android.webkit.SslErrorHandler
@@ -304,6 +305,7 @@ class WebActivity : BaseWebActivity() {
             }
         }
         d(TAG, "open url: %s", mUrl)
+        doResume()
     }
 
     override fun initView() {
@@ -327,6 +329,9 @@ class WebActivity : BaseWebActivity() {
         if (mIsShowWeb) {
             AndroidView(factory = {
                 mWebView = WebView(it).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT)
                     val settings = settings
                     settings.defaultTextEncodingName = "utf-8"
                     settings.javaScriptEnabled = true

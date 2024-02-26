@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'maven-publish'
     id 'com.kezong.fat-aar'
+    id 'stringfog'
 }
 apply from: './publish.gradle' //aar发布脚本
 apply from: '../plugins/pack.gradle'    //aar输出脚本
@@ -33,6 +34,13 @@ project.afterEvaluate {
             println("> ${projectName}: ${assembleVariantTask} dependsOn clean")
         }
     }
+}
+
+stringfog {
+    implementation = "com.github.megatronking.stringfog.xor.StringFogImpl"
+    enable = androidConfig.stringfogEnable
+    kg = new com.github.megatronking.stringfog.plugin.kg.RandomKeyGenerator()
+    mode = com.github.megatronking.stringfog.plugin.StringFogMode.bytes
 }
 
 fataar {
@@ -153,6 +161,7 @@ dependencies {
     implementation "androidx.activity:activity-compose:$dependenciesConfig.activityCompose"
     implementation "androidx.compose.material3:material3:$dependenciesConfig.composeMaterial3"
     implementation "androidx.compose.ui:ui:$dependenciesConfig.composeUI"
+    implementation "com.github.megatronking.stringfog:xor:$dependenciesConfig.stringFogVersion"
 
     compileOnly project(':app-core')
     compileOnly project(':lib-util')

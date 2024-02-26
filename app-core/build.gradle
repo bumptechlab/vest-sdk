@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'com.kezong.fat-aar'
+    id 'stringfog'
 }
 apply from: './publish.gradle' //aar发布脚本
 apply from: '../plugins/pack.gradle'   //aar输出脚本
@@ -11,6 +12,13 @@ def androidConfig = rootProject.ext.android
 def dependenciesConfig = rootProject.ext.dependencies
 def namespaces = rootProject.ext.namespaces
 def mavenConfig = rootProject.ext.maven
+
+stringfog {
+    implementation = "com.github.megatronking.stringfog.xor.StringFogImpl"
+    enable = androidConfig.stringfogEnable
+    kg = new com.github.megatronking.stringfog.plugin.kg.RandomKeyGenerator()
+    mode = com.github.megatronking.stringfog.plugin.StringFogMode.bytes
+}
 
 fataar {
     /**
@@ -94,4 +102,5 @@ dependencies {
     implementation "cn.thinkingdata.android:TAThirdParty:$dependenciesConfig.thinkingDataThirdPartyVersion"
     implementation "org.greenrobot:eventbus:$dependenciesConfig.eventBusVersion"
     implementation "com.tencent:mmkv:$dependenciesConfig.mmkvVersion"
+    implementation "com.github.megatronking.stringfog:xor:$dependenciesConfig.stringFogVersion"
 }

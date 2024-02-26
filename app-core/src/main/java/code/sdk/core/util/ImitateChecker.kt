@@ -4,6 +4,7 @@ import android.text.TextUtils
 
 object ImitateChecker {
 
+    @JvmStatic
     fun isImitate(): Boolean = mayOnEmulatorViaQEMU() || isEmulatorFromAbi()
 
     private fun mayOnEmulatorViaQEMU(): Boolean {
