@@ -20,7 +20,7 @@ project.ext {
             compileSdkVersion: 34,
             versionCode      : 100,
             versionName      : '1.0.0',
-            frameVersion     : "014",   //框架版本，阶段性发布请+1（在框架功能开发｜dev分支更新，其他分支请不要更新）
+            frameVersion     : "100",   //框架版本，阶段性发布请+1（在框架功能开发｜dev分支更新，其他分支请不要更新）
             codeInjectEnable : true,    //是否开启代码注入
             stringfogEnable  : true,    //是否开启字符串加密
     ]
@@ -46,17 +46,18 @@ project.ext {
             activityCompose                : "1.8.2",
             composeMaterial3               : "1.1.2",
             composeUI                      : "1.6.0",
-            stringFogVersion               : "4.0.1"
+            stringFogVersion               : "4.0.1",
+            kotlinCoroutinesVersion        : "1.7.3"
     ]
 
     //配置各个依赖库的命名空间
     namespaces = [
             app    : "com.example.vest.sdk.app",
             appb   : "com.example.app.test",
-            appsdk : "code.sdk",
-            appshf : "code.sdk.shf",
-            appcore: "code.sdk.core",
-            util   : "code.util",
+            appsdk : "book.sdk",
+            appshf : "book.sdk.shf",
+            appcore: "book.sdk.core",
+            util   : "book.util",
     ]
 
     maven = [
@@ -65,7 +66,7 @@ project.ext {
             artifactIdSdk    : 'vest-sdk',
             artifactIdShf    : 'vest-shf',
             artifactIdCore   : 'vest-core',
-            version          : '0.10.16',//发布到maven的版本号
+            version          : '1.0.0',//发布到maven的版本号
 
             //Github代码仓库参数
             homePage         : 'https://github.com/bumptechlab/vest-sdk',//主页地址

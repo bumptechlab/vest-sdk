@@ -42,6 +42,10 @@ def getBuildVersion() {
     return versionBase64
 }
 
+def getBuildVersionKey() {
+    return UUID.randomUUID().toString()
+}
+
 android {
     namespace namespaces.appcore
     compileSdk androidConfig.compileSdkVersion
@@ -51,6 +55,7 @@ android {
         targetSdkVersion androidConfig.targetSdkVersion
         versionName mavenConfig.version
         multiDexEnabled true
+        def buildVersionKey = getBuildVersionKey()
 
         consumerProguardFiles "../proguard/consumer-rules.pro"
         buildConfigField 'String', 'SDK_NAME', '"' + mavenConfig.sdkName + '"'
@@ -58,9 +63,11 @@ android {
         buildConfigField 'String', 'BUILD_NUMBER', '"' + releaseTime() + '"'
         buildConfigField 'String', 'HOME_PAGE', '"' + mavenConfig.homePage + '"'
         buildConfigField 'String', 'EMAIL', '"' + mavenConfig.email + '"'
+        buildConfigField 'String', 'KEY_BUILD_VERSION', '"' + buildVersionKey + '"'
 
         manifestPlaceholders = [
-                build_version: getBuildVersion()
+                build_version_key: buildVersionKey,
+                build_version    : getBuildVersion(),
         ]
     }
 

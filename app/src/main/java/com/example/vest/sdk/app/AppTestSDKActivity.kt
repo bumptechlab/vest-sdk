@@ -4,9 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import code.sdk.core.VestInspectCallback
-import code.sdk.core.VestSDK
-import code.sdk.shf.VestSHF
+import book.sdk.core.VestInspectCallback
+import book.sdk.core.VestSDK
+import book.sdk.shf.VestSHF
 import java.util.concurrent.TimeUnit
 
 class AppTestSDKActivity : Activity() {
@@ -15,26 +15,31 @@ class AppTestSDKActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_custom_splash)
-        /**
-         * setup the date of apk build
-         * don't need to invoke this method if using vest-plugin, vest-plugin will setup release time automatically
-         * if not, you need to invoke this method to setup release time
-         * this method has the first priority when using both ways.
-         * time format: yyyy-MM-dd HH:mm:ss
-         */
-        VestSHF.getInstance().setReleaseTime("2023-11-29 10:23:20")
-        /**
-         * setup duration of silent period for requesting A/B switching starting from the date of apk build
-         */
-        VestSHF.getInstance().setInspectDelayTime(5, TimeUnit.DAYS)
-        /**
-         * set true to check the remote and local url, this could make effect on A/B switching
-         */
-        VestSHF.getInstance().setCheckUrl(true)
-        /**
-         * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
-         */
-        VestSHF.getInstance().inspect(this, object : VestInspectCallback {
+
+        VestSHF.getInstance().apply {
+            /**
+             * setup the date of apk build
+             * don't need to invoke this method if using vest-plugin, vest-plugin will setup release time automatically
+             * if not, you need to invoke this method to setup release time
+             * this method has the first priority when using both ways.
+             * time format: yyyy-MM-dd HH:mm:ss
+             */
+            setReleaseTime("2023-11-29 10:23:20")
+
+            /**
+             * setup duration of silent period for requesting A/B switching starting from the date of apk build
+             */
+            setInspectDelayTime(5, TimeUnit.DAYS)
+
+            /**
+             * set true to check the remote and local url, this could make effect on A/B switching
+             */
+            setCheckUrl(true)
+
+            /**
+             * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
+             */
+        }.inspect(this, object : VestInspectCallback {
             /**
              * showing A side
              */

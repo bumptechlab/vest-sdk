@@ -128,4 +128,5 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:$dependenciesConfig.okhttpVersion"
     implementation "org.greenrobot:eventbus:$dependenciesConfig.eventBusVersion"
     implementation "com.github.megatronking.stringfog:xor:$dependenciesConfig.stringFogVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$dependenciesConfig.kotlinCoroutinesVersion"
 }

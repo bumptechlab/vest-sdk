@@ -162,6 +162,7 @@ dependencies {
     implementation "androidx.compose.material3:material3:$dependenciesConfig.composeMaterial3"
     implementation "androidx.compose.ui:ui:$dependenciesConfig.composeUI"
     implementation "com.github.megatronking.stringfog:xor:$dependenciesConfig.stringFogVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$dependenciesConfig.kotlinCoroutinesVersion"
 
     compileOnly project(':app-core')
     compileOnly project(':lib-util')

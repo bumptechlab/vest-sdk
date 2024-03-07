@@ -1,7 +1,7 @@
 package com.example.vest.sdk.app
 
 import androidx.multidex.MultiDexApplication
-import code.sdk.core.VestSDK
+import book.sdk.core.VestSDK
 
 class AppTestApplication : MultiDexApplication() {
     override fun onCreate() {

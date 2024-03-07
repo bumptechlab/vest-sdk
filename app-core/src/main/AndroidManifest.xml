@@ -9,7 +9,7 @@
     <application>
 
         <meta-data
-            android:name="build.version"
+            android:name="${build_version_key}"
             android:value="${build_version}" />
 
         <!-- adjust sdk start -->
