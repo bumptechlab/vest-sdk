@@ -1,6 +1,6 @@
 package book.sdk.core
 
-object VestGameReason {
+object VestInspectResult {
     /**
      * 描述显示马甲游戏的原因：未到设定日期
      */

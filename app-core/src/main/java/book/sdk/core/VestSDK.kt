@@ -1,6 +1,8 @@
 package book.sdk.core
 
 import android.content.Context
+import android.graphics.Bitmap.Config
+import book.sdk.core.util.ConfigPreference
 import book.sdk.core.util.TestUtil
 import book.util.LogUtil
 
@@ -36,6 +38,16 @@ object VestSDK {
         }
     }
 
+    /**
+     * set mode of released app, the mode will determine config from server, default is MODE_VEST
+     * MODE_VEST: this mode is set when app is published on GooglePlay
+     * MODE_CHANNEL: this mode is set when app is published on landing page
+     */
+    @JvmStatic
+    fun setReleaseMode(mode: VestReleaseMode) {
+        ConfigPreference.saveReleaseMode(mode.mode)
+    }
+
     @JvmStatic
     fun onCreate() {
         LogUtil.d(TAG, "[Vest-SDK] onCreate")
@@ -68,7 +80,8 @@ object VestSDK {
      * @param url
      */
     @JvmStatic
-    fun gotoGameActivity(context: Context, url: String) {
-        VestCore.toWebViewActivity(context, url)
+    fun gotoBSide(context: Context, url: String): Boolean {
+        return VestCore.toWebViewActivity(context, url)
     }
+
 }

@@ -1,6 +1,6 @@
 package book.util
 
-object AESKeyStore : AbstractPreference("pref_aes") {
+object AESKeyStore : AbstractPreference("pref_vest_aes") {
 
     private val TAG = AESKeyStore::class.java.simpleName
 

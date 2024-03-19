@@ -6,7 +6,7 @@ import android.os.Bundle
 /**
  * A面界面
  */
-class VestGameActivity : Activity() {
+class ASideActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_vest_game)

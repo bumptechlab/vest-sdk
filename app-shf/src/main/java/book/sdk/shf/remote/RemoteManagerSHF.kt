@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.text.TextUtils
 import android.webkit.URLUtil
+import book.sdk.core.VestReleaseMode
 import book.sdk.core.util.ConfigPreference
 import book.sdk.core.util.DeviceUtil
 import book.sdk.core.util.PackageUtil
@@ -30,6 +31,8 @@ class RemoteManagerSHF {
     companion object {
         private val TAG = RemoteManagerSHF::class.java.simpleName
         private const val RETRY_TOTAL_COUNT = 3
+        const val SHF_API_ENCRYPT = true
+        const val SHF_API_VERSION = 3
 
         @Synchronized
         fun init(context: Context): RemoteManagerSHF {
@@ -52,12 +55,12 @@ class RemoteManagerSHF {
 
     fun start(baseHost: String, spareHosts: Array<String?>?) {
         if (isRequesting) {
-            LogUtil.d(TAG, "[SHF] is requesting, could not proceed another request")
+            LogUtil.d(TAG, "[Vest-SHF] is requesting, could not proceed another request")
             return
         }
         val hosts = initializeHosts(baseHost, spareHosts)
         if (hosts.isEmpty()) {
-            handleError("[SHF] there are no valid hosts, abort requesting")
+            handleError("[Vest-SHF] there are no valid hosts, abort requesting")
             return
         }
         doRequest(hosts, 0, 0)
@@ -79,7 +82,7 @@ class RemoteManagerSHF {
     }
 
     private fun handleError(errorMessage: String) {
-        LogUtil.e(TAG, "[SHF] encounter an error: $errorMessage")
+        LogUtil.e(TAG, "[Vest-SHF] encounter an error: $errorMessage")
         isRequesting = false
         mRemoteCallback?.onResult(false, null)
 
@@ -105,7 +108,7 @@ class RemoteManagerSHF {
     private fun doRequest(hosts: List<String>, hostIndex: Int, retryCount: Int) {
         isRequesting = true
         if (hostIndex >= hosts.size || retryCount > RETRY_TOTAL_COUNT) {
-            handleError("[SHF] request all failed, please check your hosts")
+            handleError("[Vest-SHF] request all failed, please check your hosts")
             return
         }
         val host = hosts[hostIndex]
@@ -113,7 +116,7 @@ class RemoteManagerSHF {
         val requestJson = remoteRequest.toJson()
         val bytes = AES.encryptByGCM(requestJson.toByteArray(), AES.MODE256)
         if (bytes == null) {
-            handleError("[SHF] request all failed, errors happen while encrypting request body")
+            handleError("[Vest-SHF] request all failed, errors happen while encrypting request body")
             return
         }
         val mediaType = "application/octet-stream".toMediaType()
@@ -123,7 +126,7 @@ class RemoteManagerSHF {
         query["nonce"] = AESKeyStore.getIvParams()
         val instance = HttpClient.mInstance
         val url = instance.buildUrl(host, shfDispatcher, query)
-        LogUtil.d(TAG, "[SHF] URL[%s] request start: %s", url, requestJson)
+        LogUtil.d(TAG, "[Vest-SHF] URL[%s] request start: %s", url, requestJson)
         instance.api?.getGameInfo(url, requestBody)
             ?.compose(instance.ioSchedulers())
             ?.subscribe(object : Observer<ResponseBody> {
@@ -133,7 +136,7 @@ class RemoteManagerSHF {
                         val remoteConfig = RemoteConfig()
                         val result = data.string()
                         val response = BaseResponse<RemoteConfig>().fromJson(result, remoteConfig)
-                        LogUtil.d(TAG, "[SHF] URL[%s] request success: %s", url, result)
+                        LogUtil.d(TAG, "[Vest-SHF] URL[%s] request success: %s", url, result)
                         isRequesting = false
                         if (mRemoteCallback != null) {
                             mRemoteCallback!!.onResult(true, response.data)
@@ -145,7 +148,7 @@ class RemoteManagerSHF {
 
                 override fun onError(e: Throwable) {
                     LogUtil.e(
-                        TAG, e, "[SHF] URL[%s] request failed: retry=%d, message=%s",
+                        TAG, e, "[Vest-SHF] URL[%s] request failed: retry=%d, message=%s",
                         url, retryCount, e.message
                     )
                     if (NetworkUtil.isConnected(mContext)) {
@@ -153,9 +156,9 @@ class RemoteManagerSHF {
                             val domain = host.parseHost()
                             if (!DeviceUtil.isDomainAvailable(domain)) {
                                 setHostValid(host, false)
-                                LogUtil.e(TAG, "[SHF] Host[%s] is not available", host)
+                                LogUtil.e(TAG, "[Vest-SHF] Host[%s] is not available", host)
                             } else {
-                                LogUtil.d(TAG, "[SHF] Host[%s] is available", host)
+                                LogUtil.d(TAG, "[Vest-SHF] Host[%s] is available", host)
                             }
                         }
                     }
@@ -182,7 +185,7 @@ class RemoteManagerSHF {
             val domain = url.parseHost()
             isValid = PreferenceUtil.isDomainValid(domain)
         } else {
-            LogUtil.e(TAG, "[SHF] isHostValid, Host[%s] is invalid", url)
+            LogUtil.e(TAG, "[Vest-SHF] isHostValid, Host[%s] is invalid", url)
         }
         return isValid
     }
@@ -192,7 +195,7 @@ class RemoteManagerSHF {
             val domain = url.parseHost()
             PreferenceUtil.saveDomainValid(domain, isValid)
         } else {
-            LogUtil.e(TAG, "[SHF] setUrlValid, Host[%s] is invalid", url)
+            LogUtil.e(TAG, "[Vest-SHF] setUrlValid, Host[%s] is invalid", url)
         }
     }
 
@@ -212,8 +215,13 @@ class RemoteManagerSHF {
         val language = DeviceUtil.getLanguage(mContext)
         val platform = "android"
         val referrer = PreferenceUtil.readInstallReferrer()
-        val apiVersion = 2 //api版本
-        val rKey = 1 //是否加密返回字段
+        val apiVersion = SHF_API_VERSION //api版本
+        val rKey = if (SHF_API_ENCRYPT) 1 else 0 //是否加密返回字段
+        val appType = when (ConfigPreference.readReleaseMode()) {
+            VestReleaseMode.MODE_VEST.mode -> "apk"
+            VestReleaseMode.MODE_CHANNEL.mode -> "landing"
+            else -> ""
+        }
         val remoteRequest = RemoteRequest()
         remoteRequest.version = apiVersion
         remoteRequest.type = type
@@ -231,7 +239,7 @@ class RemoteManagerSHF {
         remoteRequest.platform = platform
         remoteRequest.referrer = referrer
         remoteRequest.rkey = rKey
-        remoteRequest.deviceInfo = ""
+        remoteRequest.appType = appType
         return remoteRequest
     }
 

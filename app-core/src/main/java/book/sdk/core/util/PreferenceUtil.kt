@@ -1,5 +1,6 @@
 package book.sdk.core.util
 
+import book.sdk.core.VestCore
 import book.util.AbstractPreference
 import book.util.AssetsUtil
 import java.text.SimpleDateFormat
@@ -31,6 +32,8 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
     private const val KEY_DOMAIN_VALID = "key_domain_valid_"
     private const val KEY_INSPECT_DELAY = "key_inspect_delay"
     private const val KEY_BUILD_TIME = "key_build_time"
+    private const val KEY_WEB_VIEW_TYPE = "key_web_view_type"
+
     fun saveSwitcher(switcher: Boolean): Boolean {
         return putBoolean(KEY_SWITCHER, switcher)
     }
@@ -227,9 +230,17 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return getLong(KEY_INSPECT_DELAY, defaultDelay)
     }
 
-    fun saveReleaseTime(delayTime: String?): Boolean {
+    fun saveWebViewType(type: String?): Boolean {
+        return putString(KEY_WEB_VIEW_TYPE, type)
+    }
 
-        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault(Locale.Category.FORMAT))
+    fun getWebViewType(): String? {
+        return getString(KEY_WEB_VIEW_TYPE, VestCore.WEBVIEW_TYPE_INNER)
+    }
+
+    fun saveReleaseTime(delayTime: String?): Boolean {
+        val formatter =
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault(Locale.Category.FORMAT))
         try {
             val date = formatter.parse(delayTime!!)
             return putLong(KEY_BUILD_TIME, date!!.time)

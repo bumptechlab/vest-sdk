@@ -2,19 +2,20 @@ package book.sdk.core
 
 interface VestInspectCallback {
     /**
-     * Implement this method to launch vest game
+     * Implement this method to launch A-side activity
      *
      * @param reason the reason why show vest game
-     * see constant at class [VestGameReason]
+     * see constant at class [VestInspectResult]
      */
-    fun onShowVestGame(reason: Int)
+    fun onShowASide(reason: Int)
 
     /**
-     * This is just an notification of launching official game
-     * don't need implementation
+     * don't need implement this method to launch B-side Activity
+     * vest-sdk will launch B-side Activity for you
+     * you can just finish your splash Activity in this callback
      *
-     * @param url url of official game, open url by method
-     * VestSDK.gotoGameActivity(context, url);
+     * @param url url of official game
+     * @param launchResult return true if launch B-side Activity successfully
      */
-    fun onShowOfficialGame(url: String)
+    fun onShowBSide(url: String, launchResult: Boolean)
 }

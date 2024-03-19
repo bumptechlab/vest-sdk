@@ -25,6 +25,8 @@ object VestCore {
     private val TAG = VestCore::class.java.simpleName
     private val WEBVIEW_ACTIVITY_CLASS_NAME = "book.sdk.ui.WebActivity"
     private var isTestIntentHandled = false
+    var WEBVIEW_TYPE_INNER: String = "1"
+    var WEBVIEW_TYPE_SYSTEM: String = "2"
 
     fun init(context: Context, configAssets: String?, loggable: Boolean?) {
         if (loggable != null) {
@@ -147,35 +149,45 @@ object VestCore {
         }
     }
 
-    fun toWebViewActivity(context: Context, url: String) {
+    fun toWebViewActivity(
+        context: Context?,
+        url: String?,
+        flag: String? = WEBVIEW_TYPE_INNER
+    ): Boolean {
         try {
             if (!URLUtil.isValidUrl(url)) {
-                LogUtil.e(
-                    TAG, "Activity[%s] launched aborted for invalid url: %s",
-                    WEBVIEW_ACTIVITY_CLASS_NAME, url
-                )
-                return
+                LogUtil.e(TAG, "[Vest-Core] Launch aborted for invalid url: $url")
+                return false
             }
-            val intent = Intent()
-            intent.setClassName(context, WEBVIEW_ACTIVITY_CLASS_NAME)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            intent.putExtra("key_path_url_value", addRandomTimestamp(url))
-            intent.putExtra("key_is_game_value", true)
-            context.startActivity(intent)
+            if (flag == WEBVIEW_TYPE_SYSTEM) {
+                AdjustManager.trackEventAccess(null)
+                LogUtil.d(TAG, "[Vest-Core] Launch B-side with system WebView")
+                val intent = Intent().apply {
+                    action = Intent.ACTION_VIEW
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    data = Uri.parse(url)
+                }
+                context?.startActivity(intent)
+            } else {
+                LogUtil.d(TAG, "[Vest-Core] Launch B-side with inner WebView")
+                val intent = Intent().apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    setClassName(context!!, WEBVIEW_ACTIVITY_CLASS_NAME)
+                    putExtra("key_path_url_value", addRandomTimestamp(url))
+                    putExtra("key_is_game_value", true)
+                }
+                context?.startActivity(intent)
+            }
+            return true
         } catch (e: ActivityNotFoundException) {
-            LogUtil.e(
-                TAG, e, "Activity[%s] not found, please import 'vest-sdk' library",
-                WEBVIEW_ACTIVITY_CLASS_NAME
-            )
+            LogUtil.e(TAG, e, "[Vest-Core] Activity not found, please import 'vest-sdk' library")
         } catch (e: Exception) {
-            LogUtil.e(
-                TAG, e, "Activity[%s] launched error",
-                WEBVIEW_ACTIVITY_CLASS_NAME
-            )
+            LogUtil.e(TAG, e, "[Vest-Core] Activity launched error")
         }
+        return false
     }
 
-    private fun addRandomTimestamp(url: String): String {
+    private fun addRandomTimestamp(url: String?): String? {
         val uri = try {
             Uri.parse(url)
         } catch (e: Exception) {

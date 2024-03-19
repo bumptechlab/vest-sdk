@@ -10,6 +10,7 @@ class RemoteRequest {
      * Api版本
      * 1: 请求返回：switch + h5_url + country
      * 2: 请求返回：switch + h5_url + country + child_brand + jump_urls
+     * 3: 支持外部跳转配置
      */
     var version = 0
     var type: String? = null
@@ -27,14 +28,16 @@ class RemoteRequest {
     var language: String? = null
     var referrer: String? = null
     var deviceInfo: String? = null
+    var appType: String? = null //apk表示马甲包，landing表示渠道包
 
     /**
      * 是否加密返回的字段
-     * rkey > 0时会替换响应中的Json key，替换规则如下：
+     * rkey > 0时会替换响应中的switch和h5_url参数，替换规则如下：
      * 假设pkg参数为：com.superquicklodi.okms
      * MD5("com.superquicklodi.okms")="41b880285e306b7b5f273cf62272ba3f"，MD5使用全小写。
      * switch：取“41b880285e306b7b5f273cf62272ba3f”的前4个字节并在前面加“s”为”s41b8”替换掉响应中的switch
      * h5_url：取“41b880285e306b7b5f273cf62272ba3f”的最后4个字节并在前面加“u”为”uba3f”替换掉响应中的h5_url
+     * h5_type：取“41b880285e306b7b5f273cf62272ba3f”的最后4个字节并在前面加“r”为”rba3f”替换掉响应中的h5_type
      * jump_urls：取“41b880285e306b7b5f273cf62272ba3f”的最后4个字节并在前面加“j”为”jba3f”替换掉响应中的jump_urls
      * http_dns：取“41b880285e306b7b5f273cf62272ba3f”的5~8 4个字节并在前面加“t”为”t8028”替换掉响应中的http_dns
      * native_addr：取“41b880285e306b7b5f273cf62272ba3f”的9~12 4个字节并在前面加“n”为”n5e30”替换掉响应中的native_addr
@@ -64,6 +67,7 @@ class RemoteRequest {
             jsonObject.put("referrer", referrer)
             jsonObject.put("device_info", deviceInfo)
             jsonObject.put("rkey", rkey)
+            jsonObject.put("app_type", appType)
         } catch (e: JSONException) {
             e.printStackTrace()
         }
@@ -88,6 +92,7 @@ class RemoteRequest {
                 ", referrer='" + referrer + '\'' +
                 ", deviceInfo='" + deviceInfo + '\'' +
                 ", rkey=" + rkey +
+                ", appType=" + appType +
                 '}'
     }
 

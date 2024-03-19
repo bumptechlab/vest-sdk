@@ -1,6 +1,7 @@
 package book.sdk.core.util
 
 import android.text.TextUtils
+import book.sdk.core.VestReleaseMode
 import book.util.AbstractPreference
 import org.json.JSONArray
 import org.json.JSONException
@@ -9,10 +10,11 @@ import org.json.JSONException
  * 专门用于存储配置的工具类，请不要存其他业务相关的数据
  * 此工具类为了vest-sdk、vest-shf能读取到配置信息
  */
-object ConfigPreference : AbstractPreference("pref_config") {
+object ConfigPreference : AbstractPreference("pref_vest_config") {
     private const val CONFIG_CHN = "CONFIG_BEAN_CHN"
     private const val CONFIG_BRD = "CONFIG_BEAN_BRD"
-    private const val CONFIG_TARGET_COUNTRY = "CONFIG_BEAN_TARGET_COUNTRY" //目标国家sim卡/目标国家网络/ThinkingData/OneSignal
+    private const val CONFIG_TARGET_COUNTRY =
+        "CONFIG_BEAN_TARGET_COUNTRY" //目标国家sim卡/目标国家网络/ThinkingData/OneSignal
     private const val CONFIG_SHF_BASE_HOST = "CONFIG_BEAN_SHF_BASE_HOST"
     private const val CONFIG_SHF_SPARE_HOSTS = "CONFIG_BEAN_SHF_SPARE_HOSTS"
     private const val CONFIG_SHF_DISPATCHER = "CONFIG_BEAN_SHF_DISPATCHER"
@@ -23,6 +25,8 @@ object ConfigPreference : AbstractPreference("pref_config") {
     private const val CONFIG_ADJUST_EVENT_UPDATED = "CONFIG_BEAN_ADJUST_EVENT_UPDATED"
     private const val CONFIG_THINKING_DATA_APP_ID = "CONFIG_BEAN_THINKING_DATA_APP_ID"
     private const val CONFIG_THINKING_DATA_HOST = "CONFIG_BEAN_THINKING_DATA_HOST"
+    private const val CONFIG_RELEASE_MODE = "CONFIG_BEAN_RELEASE_MODE"
+
     fun saveChannel(chn: String?): Boolean {
         return putString(CONFIG_CHN, chn)
     }
@@ -74,7 +78,7 @@ object ConfigPreference : AbstractPreference("pref_config") {
         if (!TextUtils.isEmpty(valueJson)) {
             try {
                 val shfHostArray = JSONArray(valueJson)
-                val shfHostList= ArrayList<String>()
+                val shfHostList = ArrayList<String>()
                 for (i in 0 until shfHostArray.length()) {
                     shfHostList.add(shfHostArray.optString(i))
                 }
@@ -148,6 +152,14 @@ object ConfigPreference : AbstractPreference("pref_config") {
 
     fun readShfDispatcher(): String {
         return getString(CONFIG_SHF_DISPATCHER)
+    }
+
+    fun saveReleaseMode(value: Int): Boolean {
+        return putInt(CONFIG_RELEASE_MODE, value)
+    }
+
+    fun readReleaseMode(): Int {
+        return getInt(CONFIG_RELEASE_MODE, VestReleaseMode.MODE_VEST.mode)
     }
 
 }

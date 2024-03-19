@@ -165,7 +165,7 @@ Code-Plugin是一款Gradle插件，用于在项目构建过程中向字节码插
    ```groovy
    buildscript {
      dependencies {
-       classpath("io.github.bumptechlab:code-plugin:1.0.6")
+       classpath("io.github.bumptechlab:code-plugin:1.1.2")
      }
    }
    ```

@@ -6,7 +6,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
-import book.sdk.core.BuildConfig
 import book.sdk.core.VestCore
 import book.util.AppGlobal
 import book.util.ImitateChecker
@@ -14,8 +13,8 @@ import book.util.LogUtil
 import java.util.Arrays
 
 object TestUtil {
-   private val TAG = TestUtil::class.java.simpleName
-    
+    private val TAG = TestUtil::class.java.simpleName
+
     fun isLoggable(): Boolean {
         var isLoggable = false
         isLoggable = if (PreferenceUtil.hasLoggable()) { //如果后门设置了日志开关，则使用后门日志开关
@@ -96,39 +95,53 @@ object TestUtil {
     }
 
     fun printDebugInfo() {
-        LogUtil.i(TAG, "[SDK] name: %s, version: %s, buildNumber: %s",
+        LogUtil.i(
+            TAG, "[SDK] name: %s, version: %s, buildNumber: %s",
             book.sdk.core.BuildConfig.SDK_NAME,
             book.sdk.core.BuildConfig.SDK_VERSION,
-            book.sdk.core.BuildConfig.BUILD_NUMBER)
-        LogUtil.i(TAG,
+            book.sdk.core.BuildConfig.BUILD_NUMBER
+        )
+        LogUtil.i(
+            TAG,
             "[App] package: %s, versionCode: %d, versionName: %s, buildVersion:%s, brand: %s, channel: %s",
             PackageUtil.getPackageName(),
             PackageUtil.getPackageVersionCode(),
             PackageUtil.getPackageVersionName(),
             PackageUtil.getBuildVersion(),
             PackageUtil.getParentBrand(),
-            PackageUtil.getChannel())
-        LogUtil.i(TAG, "[Device] sdkInt: %d, sdkVersion: %s, isEmulator: %s",
+            PackageUtil.getChannel()
+        )
+        LogUtil.i(
+            TAG, "[Device] sdkInt: %d, sdkVersion: %s, isEmulator: %s",
             Build.VERSION.SDK_INT,
             Build.VERSION.RELEASE,
-            ImitateChecker.isImitate())
-        LogUtil.i(TAG,
+            ImitateChecker.isImitate()
+        )
+        LogUtil.i(
+            TAG,
             "[Adjust] APP_ID: %s, EVENT_START: %s, EVENT_GREETING: %s, EVENT_ACCESS: %s, EVENT_UPDATED: %s",
             ConfigPreference.readAdjustAppId(),
             ConfigPreference.readAdjustEventStart(),
             ConfigPreference.readAdjustEventGreeting(),
             ConfigPreference.readAdjustEventAccess(),
-            ConfigPreference.readAdjustEventUpdated())
-        LogUtil.i(TAG, "[ThinkingData] AppId: %s, Host: %s",
+            ConfigPreference.readAdjustEventUpdated()
+        )
+        LogUtil.i(
+            TAG, "[ThinkingData] AppId: %s, Host: %s",
             ConfigPreference.readThinkingDataAppId(),
-            ConfigPreference.readThinkingDataHost())
-        LogUtil.i(TAG, "[SHF] BASE_HOST: %s, SPARE_HOSTS: %s, SHF_DISPATCHER: %s",
+            ConfigPreference.readThinkingDataHost()
+        )
+        LogUtil.i(
+            TAG, "[SHF] BASE_HOST: %s, SPARE_HOSTS: %s, SHF_DISPATCHER: %s",
             ConfigPreference.readSHFBaseHost(),
             Arrays.asList<String>(*ConfigPreference.readSHFSpareHosts()),
-            ConfigPreference.readShfDispatcher())
+            ConfigPreference.readShfDispatcher()
+        )
         LogUtil.i(TAG, "[Constant] CHN: %s", ConfigPreference.readChannel())
         LogUtil.i(TAG, "[Constant] BRD: %s", ConfigPreference.readBrand())
-        LogUtil.i(TAG, "Keystore Hash: %s",
-            java.lang.String.join(",", PackageUtil.getKeystoreHashes(AppGlobal.application!!)))
+        LogUtil.i(
+            TAG, "Keystore Hash: %s",
+            java.lang.String.join(",", PackageUtil.getKeystoreHashes(AppGlobal.application!!))
+        )
     }
 }

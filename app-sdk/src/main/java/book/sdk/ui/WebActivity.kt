@@ -25,8 +25,6 @@ import android.webkit.ClientCertRequest
 import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -82,7 +80,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import book.sdk.R
 import book.sdk.base.BaseWebActivity
 import book.sdk.bridge.JsBridgeCore
-import book.sdk.command.AssetLoaderManager
 import book.sdk.common.ScreenUtil
 import book.sdk.core.Constant
 import book.sdk.core.util.DeviceUtil
@@ -155,16 +152,15 @@ class WebActivity : BaseWebActivity() {
             fileChooserParams: FileChooserParams?
         ): Boolean {
             mUploadMessage = filePathCallback
-            val intent = Intent(Intent.ACTION_PICK)
-            if (fileChooserParams != null && fileChooserParams.acceptTypes != null && fileChooserParams.acceptTypes.isNotEmpty()) {
-                intent.type = java.lang.String.join(",", *fileChooserParams.acceptTypes)
-            } else {
-                intent.type = "*/*"
+            val intent = Intent().apply {
+                action = Intent.ACTION_PICK
+                if (fileChooserParams != null && fileChooserParams.acceptTypes != null && fileChooserParams.acceptTypes.isNotEmpty()) {
+                    type = java.lang.String.join(",", *fileChooserParams.acceptTypes)
+                } else {
+                    type = "*/*"
+                }
             }
-            startActivityForResult(
-                Intent.createChooser(intent, "File Chooser"),
-                REQUEST_CODE_FILE_CHOOSER
-            )
+            startActivityForResult(Intent.createChooser(intent, "File Chooser"), REQUEST_CODE_FILE_CHOOSER)
             return true
         }
 
@@ -191,25 +187,6 @@ class WebActivity : BaseWebActivity() {
                 e.printStackTrace()
             }
             return true
-        }
-
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-        override fun shouldInterceptRequest(
-            view: WebView?,
-            request: WebResourceRequest?
-        ): WebResourceResponse? {
-            return if (request != null) {
-                LogUtil.d(TAG, "shouldInterceptRequest[%s]: %s", request.method, request.url)
-                AssetLoaderManager.mInstance.shouldInterceptRequest(request.url)
-            } else {
-                val resourceRequest: WebResourceRequest? = null
-                super.shouldInterceptRequest(view, resourceRequest)
-            }
-        }
-
-        override fun shouldInterceptRequest(view: WebView?, url: String?): WebResourceResponse? {
-            LogUtil.d(TAG, "shouldInterceptRequest: %s", url)
-            return AssetLoaderManager.mInstance.shouldInterceptRequest(Uri.parse(url))
         }
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {

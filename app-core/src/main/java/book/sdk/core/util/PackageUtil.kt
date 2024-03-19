@@ -6,10 +6,8 @@ import android.content.pm.PackageManager
 import android.text.TextUtils
 import android.util.Base64
 import book.sdk.core.BuildConfig
-import book.sdk.core.util.ConfigPreference.readBrand
-import book.sdk.core.util.ConfigPreference.readChannel
 import book.util.AppGlobal
-import book.util.LogUtil.d
+import book.util.LogUtil
 import java.security.MessageDigest
 
 object PackageUtil {
@@ -51,8 +49,7 @@ object PackageUtil {
         if (!TextUtils.isEmpty(channel)) {
             return channel
         }
-        channel = readChannel()
-        //        channel = readMetaData("chn");
+        channel = ConfigPreference.readChannel()
         PreferenceUtil.saveChannel(channel)
         return channel
     }
@@ -62,24 +59,24 @@ object PackageUtil {
         if (!TextUtils.isEmpty(parentBrand)) {
             return parentBrand
         }
-        parentBrand = readBrand()
+        parentBrand = ConfigPreference.readBrand()
         PreferenceUtil.saveParentBrand(parentBrand)
         return parentBrand
     }
 
     fun getChildBrand(): String {
         val childBrd = PreferenceUtil.readChildBrand()
-        d(TAG, "read child brand: %s", childBrd)
+        LogUtil.d(TAG, "read child brand: %s", childBrd)
         return childBrd
     }
 
     fun getBuildVersion(): String {
-        val version = readMetaData(book.sdk.core.BuildConfig.KEY_BUILD_VERSION)
+        val version = readMetaData(BuildConfig.KEY_BUILD_VERSION)
         val versionBytes = Base64.decode(version, Base64.DEFAULT)
         return String(versionBytes)
     }
 
-    fun readMetaData(key: String?): String {
+    private fun readMetaData(key: String?): String {
         val context: Context = AppGlobal.application!!
         val pm = context.packageManager
         var value = ""

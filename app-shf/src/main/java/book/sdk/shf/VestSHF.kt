@@ -6,7 +6,7 @@ import android.net.Uri
 import android.text.TextUtils
 import android.webkit.URLUtil
 import book.sdk.core.VestCore
-import book.sdk.core.VestGameReason
+import book.sdk.core.VestInspectResult
 import book.sdk.core.VestInspectCallback
 import book.sdk.core.event.SDKEvent
 import book.sdk.core.manager.AdjustManager
@@ -45,6 +45,8 @@ class VestSHF private constructor() {
     private var mIsRunning = false
     private var mInspectJob: Job? = null
     private var mCheckConfigJob: Job? = null
+    private var mContext: Context? = null
+    private var mVestInspectCallback: VestInspectCallback? = null
 
     init {
         if (!EventBus.getDefault().isRegistered(this)) {
@@ -65,8 +67,6 @@ class VestSHF private constructor() {
         }
     }
 
-    private var mVestInspectCallback: VestInspectCallback? = null
-
     /**
      * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
      *
@@ -74,6 +74,7 @@ class VestSHF private constructor() {
      * @param vestInspectCallback
      */
     fun inspect(context: Context?, vestInspectCallback: VestInspectCallback?): VestSHF {
+        mContext = context
         mVestInspectCallback = vestInspectCallback
         inspect()
         return this
@@ -100,7 +101,7 @@ class VestSHF private constructor() {
                 //在UI线程回调
                 withContext(Dispatchers.Main) {
                     if (mVestInspectCallback != null) {
-                        mVestInspectCallback!!.onShowVestGame(VestGameReason.REASON_NOT_THE_TIME)
+                        mVestInspectCallback?.onShowASide(VestInspectResult.REASON_NOT_THE_TIME)
                     }
                 }
                 return@launch
@@ -145,7 +146,7 @@ class VestSHF private constructor() {
     }
 
     private suspend fun canInspect(): Boolean {
-        LogUtil.w(TAG, "[Vest-SHF] start canInspect")
+        LogUtil.w(TAG, "[Vest-SHF] start checking inspect enable")
         var canInspect = true
         //读取assets目录下所有文件，找出特殊标记的文件读取数据时间
         val inspectStartTime = PreferenceUtil.getInspectStartTime()
@@ -212,11 +213,13 @@ class VestSHF private constructor() {
             val remoteSwitcher = remoteConfig != null && remoteConfig.isSwitcher
             var childBrand = if (remoteConfig != null) remoteConfig.childBrd else ""
             val targetCountry = if (remoteConfig != null) remoteConfig.country else ""
+            val webViewType = if (remoteConfig != null) remoteConfig.h5Type else ""
 
             val savedSwitcher = PreferenceUtil.readSwitcher()
             val savedGameUrl = PreferenceUtil.readGameUrl()
             if (remoteSwitcher) {
                 PreferenceUtil.saveGameUrls(if (remoteConfig != null) remoteConfig.urls else "")
+                PreferenceUtil.saveWebViewType(webViewType)
             }
             if (mIsCheckUrl) {
                 val remoteUrls = PreferenceUtil.readGameUrls()
@@ -233,45 +236,28 @@ class VestSHF private constructor() {
                         urlList.add(url)
                     }
                 }
-                LogUtil.d(
-                    TAG, "[Vest-SHF] check url list: %s, savedSwitcher: %s, savedGameUrl: %s",
-                    urlList, savedSwitcher, savedGameUrl
-                )
+                LogUtil.d(TAG, "[Vest-SHF] check url list: $urlList, savedSwitcher: $savedSwitcher, savedGameUrl: $savedGameUrl")
 
                 var url = ""
                 for (curUrl in urlList) {
                     val isAvailable = curUrl.isUrlAvailable()
-                    LogUtil.d(TAG, "[Vest-SHF] check url: %s, available：%b", curUrl, isAvailable)
+                    LogUtil.d(TAG, "[Vest-SHF] check url: $curUrl, available：$isAvailable")
                     if (isAvailable) {
                         url = curUrl
                         break
                     }
                 }
 
-                if (url.isNullOrEmpty()) {
-                    LogUtil.d(
-                        TAG,
-                        "[Vest-SHF] check url: there's not any available url, switcher: %s",
-                        remoteSwitcher
-                    )
-                    mLaunchConfig.isGoWeb = false
+                if (url.isEmpty()) {
+                    LogUtil.d(TAG, "[Vest-SHF] check url: there's not any available url, switcher: $remoteSwitcher")
+                    mLaunchConfig.isGotoB = false
                 } else {
                     if (savedSwitcher) {
-                        LogUtil.d(
-                            TAG,
-                            "[Vest-SHF] check url: available url found for old user: %s, switcher: %s",
-                            url,
-                            remoteSwitcher
-                        )
-                        mLaunchConfig.isGoWeb = true
+                        LogUtil.d(TAG, "[Vest-SHF] check url: available url found for old user: $url, switcher: $remoteSwitcher")
+                        mLaunchConfig.isGotoB = true
                     } else {
-                        LogUtil.d(
-                            TAG,
-                            "[Vest-SHF] check url: available url found for new user: %s, switcher: %s",
-                            url,
-                            remoteSwitcher
-                        )
-                        mLaunchConfig.isGoWeb = remoteSwitcher
+                        LogUtil.d(TAG, "[Vest-SHF] check url: available url found for new user: $url, switcher: $remoteSwitcher")
+                        mLaunchConfig.isGotoB = remoteSwitcher
                         PreferenceUtil.saveSwitcher(remoteSwitcher)
                     }
                     mLaunchConfig.gameUrl = url
@@ -284,8 +270,8 @@ class VestSHF private constructor() {
                     //以url参数品牌为第一优先级
                     val uri = Uri.parse(url)
                     val urlBrand = uri.getQueryParameter("brd")
-                    LogUtil.d(TAG, "[Vest-SHF] parse url brand: %s", urlBrand)
-                    if (!TextUtils.isEmpty(urlBrand)) {
+                    LogUtil.d(TAG, "[Vest-SHF] parse url brand: $urlBrand")
+                    if (!urlBrand.isNullOrEmpty()) {
                         childBrand = urlBrand
                     }
                 }
@@ -293,12 +279,7 @@ class VestSHF private constructor() {
                 //1.先保存目标国家
                 //2.初始化TD/Adjust SDK
                 //3.继续跳转地址
-                LogUtil.d(
-                    TAG,
-                    "[Vest-SHF] save targetCountry: %s, childBrand: %s",
-                    targetCountry,
-                    childBrand
-                )
+                LogUtil.d(TAG, "[Vest-SHF] save targetCountry: $targetCountry, childBrand: $childBrand")
                 PreferenceUtil.saveTargetCountry(targetCountry)
                 PreferenceUtil.saveChildBrand(childBrand)
                 VestCore.updateThirdSDK()
@@ -306,11 +287,11 @@ class VestSHF private constructor() {
                     AdjustManager.trackEventGreeting(null)
                 }
             } else {
-                LogUtil.d(TAG, "[Vest-SHF] check url: skipping, switcher: %s", remoteSwitcher)
+                LogUtil.d(TAG, "[Vest-SHF] check url: skipping, switcher: $remoteSwitcher")
                 if (savedSwitcher) {
-                    mLaunchConfig.isGoWeb = true
+                    mLaunchConfig.isGotoB = true
                 } else {
-                    mLaunchConfig.isGoWeb = remoteSwitcher
+                    mLaunchConfig.isGotoB = remoteSwitcher
                     PreferenceUtil.saveSwitcher(remoteSwitcher)
                 }
                 mLaunchConfig.gameUrl = if (remoteConfig == null) "" else remoteConfig.urls
@@ -318,21 +299,27 @@ class VestSHF private constructor() {
                     AdjustManager.trackEventGreeting(null)
                 }
             }
+            mLaunchConfig.webViewType = PreferenceUtil.getWebViewType()
 
             withContext(Dispatchers.Main) {
                 val delayMills = System.currentTimeMillis() - mLaunchConfig.startMills
-                LogUtil.d(TAG, "[Vest-SHF] jump to activity after delay %d mills", delayMills)
+                LogUtil.d(TAG, "[Vest-SHF] go to activity after delay %d mills", delayMills)
                 if (delayMills < mLaunchConfig.launchOverTime) {
                     delay(mLaunchConfig.launchOverTime - delayMills)
                 }
-                LogUtil.d(
-                    TAG, "[Vest-SHF] LaunchConfig: isGogoWeb=%s, gameUrl=%s",
-                    mLaunchConfig.isGoWeb, mLaunchConfig.gameUrl
-                )
-                if (mLaunchConfig.isGoWeb) {
-                    mVestInspectCallback?.onShowOfficialGame(mLaunchConfig.gameUrl ?: "")
+                LogUtil.d(TAG, "[Vest-SHF] LaunchConfig: isGotoB=${mLaunchConfig.isGotoB}, gameUrl=${mLaunchConfig.gameUrl}")
+                if (mLaunchConfig.isGotoB) {
+                    var launchBSuccess = false
+                    if (mIsCheckUrl) {
+                        LogUtil.d(TAG, "[Vest-SHF] show B-side activity inside vest-sdk")
+                        launchBSuccess = VestCore.toWebViewActivity(mContext, mLaunchConfig.gameUrl, mLaunchConfig.webViewType)
+                    } else {
+                        LogUtil.d(TAG, "[Vest-SHF] show B-side activity outside vest-sdk")
+                    }
+                    mVestInspectCallback?.onShowBSide(mLaunchConfig.gameUrl ?: "", launchBSuccess)
                 } else {
-                    mVestInspectCallback?.onShowVestGame(VestGameReason.REASON_OFF_ON_SERVER)
+                    LogUtil.d(TAG, "[Vest-SHF] show A-side activity")
+                    mVestInspectCallback?.onShowASide(VestInspectResult.REASON_OFF_ON_SERVER)
                 }
                 AdjustManager.trackEventStart(null)
                 mIsJump = true

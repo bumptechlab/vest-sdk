@@ -9,9 +9,9 @@ import book.sdk.core.VestSDK
 import book.sdk.shf.VestSHF
 import java.util.concurrent.TimeUnit
 
-class AppTestSDKActivity : Activity() {
+class SplashActivity : Activity() {
 
-    private val TAG = AppTestSDKActivity::class.java.simpleName
+    private val TAG = SplashActivity::class.java.simpleName
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_custom_splash)
@@ -41,23 +41,29 @@ class AppTestSDKActivity : Activity() {
              */
         }.inspect(this, object : VestInspectCallback {
             /**
-             * showing A side
+             * showing A-side
              */
-            override fun onShowVestGame(reason: Int) {
-                Log.d(TAG, "show vest game")
-                val intent = Intent(baseContext, VestGameActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
+            override fun onShowASide(reason: Int) {
+                Log.d(TAG, "show A-side activity")
+                gotoASide()
                 finish()
             }
 
             /**
-             * showing B side
+             * showing B-side
              */
-            override fun onShowOfficialGame(url: String) {
-                Log.d(TAG, "show official game: $url")
-                VestSDK.gotoGameActivity(baseContext, url)
+            override fun onShowBSide(url: String, launchResult: Boolean) {
+                Log.d(TAG, "show B-side activity: $url, result: $launchResult")
+                if (!launchResult) {
+                    gotoASide()
+                }
                 finish()
+            }
+
+            private fun gotoASide() {
+                val intent = Intent(baseContext, ASideActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
             }
         })
     }

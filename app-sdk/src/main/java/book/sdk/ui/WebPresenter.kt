@@ -40,9 +40,11 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
     val mJsBridge = object : BridgeCallback {
         override fun openUrlByBrowser(url: String?) {
             try {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse(url)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    action = Intent.ACTION_VIEW
+                    data = Uri.parse(url)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
                 mWebViewActivity.startActivity(intent)
             } catch (_: Exception) {
             }
@@ -64,11 +66,12 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
             data: String?
         ) {
             try {
-                val intent = Intent(mWebViewActivity, WebActivity::class.java)
-                intent.putExtra(WebActivity.KEY_TYPE, type)
-                intent.putExtra(WebActivity.KEY_ORIENTATION, orientation)
-                intent.putExtra(WebActivity.KEY_HOVER, hover)
-                intent.putExtra(WebActivity.KEY_URL, data)
+                val intent = Intent(mWebViewActivity, WebActivity::class.java).apply {
+                    putExtra(WebActivity.KEY_TYPE, type)
+                    putExtra(WebActivity.KEY_ORIENTATION, orientation)
+                    putExtra(WebActivity.KEY_HOVER, hover)
+                    putExtra(WebActivity.KEY_URL, data)
+                }
                 mWebViewActivity.startActivity(intent)
             } catch (_: Exception) {
             }
@@ -76,7 +79,12 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
 
         override fun openApp(target: String?, fallbackUrl: String?) {
             try {
-                mWebViewActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(target)))
+                val intent = Intent().apply {
+                    action = Intent.ACTION_VIEW
+                    data = Uri.parse(target)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                mWebViewActivity.startActivity(intent)
             } catch (e: Exception) {
                 e.printStackTrace()
                 openUrlByBrowser(fallbackUrl)

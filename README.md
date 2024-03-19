@@ -1,6 +1,6 @@
 # Vest-SDK
 
-最新版本：1.0.0   
+最新版本：1.1.0   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。
 
 SDK总共三个依赖库：  
@@ -40,7 +40,7 @@ vest-shf: 用于切换A/B面的远程开关
            google()
        }
        dependencies {
-           classpath "io.github.bumptechlab:vest-plugin:1.0.14"
+           classpath "io.github.bumptechlab:vest-plugin:1.1.0"
        }
    }
    
@@ -54,12 +54,12 @@ vest-shf: 用于切换A/B面的远程开关
    ```
    plugins {
        id 'org.jetbrains.kotlin.android' //kotlin
-       id 'vest-plugin' //vest-plugin
+       id 'vest-plugin'                  //vest-plugin
    }
   
    vest {
-      timeFileEnable = true //是否写入打包时间文件到assets,如果设置了setReleaseTime，可改为false
-      jsFileEnable = true  //是否写入JS引擎文件到assets，建议设置为true
+      timeFileEnable = true //是否写入打包时间文件到assets，如果设置了setReleaseTime，可改为false
+      jsFileEnable = false  //是否写入JS引擎文件到assets，建议设置为false（为了应对静态资源检查，暂时不打包js引擎）
    }
    ```
 - vest-plugin与vest-sdk版本对照表
@@ -80,11 +80,11 @@ vest-shf: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:1.0.0'
+          implementation 'io.github.bumptechlab:vest-core:1.1.0'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:1.0.0'
+          implementation 'io.github.bumptechlab:vest-sdk:1.1.0'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:1.0.0'
+          implementation 'io.github.bumptechlab:vest-shf:1.1.0'
       }
       ```
    (2) 本地依赖方式
@@ -113,6 +113,8 @@ vest-shf: 用于切换A/B面的远程开关
           implementation "androidx.activity:activity-compose:1.8.2"
           implementation "androidx.compose.material3:material3:1.1.2"
           implementation "androidx.compose.ui:ui:1.6.0"
+          implementation "com.github.megatronking.stringfog:xor:4.0.1"
+          implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
       }
       ```
     - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)
@@ -129,65 +131,74 @@ vest-shf: 用于切换A/B面的远程开关
       ```
 
 3. 在Application中初始化VestSDK   
-   (1) `VestSDK.init()`方法中传入配置文件名称，请把该配置文件放在assets根目录，配置文件来源将在第4点说明
+   (1) `VestSDK.init()`方法中传入配置文件名称，请把该配置文件放在assets根目录，配置文件来源将在第4点说明。   
+   (2) `VestSDK.setReleaseMode()`方法设置发布模式，发布模式跟出包的用途有关，会影响到`VestSHF.getInstance().inspect()`方法的返回值。
+     - `MODE_VEST`表示当前发布的是马甲包，也就是用于上架的包，该模式是默认值
+     - `MODE_CHANNEL`表示当前发布的是渠道包，放在落地页用于推广的包
    ```
-   class AppTestApplication : MultiDexApplication()  {
+   class AppApplication : MussltiDexApplication()  {
 
       override fun onCreate() {
           super.onCreate()
-          VestSDK.setLoggable(BuildConfig.DEBUG)
+          VestSDK.setLoggable(true)
+          VestSDK.setReleaseMode(VestReleaseMode.MODE_VEST)
           VestSDK.init(baseContext, "config")
       }
 
    }
    ```
 4. 实现A/B面切换   
-   (1) 在闪屏页实现方法`VestSHF.getInstance().inspect()`
-   获取A/B面切换开关，参照例子`com.example.app.test.AppTestSDKActivity`
+   (1) 在闪屏页实现方法`VestSHF.getInstance().inspect()`获取A/B面切换开关，参照例子`com.example.app.test.SplashActivity`
     ```
     VestSHF.getInstance().apply {
-        /**
-         * setup the date of apk build
-         * don't need to invoke this method if using vest-plugin, vest-plugin will setup release time automatically
-         * if not, you need to invoke this method to setup release time
-         * this method has the first priority when using both ways.
-         * time format: yyyy-MM-dd HH:mm:ss
-         */
-        setReleaseTime("2023-11-29 10:23:20")
-        
-        /**
-         * setup duration of silent period for requesting A/B switching starting from the date of apk build
-         */
-        setInspectDelayTime(5, TimeUnit.DAYS)
-        
-        /**
-         * set true to check the remote and local url, this could make effect on A/B switching
-         */
-        setCheckUrl(true)
-        
-        /**
-         * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
-         */
+            /**
+             * setup the date of apk build
+             * don't need to invoke this method if using vest-plugin, vest-plugin will setup release time automatically
+             * if not, you need to invoke this method to setup release time
+             * this method has the first priority when using both ways.
+             * time format: yyyy-MM-dd HH:mm:ss
+             */
+            setReleaseTime("2023-11-29 10:23:20")
+
+            /**
+             * setup duration of silent period for requesting A/B switching starting from the date of apk build
+             */
+            setInspectDelayTime(5, TimeUnit.DAYS)
+
+            /**
+             * set true to check the remote and local url, this could make effect on A/B switching
+             */
+            setCheckUrl(true)
+
+            /**
+             * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
+             */
         }.inspect(this, object : VestInspectCallback {
-        /**
-         * showing A side
-         */
-        override fun onShowVestGame(reason: Int) {
-            Log.d(TAG, "show vest game")
-            val intent = Intent(baseContext, VestGameActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            finish()
-        }
-        
-        /**
-         * showing B side
-         */
-        override fun onShowOfficialGame(url: String) {
-            Log.d(TAG, "show official game: $url")
-            VestSDK.gotoGameActivity(baseContext, url)
-            finish()
-        }
+            /**
+             * showing A-side
+             */
+            override fun onShowASide(reason: Int) {
+                Log.d(TAG, "show A-side activity")
+                gotoASide()
+                finish()
+            }
+
+            /**
+             * showing B-side
+             */
+            override fun onShowBSide(url: String, launchResult: Boolean) {
+                Log.d(TAG, "show B-side activity: $url, result: $launchResult")
+                if (!launchResult) {
+                    gotoASide()
+                }
+                finish()
+            }
+
+            private fun gotoASide() {
+                val intent = Intent(baseContext, ASideActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+            }
         })
     ```
    (2) 在上面的示例中，提供了方法`setInspectDelayTime()`和`setReleaseTime()`
@@ -196,12 +207,12 @@ vest-shf: 用于切换A/B面的远程开关
     - vest-plugin
      ```
      plugins {
-     id 'vest-plugin'
+         id 'vest-plugin'
      }
 
      vest {
-     timeFileEnable = true //是否写入打包时间文件到assets,如果设置了setReleaseTime，可改为false
-     jsFileEnable = true //是否写入JS引擎文件到assets，建议设置为true
+         timeFileEnable = true //是否写入打包时间文件到assets,如果设置了setReleaseTime，可改为false
+         jsFileEnable = false //是否写入JS引擎文件到assets，建议设置为false（为了应对静态资源检查，暂时不打包js引擎）
      }
      ```
     - setReleaseTime
@@ -211,23 +222,22 @@ vest-shf: 用于切换A/B面的远程开关
    (3) 在Activity中实现vest-sdk生命周期
      ```
        override fun onPause() {
-       super.onPause()
-       VestSDK.onPause()
+           super.onPause()
+           VestSDK.onPause()
        }
 
        override fun onResume() {
-       super.onResume()
-       VestSDK.onResume()
+           super.onResume()
+           VestSDK.onResume()
        }
 
        override fun onDestroy() {
-       super.onDestroy()
-       VestSDK.onDestroy()
+           super.onDestroy()
+           VestSDK.onDestroy()
        }
      ```
 
-5. 请使用Vest-SDK厂商提供的配置文件`config`
-   ，放到工程的assets根目录。为避免出包之间文件关联，请自行更改`config`文件名。
+5. 请使用Vest-SDK厂商提供的配置文件`config`，放到工程的assets根目录。为避免出包之间文件关联，请自行更改`config`文件名。
 6. 至此Vest-SDK集成完毕。
 
 ## 使用快照
@@ -268,16 +278,16 @@ allprojects {
 
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:1.0.0-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:1.0.0-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:1.0.0-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:1.1.0-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:1.1.0-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:1.1.0-SNAPSHOT'
  }
 ```
 
 3. 在build.gradle android节点下添加以下代码，可以帮助及时更新sdk版本依赖缓存。
 
 ```
-    android{
+    android {
       ...
       //gradle依赖默认缓存24小时，在此期间内相同版本只会使用本地资源
       configurations.all {
@@ -460,7 +470,13 @@ allprojects {
 - 重构代码
 - VestSHF接口优化，支持流式调用
 - DeviceId获取规则去掉了Android ID，按以下顺序获取
-  * Google Service Framework ID
-  * Google Ad ID
-  * UUID
+    * Google Service Framework ID
+    * Google Ad ID
+    * UUID
 - 支持三方游戏通过isThirdGame参数退出游戏
+
+### 1.1.0
+
+- WebView默认不拦截js引擎文件
+- 实现B面外部跳转
+- A/B开关请求区分马甲包和渠道包

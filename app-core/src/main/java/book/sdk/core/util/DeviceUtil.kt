@@ -179,7 +179,7 @@ object DeviceUtil {
                 ), slotIndex
             )
             val subIds = if (obj == null) intArrayOf() else (obj as IntArray)
-            if (subIds.size > 0) {
+            if (subIds.isNotEmpty()) {
                 subId = subIds[0]
             }
         }
@@ -193,7 +193,7 @@ object DeviceUtil {
      * @param subId
      * @return
      */
-    fun getSimCountryIsoBySubId(context: Context, subId: Int): String {
+    private fun getSimCountryIsoBySubId(context: Context, subId: Int): String {
         val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val simCountryIsoObj = ReflectionUtil.invokeMethod(
             tm,
@@ -210,7 +210,7 @@ object DeviceUtil {
      * @param phoneId
      * @return
      */
-    fun getSimCountryIsoByPhoneId(context: Context, phoneId: Int): String {
+    private fun getSimCountryIsoByPhoneId(context: Context, phoneId: Int): String {
         val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val simCountryIsoObj = ReflectionUtil.invokeMethod(
             tm,
@@ -254,21 +254,21 @@ object DeviceUtil {
         }
     }
 
-    fun openGooglePlay(context: Context, packageName: String): Boolean {
+   private fun openGooglePlay(context: Context, packageName: String): Boolean {
         var success = false
         try {
             val intent = Intent(Intent.ACTION_VIEW)
-            intent.setData(Uri.parse("market://details?id=$packageName"))
+            intent.data = Uri.parse("market://details?id=$packageName")
             intent.setPackage("com.android.vending")
             if (intent.resolveActivity(context.packageManager) != null) {
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 context.startActivity(intent)
                 success = true
             } else { //没有应用市场，通过浏览器跳转到Google Play
                 val intent2 = Intent(Intent.ACTION_VIEW)
-                intent2.setData(Uri.parse("https://play.google.com/store/apps/details?id=$packageName"))
+                intent2.data = Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
                 if (intent2.resolveActivity(context.packageManager) != null) {
-                    intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    intent2.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent2)
                     success = true
                 } else {
@@ -281,12 +281,14 @@ object DeviceUtil {
         return success
     }
 
-    fun openBuildInMarket(context: Context, packageName: String): Boolean {
+   private fun openBuildInMarket(context: Context, packageName: String): Boolean {
         var success = false
         try {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.setData(Uri.parse("market://details?id=$packageName")) //跳转到应用市场，非Google Play市场一般情况也实现了这个接口
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val intent = Intent().apply {
+                action = Intent.ACTION_VIEW
+                data = Uri.parse("market://details?id=$packageName") //跳转到应用市场，非Google Play市场一般情况也实现了这个接口
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
             context.startActivity(intent)
             success = true
         } catch (e: Exception) {
