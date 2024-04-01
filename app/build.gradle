@@ -79,7 +79,7 @@ android.applicationVariants.all { variant ->
 
 dependencies {
     // 方式一：引入Maven依赖
-    def vestSdkVersion = "1.2.2"
+    def vestSdkVersion = "1.2.4"
     implementation "io.github.bumptechlab:vest-core:$vestSdkVersion"
     implementation "io.github.bumptechlab:vest-sdk:$vestSdkVersion"
     //vest-shf和vest-firebase 二选一

@@ -1,6 +1,6 @@
 # Vest-SDK
 
-最新版本：1.2.2   
+最新版本：1.2.4   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。
 
 SDK总共四个依赖库：  
@@ -69,13 +69,13 @@ vest-firebase: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:1.2.2'
+          implementation 'io.github.bumptechlab:vest-core:1.2.4'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:1.2.2'
+          implementation 'io.github.bumptechlab:vest-sdk:1.2.4'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:1.2.2'
+          implementation 'io.github.bumptechlab:vest-shf:1.2.4'
           //vest-shf和vest-firebase 二选一
-          //implementation 'io.github.bumptechlab:vest-firebase:1.2.2'
+          //implementation 'io.github.bumptechlab:vest-firebase:1.2.4'
       }
       ```
    (2) 本地依赖方式
@@ -208,6 +208,9 @@ vest-firebase: 用于切换A/B面的远程开关
              */
             setInspectDelayTime(0, TimeUnit.DAYS)
 
+            /**
+             * keep the name same as value on firebase control
+             */
             setFirebaseKey("url")
 
         }.inspect(this, object : VestInspectCallback {
@@ -242,7 +245,11 @@ vest-firebase: 用于切换A/B面的远程开关
      ```
        VestFirebase.getInstance().setReleaseTime("2023-11-29 10:23:20");
      ```
-   (4) 在Activity中实现vest-sdk生命周期
+   (4) Firebase控制需要设置跟远程配置一样的key，每个包建议改一下，避免关联。
+     ```
+        VestFirebase.getInstance().setFirebaseKey("url")
+     ```
+   (5) 在Activity中实现vest-sdk生命周期
      ```
        override fun onPause() {
            super.onPause()
@@ -302,11 +309,11 @@ allprojects {
 
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:1.2.2-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:1.2.2-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:1.2.2-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:1.2.4-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:1.2.4-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:1.2.4-SNAPSHOT'
     //vest-shf和vest-firebase 二选一
-    //implementation 'io.github.bumptechlab:vest-firebase:1.2.2-SNAPSHOT'
+    //implementation 'io.github.bumptechlab:vest-firebase:1.2.4-SNAPSHOT'
  }
 ```
 
@@ -507,7 +514,7 @@ allprojects {
 - 实现B面外部跳转
 - A/B开关请求区分马甲包和渠道包
 
-### 1.2.2
+### 1.2.4
 
 - 增加firebase控制A/B开关
 - 移除风险代码

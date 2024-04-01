@@ -31,6 +31,9 @@ class SplashActivity : Activity() {
              */
             setInspectDelayTime(0, TimeUnit.DAYS)
 
+            /**
+             * keep the name same as value on firebase control
+             */
             setFirebaseKey("url")
 
         }.inspect(this, object : VestInspectCallback {
