@@ -1,9 +1,8 @@
 package book.sdk.core
 
 import android.content.Context
-import android.graphics.Bitmap.Config
 import book.sdk.core.util.ConfigPreference
-import book.sdk.core.util.TestUtil
+import book.sdk.core.util.Tester
 import book.util.LogUtil
 
 object VestSDK {
@@ -31,17 +30,17 @@ object VestSDK {
     @JvmStatic
     fun setLoggable(loggable: Boolean) {
         try {
-            TestUtil.setLoggable(loggable)
-            LogUtil.setDebug(TestUtil.isLoggable())
+            Tester.setLoggable(loggable)
+            LogUtil.setDebug(Tester.isLoggable())
         } catch (e: Exception) {
             mLoggable = loggable
         }
     }
 
     /**
-     * set mode of released app, the mode will determine config from server, default is MODE_VEST
-     * MODE_VEST: this mode is set when app is published on GooglePlay
-     * MODE_CHANNEL: this mode is set when app is published on landing page
+     * set mode of released apk, the mode will determine the config from server
+     * MODE_VEST: this mode is set when A-side apk is ready
+     * MODE_CHANNEL: this mode is set when B-side apk is ready
      */
     @JvmStatic
     fun setReleaseMode(mode: VestReleaseMode) {

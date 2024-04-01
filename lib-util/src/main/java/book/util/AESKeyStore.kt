@@ -14,7 +14,7 @@ object AESKeyStore : AbstractPreference("pref_vest_aes") {
 
     //GCM偏移向量, 固定12字节的字符串.
 
-    fun getIvParams(): String {
+    fun getIvParams(): String? {
         return getString("iv")
     }
 
@@ -24,7 +24,7 @@ object AESKeyStore : AbstractPreference("pref_vest_aes") {
     }
 
 
-    fun getGcm256Key(): String {
+    fun getGcm256Key(): String? {
         return getString("gcm_256_key")
     }
 
@@ -34,7 +34,7 @@ object AESKeyStore : AbstractPreference("pref_vest_aes") {
     }
 
 
-    fun getGcm192Key(): String {
+    fun getGcm192Key(): String? {
         return getString("gcm_192_key")
     }
 
@@ -43,7 +43,7 @@ object AESKeyStore : AbstractPreference("pref_vest_aes") {
     }
 
 
-    fun getGcm128Key(): String {
+    fun getGcm128Key(): String? {
         return getString("gcm_128_key")
     }
 

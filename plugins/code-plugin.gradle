@@ -1,8 +1,0 @@
-apply plugin: 'code-plugin'
-def androidConfig = rootProject.ext.android
-
-code {
-    codeInjectEnable = androidConfig.codeInjectEnable
-    codeInjectPercentage = 100 //垃圾代码注入方法中，占源代码方法数的百分比，整形数，取值[0, 100]
-    codeInjectMethodRatio = 2.0f //垃圾方法注入类中，跟源代码方法数之间的比例，浮点数，取值[0, ∞]（建议不要太大，否则会让类变得很庞大）
-}

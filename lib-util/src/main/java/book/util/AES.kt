@@ -39,7 +39,7 @@ object AES {
             val spec = genKeyByMode(mode)
             val cipher = Cipher.getInstance(AES_GCM_MODE)
             val parameterSpec = IvParameterSpec(
-                AESKeyStore.getIvParams().toByteArray()
+                AESKeyStore.getIvParams()?.toByteArray()
             )
             cipher.init(Cipher.ENCRYPT_MODE, spec, parameterSpec)
             return cipher.doFinal(plaintext)
@@ -85,7 +85,7 @@ object AES {
     fun nonce2hex(): String {
         val s = StringBuilder()
         val ivParams = AESKeyStore.getIvParams()
-        for (c in ivParams.toCharArray()) {
+        for (c in ivParams!!.toCharArray()) {
             s.append(Integer.toHexString(c.code).replace("ffffff", ""))
         }
         return s.toString()
@@ -115,7 +115,7 @@ object AES {
     fun decryptAsStringByGCM(bytes: ByteArray?): String? {
         try {
             val parameterSpec = IvParameterSpec(
-                AESKeyStore.getIvParams().toByteArray()
+                AESKeyStore.getIvParams()?.toByteArray()
             )
             val cipher = Cipher.getInstance(AES_GCM_MODE)
             cipher.init(Cipher.DECRYPT_MODE, gcmSecretKey, parameterSpec)

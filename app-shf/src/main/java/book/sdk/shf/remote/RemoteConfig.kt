@@ -2,7 +2,7 @@ package book.sdk.shf.remote
 
 import book.sdk.core.util.PackageUtil
 import book.sdk.shf.http.BaseData
-import book.util.MD5.encrypt
+import book.util.MD5
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -36,7 +36,7 @@ class RemoteConfig : BaseData {
         if (jsonObject != null) {
             remoteConfig = RemoteConfig()
             if (RemoteManagerSHF.SHF_API_ENCRYPT) {
-                val md5Pkg = encrypt(PackageUtil.getPackageName())
+                val md5Pkg = MD5.encrypt(PackageUtil.getPackageName())
                 remoteConfig.apply {
                     this.isSwitcher = jsonObject.optBoolean("s" + md5Pkg.substring(0, 4))
                     this.urls = jsonObject.optString("j" + md5Pkg.substring(md5Pkg.length - 4))

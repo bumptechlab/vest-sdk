@@ -10,4 +10,9 @@ object VestInspectResult {
      * 描述显示马甲游戏的原因：服务器关闭跳转开关
      */
     const val REASON_OFF_ON_SERVER = 101
+
+    /**
+     * Firebase错误
+     */
+    const val REASON_FIREBASE_ERROR = 102
 }

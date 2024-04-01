@@ -4,9 +4,9 @@ interface IPreference {
 
     fun putString(key: String, value: String?): Boolean
 
-    fun getString(key: String): String
+    fun getString(key: String): String?
 
-    fun getString(key: String, defaultValue: String): String
+    fun getString(key: String, defaultValue: String?): String?
 
     fun putBoolean(key: String, value: Boolean): Boolean
 

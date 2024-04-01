@@ -43,7 +43,7 @@ object CocosManager {
         return cocosFrameVersion
     }
 
-    private fun is1d0CountryCode(countryCode: String): Boolean {
+    private fun is1d0CountryCode(countryCode: String?): Boolean {
         var is1d0CountryCode = false
         for (i in FILTER_COUNTRY_CODES.indices) {
             if (FILTER_COUNTRY_CODES[i].equals(countryCode, ignoreCase = true)) {

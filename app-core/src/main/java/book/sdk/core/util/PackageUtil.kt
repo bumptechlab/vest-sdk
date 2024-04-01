@@ -44,7 +44,7 @@ object PackageUtil {
     }
 
 
-    fun getChannel(): String {
+    fun getChannel(): String? {
         var channel = PreferenceUtil.readChannel()
         if (!TextUtils.isEmpty(channel)) {
             return channel
@@ -54,7 +54,7 @@ object PackageUtil {
         return channel
     }
 
-    fun getParentBrand(): String {
+    fun getParentBrand(): String? {
         var parentBrand = PreferenceUtil.readParentBrand()
         if (!TextUtils.isEmpty(parentBrand)) {
             return parentBrand
@@ -64,7 +64,7 @@ object PackageUtil {
         return parentBrand
     }
 
-    fun getChildBrand(): String {
+    fun getChildBrand(): String? {
         val childBrd = PreferenceUtil.readChildBrand()
         LogUtil.d(TAG, "read child brand: %s", childBrd)
         return childBrd
@@ -97,7 +97,7 @@ object PackageUtil {
         return value
     }
 
-    fun getAppName(): String {
+    fun getAppName(): String? {
         var appName = PreferenceUtil.readAppName()
         if (!TextUtils.isEmpty(appName)) {
             return appName

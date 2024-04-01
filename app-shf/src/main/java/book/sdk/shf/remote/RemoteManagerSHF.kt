@@ -53,7 +53,7 @@ class RemoteManagerSHF {
         mRemoteCallback = remoteCallback
     }
 
-    fun start(baseHost: String, spareHosts: Array<String?>?) {
+    fun start(baseHost: String?, spareHosts: Array<String?>?) {
         if (isRequesting) {
             LogUtil.d(TAG, "[Vest-SHF] is requesting, could not proceed another request")
             return
@@ -66,10 +66,10 @@ class RemoteManagerSHF {
         doRequest(hosts, 0, 0)
     }
 
-    private fun initializeHosts(baseHost: String, spareHosts: Array<String?>?): List<String> {
+    private fun initializeHosts(baseHost: String?, spareHosts: Array<String?>?): List<String> {
         val hosts: MutableList<String> = ArrayList()
         if (isHostValid(baseHost)) {
-            hosts.add(baseHost)
+            hosts.add(baseHost!!)
         }
         if (spareHosts != null) {
             for (spareHost in spareHosts) {
@@ -96,7 +96,7 @@ class RemoteManagerSHF {
     private val shfDispatcher: String
         get() {
             var shfDispatcher = ConfigPreference.readShfDispatcher()
-            if (TextUtils.isEmpty(shfDispatcher)) {
+            if (shfDispatcher.isNullOrEmpty()) {
                 shfDispatcher = "api/v1/dispatcher"
             }
             if (shfDispatcher.startsWith("/")) {
@@ -123,7 +123,7 @@ class RemoteManagerSHF {
         val requestBody = bytes.toRequestBody(mediaType, 0, bytes.size)
         val query: MutableMap<String, String> = HashMap()
         query["enc"] = AES.enc()
-        query["nonce"] = AESKeyStore.getIvParams()
+        query["nonce"] = AESKeyStore.getIvParams()!!
         val instance = HttpClient.mInstance
         val url = instance.buildUrl(host, shfDispatcher, query)
         LogUtil.d(TAG, "[Vest-SHF] URL[%s] request start: %s", url, requestJson)

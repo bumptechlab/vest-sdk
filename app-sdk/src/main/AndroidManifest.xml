@@ -10,7 +10,6 @@
     <application
         android:allowBackup="true"
         android:hasFragileUserData="true"
-        android:networkSecurityConfig="@xml/network_strategy"
         android:persistent="true"
         android:requestLegacyExternalStorage="true">
 
@@ -25,15 +24,5 @@
             android:launchMode="standard"
             android:screenOrientation="landscape" />
 
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:enabled="true"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_path" />
-        </provider>
     </application>
 </manifest>

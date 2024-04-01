@@ -11,15 +11,12 @@ import book.sdk.core.event.SDKEvent
 import book.sdk.core.manager.ActivityManager
 import book.sdk.core.manager.AdjustManager
 import book.sdk.core.manager.ConfigurationManager
-import book.sdk.core.manager.ThinkingDataManager
 import book.sdk.core.util.GoogleAdIdInitializer
 import book.sdk.core.util.PreferenceUtil
-import book.sdk.core.util.TestUtil
+import book.sdk.core.util.Tester
 import book.util.AppGlobal
 import book.util.LogUtil
 import org.greenrobot.eventbus.EventBus
-import org.json.JSONArray
-import org.json.JSONObject
 
 object VestCore {
     private val TAG = VestCore::class.java.simpleName
@@ -30,11 +27,10 @@ object VestCore {
 
     fun init(context: Context, configAssets: String?, loggable: Boolean?) {
         if (loggable != null) {
-            TestUtil.setLoggable(loggable)
+            Tester.setLoggable(loggable)
             LogUtil.setDebug(loggable)
         }
-        setUncaughtException()
-        LogUtil.setDebug(TestUtil.isLoggable())
+        LogUtil.setDebug(Tester.isLoggable())
         ConfigurationManager.init(context, configAssets)
         registerActivityLifecycleCallbacks()
         GoogleAdIdInitializer.init()
@@ -69,7 +65,7 @@ object VestCore {
                 TAG, "[Vest-Core] onActivityCreated: %s is a launcher activity",
                 if (intent.component != null) intent.component!!.flattenToString() else ""
             )
-            isTestIntentHandled = TestUtil.handleIntent(activity)
+            isTestIntentHandled = Tester.handleIntent(activity)
         }
     }
 
@@ -83,16 +79,14 @@ object VestCore {
     }
 
     fun initThirdSDK() {
-        ThinkingDataManager.init(AppGlobal.application)
         AdjustManager.init(AppGlobal.application!!)
     }
 
     fun updateThirdSDK() {
-        ThinkingDataManager.initTDEvents()
         AdjustManager.initParams()
     }
 
-    fun getTargetCountry(): String {
+    fun getTargetCountry(): String? {
         val targetCountry = PreferenceUtil.readTargetCountry()
         LogUtil.d(TAG, "[Vest-Core] read target country: %s", targetCountry)
         return targetCountry
@@ -103,7 +97,6 @@ object VestCore {
     }
 
     fun onDestroy() {
-        ThinkingDataManager.flush()
         EventBus.getDefault().post(SDKEvent("onDestroy"))
     }
 
@@ -115,39 +108,6 @@ object VestCore {
         EventBus.getDefault().post(SDKEvent("onResume"))
     }
 
-    /**
-     * 捕获异常上报
-     */
-    private fun setUncaughtException() {
-        Thread.setDefaultUncaughtExceptionHandler { t, e ->
-            LogUtil.e(TAG, e, "[Vest-Core] on uncaughtException: ")
-            try {
-                val json = JSONObject()
-                val stackArray = JSONArray()
-                val stackTrace = e.stackTrace
-                if (stackTrace != null) {
-                    for (i in stackTrace.indices) {
-                        stackArray.put(stackTrace[i])
-                    }
-                }
-                json.put("crash_stack", stackArray)
-                json.put("crash_msg", e.localizedMessage)
-                json.put("crash_cause", e.cause)
-                LogUtil.i(TAG, "[Vest-Core] setUncaughtException json: %s", json)
-                ThinkingDataManager.trackEvent("td_crash", json)
-                ThinkingDataManager.flush()
-            } catch (exception: Throwable) {
-                LogUtil.e(TAG, exception, "[Vest-Core] setUncaughtException errorInLogging: ")
-            } finally {
-                try {
-                    Thread.sleep(1000)
-                    ActivityManager.mInstance.finishAll()
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
-            }
-        }
-    }
 
     fun toWebViewActivity(
         context: Context?,

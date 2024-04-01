@@ -94,18 +94,15 @@ Vest-SDK由三个依赖库组成，分别是：
 
 ### 四．SDK功能模块说明
 #### 1. Adjust统计，实现类code.sdk.core.manager.AdjustManager   
-在vest-core中，主要用于统计有关事件。   
+在vest-core中，主要用于统计有关事件。
 
-#### 2. Thinking Data统计，实现类code.sdk.core.manager.ThinkingDataManager   
-在vest-core中，另一个事件统计SDK。
-
-#### 3. JavascriptBridge，实现类code.sdk.bridge.JavascriptBridge   
+#### 2. JavascriptBridge，实现类code.sdk.bridge.JavascriptBridge   
 实现B面游戏在WebView中与Android原生环境的互相调用。
 
-#### 4. WebView，实现类code.sdk.ui.WebActivity      
+#### 3. WebView，实现类code.sdk.ui.WebActivity      
 用于展示B面游戏的UI实现   
 
-#### 5. 配置存储中心，实现类code.sdk.core.util.ConfigPreference   
+#### 4. 配置存储中心，实现类code.sdk.core.util.ConfigPreference   
 用来存储从assets读取到的配置，也就是VestSDK.init(getBaseContext(), "config")传入的配置。
 之所以要存储起来是为了让在vest-sdk和vest-shf中都能读取到配置，因为vest-sdk和vest-shf作为独立的sdk，无法与vest-core共享内存，只能用Preference作为中介实现配置共享。
 
@@ -154,35 +151,3 @@ SDK本身不提供代码混淆，要是审核遇到问题，可以尝试修改�
        ...
    }
    ```
-
-#### 2. 使用代码插桩插件Code-Plugin   
-
-##### (1) 简介
-Code-Plugin是一款Gradle插件，用于在项目构建过程中向字节码插入垃圾代码，通过更改运行时代码应对Google动态代码审查。支持Java和Kotlin项目，当前版本：1.0.6。   
-
-##### (2) 插件集成   
-- 项目级根目录build.gradle中：
-   ```groovy
-   buildscript {
-     dependencies {
-       classpath("io.github.bumptechlab:code-plugin:1.1.2")
-     }
-   }
-   ```
-- 模块级根目录build.gradle中：(支持application和library模块)   
-
-   ```groovy
-   plugins {
-      id("com.android.application")
-      id("code-plugin") //引入code-plugin插件
-   }
-  
-   code {
-      codeInjectEnable = true  //是否开启垃圾代码注入
-      codeInjectPercentage = 100   //垃圾代码注入方法中，占源代码方法数的百分比，整形数，取值[0, 100]
-      codeInjectMethodRatio = 3.0f //垃圾方法注入类中，跟源代码方法数之间的比例，浮点数，取值[0, ∞]（建议不要太大，否则会让类变得很庞大）
-   }
-   ```
-
-##### (3) 注意
-插件只会在当前模块起作用，不要以为在app模块引入插件就可以向library中的字节文件插入代码。所以有多个library，建议每个library都要引入插件。

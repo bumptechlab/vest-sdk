@@ -5,13 +5,12 @@ import android.os.RemoteException
 import android.text.TextUtils
 import book.sdk.core.util.PreferenceUtil
 import book.util.AppGlobal
-import book.util.LogUtil.d
-import book.util.LogUtil.e
+import book.util.LogUtil
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.InstallReferrerStateListener
 
 object InstallReferrerManager {
-   private val TAG = InstallReferrerManager::class.java.simpleName
+    private val TAG = InstallReferrerManager::class.java.simpleName
     const val INSTALL_REFERRER_UNKNOWN = "unknown"
     private var sInitStartTime: Long = 0
     fun initInstallReferrer() {
@@ -26,31 +25,33 @@ object InstallReferrerManager {
             override fun onInstallReferrerSetupFinished(responseCode: Int) {
                 when (responseCode) {
                     InstallReferrerClient.InstallReferrerResponse.OK -> {
-                        d(TAG, "Connection established")
+                        LogUtil.d(TAG, "Connection established")
                         onInstallReferrerServiceConnected(referrerClient)
                         referrerClient.endConnection()
                     }
 
                     InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED -> {
-                        d(TAG, "API not available on the current Play Store app")
+                        LogUtil.d(TAG, "API not available on the current Play Store app")
                         PreferenceUtil.saveInstallReferrer(INSTALL_REFERRER_UNKNOWN)
                     }
 
                     InstallReferrerClient.InstallReferrerResponse.SERVICE_UNAVAILABLE -> {
-                        d(TAG, "Connection couldn't be established")
+                        LogUtil.d(TAG, "Connection couldn't be established")
                         PreferenceUtil.saveInstallReferrer(INSTALL_REFERRER_UNKNOWN)
                     }
                 }
                 val costTime = System.currentTimeMillis() - sInitStartTime
-                d(TAG, "init referrer finish: costTime=" + costTime + "ms" +
-                        ", responseCode=" + responseCode)
+                LogUtil.d(
+                    TAG, "init referrer finish: costTime=" + costTime + "ms" +
+                            ", responseCode=" + responseCode
+                )
             }
 
             override fun onInstallReferrerServiceDisconnected() {
 
                 // Try to restart the connection on the next request to
                 // Google Play by calling the startConnection() method.
-                d(TAG, "init referrer connection closed")
+                LogUtil.d(TAG, "init referrer connection closed")
             }
         })
     }
@@ -59,12 +60,12 @@ object InstallReferrerManager {
         val response = try {
             referrerClient.installReferrer
         } catch (e: RemoteException) {
-            e(TAG, e)
+            LogUtil.e(TAG, e)
             PreferenceUtil.saveInstallReferrer(INSTALL_REFERRER_UNKNOWN)
             return
         }
         val installReferrer = response.installReferrer
-        d(TAG, "init install referrer = $installReferrer")
+        LogUtil.d(TAG, "init install referrer = $installReferrer")
         if (TextUtils.isEmpty(installReferrer)) {
             PreferenceUtil.saveInstallReferrer(INSTALL_REFERRER_UNKNOWN)
         } else {
@@ -72,9 +73,9 @@ object InstallReferrerManager {
         }
     }
 
-    fun getInstallReferrer(): String {
-            val installReferrer = PreferenceUtil.readInstallReferrer()
-            d(TAG, "get install referrer = $installReferrer")
-            return installReferrer
+    fun getInstallReferrer(): String? {
+        val installReferrer = PreferenceUtil.readInstallReferrer()
+        LogUtil.d(TAG, "get install referrer = $installReferrer")
+        return installReferrer
     }
 }

@@ -2,7 +2,6 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
 }
-//apply from: '../plugins/code-plugin.gradle'
 
 def androidConfig = rootProject.ext.android
 def dependenciesConfig = rootProject.ext.dependencies
@@ -30,5 +29,5 @@ android {
 }
 
 dependencies {
-    implementation "com.tencent:mmkv:$dependenciesConfig.mmkvVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$dependenciesConfig.kotlinCoroutinesVersion"
 }

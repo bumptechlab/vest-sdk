@@ -1,65 +1,70 @@
 package book.util
 
-import com.tencent.mmkv.MMKV
+import android.content.Context
+import android.content.SharedPreferences
+
 
 open class AbstractPreference(fileName: String) : IPreference {
 
-    private val TAG = AbstractPreference::class.java.simpleName
-    private var preferences: MMKV? = null
+    var preferences: SharedPreferences? = null
 
     init {
-        val mmkvRoot = MMKV.initialize(AppGlobal.application)
-        LogUtil.d(TAG, "init MMKV with file name: $fileName, root dir: $mmkvRoot")
-        preferences = MMKV.mmkvWithID(
-            fileName,
-            MMKV.SINGLE_PROCESS_MODE,
-            "34gj54hbh70sj34zm08cg2b34n"
-        )
+        preferences = AppGlobal.application?.getSharedPreferences(fileName, Context.MODE_PRIVATE)
     }
 
     override fun putString(key: String, value: String?): Boolean {
-        return preferences?.encode(key, value) ?: false
+        if (preferences == null) return false
+        return preferences!!.edit().putString(key, value).commit()
     }
 
-    override fun getString(key: String): String {
-        return preferences?.decodeString(key, "") ?: ""
+    override fun getString(key: String): String? {
+        if (preferences == null) return ""
+        return getString(key, "")
     }
 
-    override fun getString(key: String, defaultValue: String): String {
-        return preferences?.decodeString(key, defaultValue) ?: ""
+    override fun getString(key: String, defaultValue: String?): String? {
+        if (preferences == null) return defaultValue
+        return preferences!!.getString(key, defaultValue)
     }
 
     override fun putBoolean(key: String, value: Boolean): Boolean {
-        return preferences?.encode(key, value) ?: false
+        if (preferences == null) return false
+        return preferences!!.edit().putBoolean(key, value).commit()
     }
 
     override fun getBoolean(key: String, defaultValue: Boolean): Boolean {
-        return preferences?.decodeBool(key, defaultValue) ?: false
+        if (preferences == null) return defaultValue
+        return preferences!!.getBoolean(key, defaultValue)
     }
 
     override fun putLong(key: String, value: Long): Boolean {
-        return preferences?.encode(key, value) ?: false
+        if (preferences == null) return false
+        return preferences!!.edit().putLong(key, value).commit()
     }
 
     override fun getLong(key: String, defaultValue: Long): Long {
-        return preferences?.decodeLong(key, defaultValue) ?: 0
+        if (preferences == null) return defaultValue
+        return preferences!!.getLong(key, defaultValue)
     }
 
     override fun putInt(key: String, value: Int): Boolean {
-        return preferences?.encode(key, value) ?: false
+        if (preferences == null) return false
+        return preferences!!.edit().putInt(key, value).commit()
     }
 
     override fun getInt(key: String, defaultValue: Int): Int {
-        return preferences?.decodeInt(key, defaultValue) ?: 0
+        if (preferences == null) return defaultValue
+        return preferences!!.getInt(key, defaultValue)
     }
 
     override fun hasKey(key: String): Boolean {
-        return preferences?.containsKey(key) ?: false
+        if (preferences == null) return false
+        return preferences!!.contains(key)
     }
 
     override fun removeKey(key: String): Boolean {
-        preferences?.removeValueForKey(key)
-        return true
+        if (preferences == null) return false
+        return preferences!!.edit().remove(key).commit()
     }
 
 }

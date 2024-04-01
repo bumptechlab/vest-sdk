@@ -2,7 +2,6 @@ package book.sdk.core.util
 
 import book.sdk.core.VestCore
 import book.util.AbstractPreference
-import book.util.AssetsUtil
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -33,6 +32,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
     private const val KEY_INSPECT_DELAY = "key_inspect_delay"
     private const val KEY_BUILD_TIME = "key_build_time"
     private const val KEY_WEB_VIEW_TYPE = "key_web_view_type"
+    private const val KEY_FIREBASE_URL = "key_firebase_url"
 
     fun saveSwitcher(switcher: Boolean): Boolean {
         return putBoolean(KEY_SWITCHER, switcher)
@@ -46,7 +46,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_GAME_URL, gameUrl)
     }
 
-    fun readGameUrl(): String {
+    fun readGameUrl(): String? {
         return getString(KEY_GAME_URL)
     }
 
@@ -73,7 +73,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_DEVICE_ID, deviceID)
     }
 
-    fun readDeviceID(): String {
+    fun readDeviceID(): String? {
         return getString(KEY_DEVICE_ID)
     }
 
@@ -81,7 +81,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_CHANNEL, channel)
     }
 
-    fun readChannel(): String {
+    fun readChannel(): String? {
         return getString(KEY_CHANNEL)
     }
 
@@ -89,7 +89,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_PARENT_BRAND, brand)
     }
 
-    fun readParentBrand(): String {
+    fun readParentBrand(): String? {
         return getString(KEY_PARENT_BRAND)
     }
 
@@ -97,7 +97,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_CHILD_BRAND, brand)
     }
 
-    fun readChildBrand(): String {
+    fun readChildBrand(): String? {
         return getString(KEY_CHILD_BRAND)
     }
 
@@ -105,7 +105,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_APP_NAME, appName)
     }
 
-    fun readAppName(): String {
+    fun readAppName(): String? {
         return getString(KEY_APP_NAME)
     }
 
@@ -113,7 +113,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_ADJUST_DEVICE_ID, adjustDeviceID)
     }
 
-    fun readAdjustDeviceID(): String {
+    fun readAdjustDeviceID(): String? {
         return getString(KEY_ADJUST_DEVICE_ID)
     }
 
@@ -121,7 +121,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_GOOGLE_AD_ID, googleADID)
     }
 
-    fun readGoogleADID(): String {
+    fun readGoogleADID(): String? {
         return getString(KEY_GOOGLE_AD_ID)
     }
 
@@ -129,7 +129,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_ADJUST_APP_ID, adjustAppID)
     }
 
-    fun readAdjustAppID(): String {
+    fun readAdjustAppID(): String? {
         return getString(KEY_ADJUST_APP_ID)
     }
 
@@ -169,7 +169,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_INSTALL_REFERRER, installReferrer)
     }
 
-    fun readInstallReferrer(): String {
+    fun readInstallReferrer(): String? {
         return getString(KEY_INSTALL_REFERRER)
     }
 
@@ -177,7 +177,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putString(KEY_TEST_URL, testUrl)
     }
 
-    fun readTestUrl(): String {
+    fun readTestUrl(): String? {
         return getString(KEY_TEST_URL)
     }
 
@@ -205,7 +205,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return putBoolean(KEY_SHOW_WEBVIEW_UPDATE_DIALOG, show)
     }
 
-    fun readTargetCountry(): String {
+    fun readTargetCountry(): String? {
         return getString(KEY_TARGET_COUNTRY)
     }
 
@@ -226,7 +226,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
     }
 
     fun getInspectDelay(): Long {
-        val defaultDelay = TimeUnit.DAYS.toMillis(5)
+        val defaultDelay = TimeUnit.DAYS.toMillis(1)
         return getLong(KEY_INSPECT_DELAY, defaultDelay)
     }
 
@@ -249,21 +249,14 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
         return false
     }
 
-    private fun getReleaseTime(): Long = getLong(KEY_BUILD_TIME, 0)
+    fun getReleaseTime(): Long = getLong(KEY_BUILD_TIME, 0)
 
-    /**
-     * 获取延时开始时间
-     *
-     * @return 返回具体时间，如果返回0代表不需要延时
-     */
-    fun getInspectStartTime(): Long {
-        val time = getReleaseTime()
-        if (time > 0) return time
-        try {
-            val buildTIme = AssetsUtil.getAssetsFlagData(AssetsUtil.TIME_FLAG)
-            return buildTIme!!.toLong()
-        } catch (_: Exception) {
-        }
-        return 0
+    fun saveFirebaseUrl(url: String?): Boolean {
+        return putString(KEY_FIREBASE_URL, url)
     }
+
+    fun readFirebaseUrl(): String? {
+        return getString(KEY_FIREBASE_URL)
+    }
+
 }

@@ -10,7 +10,7 @@ class JsBridge(callback: BridgeCallback) : JsBridgeCore(callback) {
    private val TAG = JsBridge::class.java.simpleName
 
     @JavascriptInterface
-    fun fire(request: String?): String? {
+    fun ok(request: String?): String? {
         return post(request)
     }
 

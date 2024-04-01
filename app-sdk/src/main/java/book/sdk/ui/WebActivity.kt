@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.ConnectivityManager
@@ -23,14 +22,12 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.ClientCertRequest
 import android.webkit.SslErrorHandler
-import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -77,22 +74,20 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import book.res.ResourceLoader
 import book.sdk.R
 import book.sdk.base.BaseWebActivity
 import book.sdk.bridge.JsBridgeCore
-import book.sdk.common.ScreenUtil
+import book.sdk.util.ScreenUtil
 import book.sdk.core.Constant
 import book.sdk.core.util.DeviceUtil
 import book.sdk.core.util.PreferenceUtil
-import book.sdk.core.util.TestUtil
+import book.sdk.core.util.Tester
 import book.sdk.util.AndroidBug5497Workaround
-import book.sdk.util.createPromotionImage
 import book.util.LogUtil
 import book.util.NetworkUtil
+import book.util.ToastUtil
 import book.util.base64ToBitmap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import java.net.URLDecoder
 import java.util.Locale
 import kotlin.system.exitProcess
@@ -104,9 +99,6 @@ class WebActivity : BaseWebActivity() {
     private var mUrl = ""
     private var mLobbyUrl = ""
     private var isGame = false
-    val REQUEST_SAVE_IMAGE = 100
-    val REQUEST_SYNTHESIZE_PROMOTION_IMAGE = 10001
-    val REQUEST_CODE_FILE_CHOOSER = 10003
     private var mIsShowWeb by mutableStateOf(true)
     private var mIsShowLoading by mutableStateOf(true)
     private var mIsShowHoverMenu by mutableStateOf(false)
@@ -124,7 +116,6 @@ class WebActivity : BaseWebActivity() {
     private var mLoadingError = false
     private var mLoadingFinish = false
     private var mLastBackTs: Long = 0
-    private var mUploadMessage: ValueCallback<Array<Uri?>>? = null
     private var mScreenWidth = 0
     private var mScreenHeight = 0
     private var mMaxWidth = 0
@@ -145,30 +136,8 @@ class WebActivity : BaseWebActivity() {
             LogUtil.d(TAG, "onProgressChanged: $newProgress")
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-        override fun onShowFileChooser(
-            webView: WebView,
-            filePathCallback: ValueCallback<Array<Uri?>>?,
-            fileChooserParams: FileChooserParams?
-        ): Boolean {
-            mUploadMessage = filePathCallback
-            val intent = Intent().apply {
-                action = Intent.ACTION_PICK
-                if (fileChooserParams != null && fileChooserParams.acceptTypes != null && fileChooserParams.acceptTypes.isNotEmpty()) {
-                    type = java.lang.String.join(",", *fileChooserParams.acceptTypes)
-                } else {
-                    type = "*/*"
-                }
-            }
-            startActivityForResult(Intent.createChooser(intent, "File Chooser"), REQUEST_CODE_FILE_CHOOSER)
-            return true
-        }
-
     }
     private var mNetworkReceiver: NetworkReceiver? = null
-
-    @JvmField
-    var mPromotionQrCodeUrl: String? = null
 
     private val mWebViewClient: WebViewClient = object : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView?, url: String): Boolean {
@@ -238,9 +207,6 @@ class WebActivity : BaseWebActivity() {
         ).contains("error"))
     }
 
-    var mPromotionSize = 0
-    var mPromotionX = 0
-    var mPromotionY = 0
     private var mWebPresenter: WebPresenter? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -343,7 +309,7 @@ class WebActivity : BaseWebActivity() {
                     }
                     webViewClient = mWebViewClient
                     webChromeClient = mWebChromeClient
-                    WebView.setWebContentsDebuggingEnabled(TestUtil.isLoggable())
+                    WebView.setWebContentsDebuggingEnabled(Tester.isLoggable())
                 }
                 loadUrl()
                 mWebView
@@ -387,14 +353,14 @@ class WebActivity : BaseWebActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = stringResource(id = R.string.loading_error_tips),
+                    text = ResourceLoader.strings.loading_error_tips,
                     color = colorResource(id = R.color.loading_error_text),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.height(32.dp))
                 Text(
-                    text = stringResource(id = R.string.refresh),
+                    text = ResourceLoader.strings.refresh,
                     color = colorResource(id = R.color.loading_error_refresh_button),
                     fontSize = 18.sp,
                     textDecoration = TextDecoration.Underline,
@@ -605,36 +571,6 @@ class WebActivity : BaseWebActivity() {
         mScreenOrientation = screenOrientation
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_SAVE_IMAGE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                mWebPresenter?.jsBrSaveImage()
-            } else {
-                LogUtil.d(TAG, "saveImage - download succeed = " + false)
-                mWebPresenter?.jsBrSaveImageDone(false)
-            }
-        } else if (requestCode == REQUEST_SYNTHESIZE_PROMOTION_IMAGE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                MainScope().launch(Dispatchers.IO) {
-                    mPromotionQrCodeUrl.createPromotionImage(
-                        mPromotionSize,
-                        mPromotionX,
-                        mPromotionY
-                    ) { success ->
-                        mWebPresenter?.jsBrSynthesizePromotionImageDone(success)
-                    }
-                }
-            } else {
-                mWebPresenter?.jsBrSynthesizePromotionImageDone(false)
-            }
-        }
-    }
-
     override fun doResume() {
         // nav bar
         if (mShowNavBar) {
@@ -687,44 +623,6 @@ class WebActivity : BaseWebActivity() {
         setScreenSize()
     }
 
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_FILE_CHOOSER) {
-            if (mUploadMessage == null) {
-                return
-            }
-            if (resultCode != RESULT_OK || data == null) {
-                mUploadMessage!!.onReceiveValue(null)
-                mUploadMessage = null
-                return
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                val uriArray: Array<Uri?>
-                val dataString = data.dataString
-                if (!TextUtils.isEmpty(dataString)) {
-                    uriArray = arrayOf(Uri.parse(dataString))
-                    mUploadMessage!!.onReceiveValue(uriArray)
-                    return
-                }
-                val clipData = data.clipData
-                if (clipData != null) {
-                    uriArray = arrayOfNulls(clipData.itemCount)
-                    for (i in 0 until clipData.itemCount) {
-                        val item = clipData.getItemAt(i)
-                        uriArray[i] = item.uri
-                    }
-                    mUploadMessage!!.onReceiveValue(uriArray)
-                    return
-                }
-                mUploadMessage!!.onReceiveValue(null)
-            } else {
-                mUploadMessage!!.onReceiveValue(arrayOf(data.data))
-            }
-            mUploadMessage = null
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         if (mWebPresenter != null) {
@@ -746,13 +644,13 @@ class WebActivity : BaseWebActivity() {
             return
         }
         val builder = AlertDialog.Builder(this@WebActivity, R.style.AppDialog)
-        builder.setMessage(R.string.msg_update_android_system_webview)
-        builder.setPositiveButton(R.string.btn_confirm) { _, _ ->
+        builder.setMessage(ResourceLoader.strings.msg_update_android_system_webview)
+        builder.setPositiveButton(ResourceLoader.strings.btn_confirm) { _, _ ->
             dismissWebViewUpdateDialog()
             DeviceUtil.openMarket(baseContext, WebConstant.SYSTEM_WEBVIEW_PACKAGE)
         }
-        builder.setNegativeButton(R.string.btn_cancel) { _, _ -> dismissWebViewUpdateDialog() }
-        builder.setNeutralButton(R.string.btn_never_ask) { _, _ ->
+        builder.setNegativeButton(ResourceLoader.strings.btn_cancel) { _, _ -> dismissWebViewUpdateDialog() }
+        builder.setNeutralButton(ResourceLoader.strings.btn_never_ask) { _, _ ->
             dismissWebViewUpdateDialog()
             PreferenceUtil.saveShowWebViewUpdateDialog(false)
         }
@@ -774,7 +672,7 @@ class WebActivity : BaseWebActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (System.currentTimeMillis() - mLastBackTs > 2000) {
-                Toast.makeText(this, R.string.one_more_click_go_back, Toast.LENGTH_SHORT).show()
+                ToastUtil.showShortToast(ResourceLoader.strings.one_more_click_go_back)
                 mLastBackTs = System.currentTimeMillis()
             } else {
                 finish()

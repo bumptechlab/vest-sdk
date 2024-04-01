@@ -62,7 +62,7 @@ open class JsBridgeCore(callback: BridgeCallback) : Bridge(JsBridgeImpl(callback
          * @return
          */
 
-        fun getJsBridgeName(): String {
+        private fun getJsBridgeName(): String {
             val pkgMd5 = encrypt(PackageUtil.getPackageName())
             //加入随机字母防止md5出现全数字的情况，全数字的命名空间无法正常运行
             val randomCharCode = Random.nextInt(97..122) // 小写字母ASCII范围：97-122

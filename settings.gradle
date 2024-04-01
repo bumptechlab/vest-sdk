@@ -16,8 +16,9 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Vest-SDK"
+include ':app'
 include ':app-sdk'
-include ':lib-util'
 include ':app-shf'
 include ':app-core'
-include ':app'
+include ':app-firebase'
+include ':lib-util'

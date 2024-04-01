@@ -9,12 +9,13 @@ import book.sdk.core.util.ConfigPreference
 import book.sdk.core.util.DeviceUtil
 import book.sdk.core.util.PackageUtil
 import book.sdk.core.util.PreferenceUtil
-import book.sdk.core.util.TestUtil
+import book.sdk.core.util.Tester
 import book.util.LogUtil
 import com.adjust.sdk.Adjust
 import com.adjust.sdk.AdjustConfig
 import com.adjust.sdk.AdjustEvent
 import com.adjust.sdk.LogLevel
+import java.util.Locale
 
 object AdjustManager {
    private val TAG = AdjustManager::class.java.simpleName
@@ -44,9 +45,24 @@ object AdjustManager {
         //以下数据需要服务器返回
         Adjust.addSessionCallbackParameter("app_brd", PackageUtil.getChildBrand())
         Adjust.addSessionCallbackParameter("app_country", VestCore.getTargetCountry())
-        Adjust.addSessionCallbackParameter("ta_distinct_id", ThinkingDataManager.getTDDistinctId())
-        Adjust.addSessionCallbackParameter("ta_account_id", ThinkingDataManager.getAccountId())
+        Adjust.addSessionCallbackParameter("ta_distinct_id", DeviceUtil.getDeviceID())
+        Adjust.addSessionCallbackParameter("ta_account_id", getAccountId())
         updateCocosFrameVersion()
+    }
+
+    fun getAccountId(): String {
+        var userID = CocosManager.getUserId()
+        if (userID.isNullOrEmpty()) {
+            return ""
+        }
+        val targetCountry = VestCore.getTargetCountry()?.uppercase(Locale.getDefault())
+        //cocos frame version 不存在认为是1.0版本，返回${country}-${userId}的账号形式
+        //cocos frame version 是2.0.0及以上，值返回${userId}的账号形式
+        val cocosFrameVersion = CocosManager.getCocosFrameVersionInt()
+        if (cocosFrameVersion < 200) {
+            userID = "${targetCountry}-$userID"
+        }
+        return userID
     }
 
     fun updateCocosFrameVersion() {
@@ -59,8 +75,8 @@ object AdjustManager {
             return
         }
         val environment =
-            if (book.sdk.core.BuildConfig.DEBUG) AdjustConfig.ENVIRONMENT_SANDBOX else AdjustConfig.ENVIRONMENT_PRODUCTION
-        val logLevel = if (TestUtil.isLoggable()) LogLevel.VERBOSE else LogLevel.INFO
+            if (BuildConfig.DEBUG) AdjustConfig.ENVIRONMENT_SANDBOX else AdjustConfig.ENVIRONMENT_PRODUCTION
+        val logLevel = if (Tester.isLoggable()) LogLevel.VERBOSE else LogLevel.INFO
         LogUtil.d(
             TAG, "[Adjust] init with config [appId: %s, environment: %s, logLevel: %s]",
             appId, environment, logLevel.name
@@ -179,7 +195,7 @@ object AdjustManager {
         PreferenceUtil.saveAdjustEventRecordUpdated(token)
     }
 
-    fun getAdjustDeviceID(): String {
+    fun getAdjustDeviceID(): String? {
         var adjustDeviceID = PreferenceUtil.readAdjustDeviceID()
         if (!TextUtils.isEmpty(adjustDeviceID)) {
             return adjustDeviceID

@@ -1,0 +1,72 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.kezong.fat-aar'
+}
+apply from: './publish.gradle' //aar发布脚本
+apply from: '../plugins/pack.gradle'   //aar输出脚本
+
+def androidConfig = rootProject.ext.android
+def dependenciesConfig = rootProject.ext.dependencies
+def namespaces = rootProject.ext.namespaces
+def mavenConfig = rootProject.ext.maven
+
+fataar {
+    /**
+     * If transitive is true, local jar module and remote library's dependencies will be embed. (local aar module does not support)
+     * If transitive is false, just embed first level dependency
+     * Default value is false
+     * @since 1.3.0
+     */
+    transitive = true
+}
+
+android {
+    namespace namespaces.appfirebase
+    compileSdk androidConfig.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion androidConfig.minSdkVersion
+        targetSdkVersion androidConfig.targetSdkVersion
+        versionName mavenConfig.version
+        consumerProguardFiles "../proguard/consumer-rules.pro"
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            jniDebuggable true
+            renderscriptDebuggable true
+            minifyEnabled false
+            shrinkResources false
+            //R8混淆开启之后解决APP打开类加载时找不到类的问题,指定文件来放置启动时需要优先加载的类
+            multiDexKeepFile file("maindexlist.txt")
+        }
+        release {
+            debuggable false
+            jniDebuggable false
+            renderscriptDebuggable false
+            minifyEnabled false
+            shrinkResources false
+            //R8混淆开启之后解决APP打开类加载时找不到类的问题,指定文件来放置启动时需要优先加载的类
+            multiDexKeepFile file("maindexlist.txt")
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', '../proguard/consumer-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+    packagingAAR(project, android, mavenConfig.artifactIdFirebase)
+}
+
+dependencies {
+    compileOnly project(':app-core')
+    compileOnly project(':lib-util')
+    implementation "org.greenrobot:eventbus:$dependenciesConfig.eventBusVersion"
+    implementation "com.google.firebase:firebase-config-ktx:$dependenciesConfig.firebaseConfigVersion"
+}

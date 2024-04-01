@@ -3,7 +3,7 @@ package book.sdk.core.manager
 import android.content.Context
 import android.text.TextUtils
 import book.sdk.core.Configuration
-import book.sdk.core.Configuration.Companion.toConfiguration
+import book.sdk.core.toConfiguration
 import book.sdk.core.util.ConfigPreference
 import book.util.AESUtil
 import book.util.LogUtil
@@ -47,7 +47,7 @@ class ConfigurationManager private constructor() {
             return String(decryptBytes)
         }
 
-        private fun initConfig(configuration: book.sdk.core.Configuration) {
+        private fun initConfig(configuration: Configuration) {
             ConfigPreference.apply {
                 saveChannel(configuration.channel)
                 saveBrand(configuration.brand)
@@ -60,8 +60,6 @@ class ConfigurationManager private constructor() {
                 saveAdjustEventGreeting(configuration.adjustEventGreeting)
                 saveAdjustEventAccess(configuration.adjustEventAccess)
                 saveAdjustEventUpdated(configuration.adjustEventUpdated)
-                saveThinkingDataAppId(configuration.thinkingDataAppId)
-                saveThinkingDataHost(configuration.thinkingDataHost)
             }
         }
 

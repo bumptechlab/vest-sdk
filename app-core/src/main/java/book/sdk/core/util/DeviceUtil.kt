@@ -1,6 +1,5 @@
 package book.sdk.core.util
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -10,17 +9,12 @@ import android.database.Cursor
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Build
-import android.os.Environment
-import android.provider.Settings.Secure
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
-import android.util.Pair
 import book.util.AppGlobal
 import book.util.LogUtil
-import java.io.File
 import java.io.InputStreamReader
 import java.io.LineNumberReader
-import java.lang.StringBuilder
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.util.Locale
@@ -29,38 +23,20 @@ import java.util.UUID
 object DeviceUtil {
     private val TAG = DeviceUtil::class.java.simpleName
 
-    /* public */
-    private const val XIAOMI_VIRTUAL_DEVICE_ID_NULL = "0000000000000000"
+    private val INVALID_DEVICE_IDS = arrayOf(
+        "00000000-0000-0000-0000-000000000000",
+        "0000000000000000",
+        "02:00:00:00:00:00", //Mac地址的不合法形式
+        "9774d56d682e549c" //Android ID的不合法形式
+    )
 
-    /**
-     * 判断是否有能同步获取到的设备ID（包括sp、file存储）
-     *
-     * @return Pair <deviceId></deviceId>,isReadFromFile>
-     */
-    fun preGetDeviceID(): Pair<String?, Boolean> {
-        var deviceId: String? = PreferenceUtil.readDeviceID()
-        var isReadFromFile = false
-        if (deviceId.isNullOrEmpty()) {
-            deviceId = readDeviceIDFromFile()
-            LogUtil.d(TAG, "getDeviceId: CacheFile: $deviceId")
-            isReadFromFile = !deviceId.isNullOrEmpty()
-        }
-        //GSF ID
-        if (deviceId.isNullOrEmpty()) {
-            deviceId = gsfAndroidId
-            LogUtil.d(TAG, "getDeviceId: GoogleServiceFrameworkId: $deviceId")
-        }
-
-        if (!deviceId.isNullOrEmpty()) {
-            saveDeviceID(deviceId, isReadFromFile)
-        }
-        return Pair.create(deviceId, isReadFromFile)
+    private fun isInvalidDeviceId(deviceId: String?): Boolean {
+        return deviceId.isNullOrEmpty() || INVALID_DEVICE_IDS.contains(deviceId)
     }
 
     /**
      * get device id orderly
-     * warn:avoid getting the deviceID before Adjust.OnDeviceIdsRead(in MainApplication) callback!
-     *
+     * remove Android ID because it will be changed after app signature changed
      *
      * 1.GSF ID
      * 2.GOOGLE AD ID
@@ -69,19 +45,23 @@ object DeviceUtil {
      * @return device id
      */
     fun getDeviceID(): String? {
-        val pair = preGetDeviceID()
-        var deviceId = pair.first
-        val isReadFromFile = pair.second
-        if (deviceId.isNullOrEmpty()) {
+        var deviceId: String? = PreferenceUtil.readDeviceID()
+        //GSF ID
+        if (isInvalidDeviceId(deviceId)) {
+            deviceId = gsfAndroidId
+            LogUtil.d(TAG, "getDeviceId: GoogleServiceFrameworkId: $deviceId")
+        }
+        //Google AD ID
+        if (isInvalidDeviceId(deviceId)) {
             deviceId = googleAdId
             LogUtil.d(TAG, "getDeviceId: GoogleADId: $deviceId")
         }
         //UUID
-        if (deviceId.isNullOrEmpty()) {
+        if (isInvalidDeviceId(deviceId)) {
             deviceId = UUID.randomUUID().toString()
             LogUtil.d(TAG, "getDeviceId: UUID: $deviceId")
         }
-        saveDeviceID(deviceId, isReadFromFile)
+        PreferenceUtil.saveDeviceID(deviceId)
         LogUtil.d(TAG, "getDeviceId: DeviceId: $deviceId")
         return deviceId
     }
@@ -92,18 +72,12 @@ object DeviceUtil {
             return field
         }
 
-    private fun saveDeviceID(deviceID: String?, isReadFromFile: Boolean) {
-        PreferenceUtil.saveDeviceID(deviceID)
-        if (!isReadFromFile) {
-            saveDeviceIDToFile(deviceID)
-        }
-    }
-
     /**
      * get Google Service Framework id
      *
      * @return gsf id
      */
+    @OptIn(ExperimentalStdlibApi::class)
     var gsfAndroidId: String? = null
         get() {
             if (field.isNullOrEmpty()) {
@@ -116,10 +90,8 @@ object DeviceUtil {
                         AppGlobal.application?.contentResolver?.query(URI, null, null, params, null)
                     if (cursor != null && cursor.moveToFirst() && cursor.columnCount >= 2) {
                         val id = cursor.getString(1)
-                        field =
-                            if (id.isNullOrEmpty() || "null" == id) null else java.lang.Long.toHexString(
-                                id.toLong()
-                            )
+                        field = if (id.isNullOrEmpty() || "null" == id) null else id.toLong()
+                            .toHexString()
                     }
 
                 } catch (e: Exception) {
@@ -221,8 +193,7 @@ object DeviceUtil {
     }
 
     fun getLanguage(context: Context): String {
-        val locale: Locale?
-        locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        val locale: Locale? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             context.resources.configuration.locales[0]
         } else {
             context.resources.configuration.locale
@@ -254,7 +225,7 @@ object DeviceUtil {
         }
     }
 
-   private fun openGooglePlay(context: Context, packageName: String): Boolean {
+    private fun openGooglePlay(context: Context, packageName: String): Boolean {
         var success = false
         try {
             val intent = Intent(Intent.ACTION_VIEW)
@@ -266,7 +237,8 @@ object DeviceUtil {
                 success = true
             } else { //没有应用市场，通过浏览器跳转到Google Play
                 val intent2 = Intent(Intent.ACTION_VIEW)
-                intent2.data = Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+                intent2.data =
+                    Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
                 if (intent2.resolveActivity(context.packageManager) != null) {
                     intent2.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent2)
@@ -281,12 +253,13 @@ object DeviceUtil {
         return success
     }
 
-   private fun openBuildInMarket(context: Context, packageName: String): Boolean {
+    private fun openBuildInMarket(context: Context, packageName: String): Boolean {
         var success = false
         try {
             val intent = Intent().apply {
                 action = Intent.ACTION_VIEW
-                data = Uri.parse("market://details?id=$packageName") //跳转到应用市场，非Google Play市场一般情况也实现了这个接口
+                data =
+                    Uri.parse("market://details?id=$packageName") //跳转到应用市场，非Google Play市场一般情况也实现了这个接口
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
             context.startActivity(intent)
@@ -393,30 +366,6 @@ object DeviceUtil {
         }
         return macAddress
     }
-
     /* public */
 
-    /* private */
-    private val deviceIdFile: File?
-        get() = File(
-            AppGlobal.application!!.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
-            "did.dat"
-        )
-
-    private fun saveDeviceIDToFile(deviceId: String?) {
-        if (deviceId?.isNotEmpty()!!) {
-            deviceIdFile?.writeText(deviceId, Charsets.UTF_8)
-        }
-    }
-
-    private fun readDeviceIDFromFile(): String? {
-        LogUtil.d(TAG, "getDeviceId: deviceIdFile=$deviceIdFile")
-        return if (deviceIdFile?.exists()!!) deviceIdFile?.readText(charset = Charsets.UTF_8) else null
-    }
-
-    private var androidId: String? = null
-        @SuppressLint("HardwareIds")
-        get() = Secure.getString(AppGlobal.application?.contentResolver, Secure.ANDROID_ID)
-
-    /* private */
 }
