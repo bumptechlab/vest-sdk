@@ -4,11 +4,12 @@
 SDK最新版本：1.2.4
 
 ### 二．SDK简介
-Vest-SDK由三个依赖库组成，分别是：
+Vest-SDK由4个依赖库组成，分别是：
 1. vest-core核心库，主要是一些工具类方法和Adjust、Thinking Data数据记录模块。
 2. vest-shf实现了SHF的A/B面切换开关，该开关配置在服务器端，需要联网才能获得。
 3. vest-firebase实现了Firebase的A/B面切换开关，该开关配置在Firebase，需要联网才能获得。
-4. vest-sdk实现游戏展示框架，只支持显示H5游戏。
+4. vest-sdk实现游戏展示框架，只支持显示H5游戏。   
+
 注意： vest-firebase和vest-shf两种开关方式只需要二选一，根据过包情况自由选择，其中Firebase在控制台可按照国家进行配置。
 
 ### 三．SDK使用
