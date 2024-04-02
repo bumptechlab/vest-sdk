@@ -10,6 +10,6 @@ output-metadata.json
 /build
 /app-b
 maven.properties
-Maven仓库发布说明.md
+docs/maven-publish.md
 secring.gpg
 

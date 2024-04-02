@@ -1,39 +1,55 @@
 # Vest-SDK
 ### 一. 前言
-本文档只针对需要对SDK工程代码进行修改和混淆的开发者，方便他们理解工程结构以及SDK功能模块，最后给出了过包方案。
+本文档只针对需要对SDK工程代码进行修改和混淆的开发者，方便他们理解工程结构以及SDK功能模块，最后给出了过包方案。   
+SDK最新版本：1.2.4
 
 ### 二．SDK简介
 Vest-SDK由三个依赖库组成，分别是：
 1. vest-core核心库，主要是一些工具类方法和Adjust、Thinking Data数据记录模块。
-2. vest-shf实现了A/B面切换开关，该开关配置在服务器端，需要联网才能获得。
-3. vest-sdk实现游戏展示框架，只支持显示H5游戏。
+2. vest-shf实现了SHF的A/B面切换开关，该开关配置在服务器端，需要联网才能获得。
+3. vest-firebase实现了Firebase的A/B面切换开关，该开关配置在Firebase，需要联网才能获得。
+4. vest-sdk实现游戏展示框架，只支持显示H5游戏。
+注意： vest-firebase和vest-shf两种开关方式只需要二选一，根据过包情况自由选择，其中Firebase在控制台可按照国家进行配置。
 
 ### 三．SDK使用
 1. 把加密后的配置放到assets目录，并自行修改配置文件名
 2. Application中初始化SDK，传入配置文件名
-   ``` java
+   ``` kotlin
+   //传入配置文件
    VestSDK.init(getBaseContext(), "config");
+   //设置包的发布模式：马甲包和渠道包
+   VestSDK.setReleaseMode(VestReleaseMode.MODE_VEST)
    ```
-3. 其中config文件的原始内容如下：
+3. 其中config文件的原始内容在使用Firebase控制和SHF控制的时候各有不同：
+- Firebase控制：
    ``` json
     {
-      "channel": "website",
-      "brand": "test",
-      "country": "br",
-      "shf_base_domain": "https://shf.test.baowengame.com",
-      "shf_spare_domains": [
-        "https://www.ozt4axm9.com",
-        "https://www.6r4hx6e2.com",
-        "https://www.cictnjac.com"
-      ],
-      "shf_dispatcher": "/f815c73be1/01ff357222/9d5316545333",
-      "adjust_app_id": "3h9btar5b3i8",
-      "adjust_event_start": "15wkgy",
-      "adjust_event_greeting": "h5twnz",
-      "adjust_event_access": "mza6nh",
-      "adjust_event_updated": "gz7ht9",
-      "thinking_data_app_id": "4edaf2728be644dd83f04c54d60f0fa0",
-      "thinking_data_host": "https://data.kneil.com/"
+        "channel": "website",
+        "brand": "test",
+        "adjust_app_id": "5f4qg9uhutts",
+        "adjust_event_start": "fq5h6s",
+        "adjust_event_greeting": "2zmcn8",
+        "adjust_event_access": "iuj12u",
+        "adjust_event_updated": "oc5lmj"
+    }
+   ```
+- SHF控制：
+   ``` json
+    {
+        "channel": "website",
+        "brand": "test",
+        "shf_base_domain": "https://shf.test.baowengame.com",
+        "shf_spare_domains": [
+            "https://www.ozt4axm9.com",
+            "https://www.6r4hx6e2.com",
+            "https://www.cictnjac.com"
+        ],
+        "shf_dispatcher": "/4dbcdda313/e74a32918b/df14abf6ce87",
+        "adjust_app_id": "5f4qg9uhutts",
+        "adjust_event_start": "fq5h6s",
+        "adjust_event_greeting": "2zmcn8",
+        "adjust_event_access": "iuj12u",
+        "adjust_event_updated": "oc5lmj"
     }
    ```
 数据分为三大块   
@@ -57,49 +73,86 @@ Vest-SDK由三个依赖库组成，分别是：
 | adjust_event_greeting | 记录A/B开关请求成功事件     |
 | adjust_event_access   | 记录进入B面游戏事件         |
 | adjust_event_updated  | 没有用                    |
- 
-（3）Thinking Data相关参数，每个品牌使用一样的参数
 
-| 字段                   | 说明                          |
-|-----------------------|------------------------------|
-| thinking_data_app_id  | 用于初始化Thinking Data SDK    |
-| thinking_data_host    | 厂商服务器地址，用于接收Thinking Data服务器的回传事件 |
 
 4. 实现A/B面切换，开关在厂商后台控制。   
-打开开关表示跳转到B面，回调方法onShowOfficialGame   
-关闭开关表示跳转到A面，回调方法onShowVestGame   
+打开开关表示跳转到B面，回调方法onShowBSide   
+关闭开关表示跳转到A面，回调方法onShowASide   
 为了在审核期间不暴露请求API，还可以设置请求发起的延迟时间
-   ``` java
-   VestSHF.getInstance().setInspectDelayTime(10, TimeUnit.DAYS);
-   VestSHF.getInstance().inspect(this, new VestInspectCallback() {
-         //这里跳转到A面，A面请自行实现
-         @Override
-         public void onShowVestGame() {
-             Log.d(TAG, "show vest game");
-             Intent intent = new Intent(getBaseContext(), VestGameActivity.class);
-             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-             startActivity(intent);
-             AppTestSDKActivity.this.finish();
-         }
-   
-         //这里跳转到B面，B面由SDK提供，使用VestSDK.gotoGameActivity()方法跳转
-         @Override
-         public void onShowOfficialGame(String url) {
-             Log.d(TAG, "show official game: " + url);
-             VestSDK.gotoGameActivity(getBaseContext(), url);
-             AppTestSDKActivity.this.finish();
-         }
-   });
-   ```
+- SHF控制示例代码：
+    ```kotlin
+    VestSHF.getInstance().apply {
+        //设置APK构建时间
+        setReleaseTime("2023-11-29 10:23:20")
 
+        //设置延迟发起A/B请求的时间
+        setInspectDelayTime(5, TimeUnit.DAYS)
+
+        //设置是否检查SHF返回的URL合法性
+        setCheckUrl(true)
+
+        //开始请求A/B开关
+    }.inspect(this, object : VestInspectCallback {
+        //显示A面
+        override fun onShowASide(reason: Int) {
+            Log.d(TAG, "show A-side activity")
+            gotoASide()
+            finish()
+        }
+
+        //SDK内部执行了B面跳转，跳转结果通过launchResult给出，如果跳转不成功需要展示A面
+        override fun onShowBSide(url: String, launchResult: Boolean) {
+            Log.d(TAG, "show B-side activity: $url, result: $launchResult")
+            if (!launchResult) {
+                gotoASide()
+            }
+            finish()
+        }
+
+    })
+    ```
+- Firebase控制示例代码：
+    ```kotlin
+    VestFirebase.getInstance().apply {
+        //设置APK构建时间
+        setReleaseTime("2023-11-29 10:23:20")
+
+        //设置延迟发起A/B请求的时间
+        setInspectDelayTime(0, TimeUnit.DAYS)
+
+        //设置在Firebase控制台设置的游戏链接key的名称，每次出包务必更换名称
+        setFirebaseKey("url")
+
+    }.inspect(this, object : VestInspectCallback {
+
+        //显示A面
+        override fun onShowASide(reason: Int) {
+            Log.d(TAG, "show A-side activity")
+            gotoASide()
+            finish()
+        }
+
+        //显示B面
+        override fun onShowBSide(url: String, launchResult: Boolean) {
+            Log.d(TAG, "show B-side activity: $url, result: $launchResult")
+            if (!launchResult) {
+                gotoASide()
+            }
+            finish()
+        }
+
+    })   
+   ```
+  
+  
 ### 四．SDK功能模块说明
-#### 1. Adjust统计，实现类code.sdk.core.manager.AdjustManager   
+#### 1. Adjust统计，实现类book.sdk.core.manager.AdjustManager   
 在vest-core中，主要用于统计有关事件。
 
-#### 2. JavascriptBridge，实现类code.sdk.bridge.JavascriptBridge   
+#### 2. BridgeInterface只保留了15个基本接口（为了消除恶意软件提醒），实现类book.sdk.bridge.JsBridgeImpl  
 实现B面游戏在WebView中与Android原生环境的互相调用。
 
-#### 3. WebView，实现类code.sdk.ui.WebActivity      
+#### 3. WebView，实现类book.sdk.ui.WebActivity      
 用于展示B面游戏的UI实现   
 
 #### 4. 配置存储中心，实现类code.sdk.core.util.ConfigPreference   
@@ -151,3 +204,8 @@ SDK本身不提供代码混淆，要是审核遇到问题，可以尝试修改�
        ...
    }
    ```
+
+
+
+
+### 六．SDK发布详见文档：[maven-publish.md](maven-publish.md)
