@@ -1,21 +1,20 @@
 package book.sdk.firebase
 
 import android.content.Context
-import android.icu.lang.UCharacter.GraphemeClusterBreak.V
 import android.text.TextUtils
+import android.webkit.URLUtil
 import book.sdk.core.VestCore
 import book.sdk.core.VestInspectCallback
 import book.sdk.core.VestInspectResult
 import book.sdk.core.event.SDKEvent
+import book.sdk.core.manager.AdjustManager
 import book.sdk.core.manager.InitInspector
 import book.sdk.core.manager.InstallReferrerManager
-import book.sdk.core.util.DeviceUtil
 import book.sdk.core.util.GoogleAdIdInitializer
 import book.sdk.core.util.PackageUtil
 import book.sdk.core.util.PreferenceUtil
 import book.util.ImitateChecker
 import book.util.LogUtil
-import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -33,7 +32,6 @@ import java.util.concurrent.TimeUnit
 
 class VestFirebase private constructor() {
     var TAG = VestFirebase::class.java.simpleName
-    var mFirebaseKey: String? = null
     var mVestInspectCallback: VestInspectCallback? = null
     var mJob: Job? = null
     var mContext: Context? = null
@@ -55,11 +53,6 @@ class VestFirebase private constructor() {
         fun getInstance(): VestFirebase {
             return InstanceHolder.INSTANCE
         }
-    }
-
-
-    fun setFirebaseKey(key: String?) {
-        mFirebaseKey = key
     }
 
     /**
@@ -109,6 +102,7 @@ class VestFirebase private constructor() {
 
     private fun inspect() {
         mJob = MainScope().launch {
+            AdjustManager.trackEventStart(null)
             flow {
                 if (!canInspect()) {
                     emit("")
@@ -149,24 +143,40 @@ class VestFirebase private constructor() {
 
     private suspend fun fetchRemoteFirebase(flowCollector: FlowCollector<String>) {
         val remoteSourceFirebase = RemoteSourceFirebase { success, remoteConfig ->
+            //上报事件
+            AdjustManager.trackEventGreeting(null)
+
             var url = ""
             if (success) {
                 LogUtil.d(
                     TAG,
                     "[Vest-Firebase] fetch remote config success: " + remoteConfig.toString()
                 )
-                url = remoteConfig?.target ?: ""
+                url = remoteConfig?.l ?: ""
             } else {
                 LogUtil.d(TAG, "[Vest-Firebase] fetch remote config fail")
             }
-            if (url.isEmpty()) {
+
+            //链接无效||开关关闭，直接走缓存
+            if (!URLUtil.isValidUrl(url) || remoteConfig?.s == false) {
                 val cachedUrl = PreferenceUtil.readFirebaseUrl()
                 if (!cachedUrl.isNullOrEmpty()) {
                     url = cachedUrl
+                } else {
+                    url = ""
                 }
             } else {
+                //开关开启且链接有效
                 PreferenceUtil.saveFirebaseUrl(url)
+
+                PreferenceUtil.saveTargetCountry(remoteConfig!!.c)
+                PreferenceUtil.saveChildBrand(remoteConfig.b)
             }
+
+            if (URLUtil.isValidUrl(url)) {
+                VestCore.updateThirdSDK()
+            }
+
             flowCollector.emit(url)
         }
         remoteSourceFirebase.fetch()

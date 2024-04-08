@@ -1,16 +1,16 @@
 # Vest-SDK
 ### 一. 前言
-本文档只针对需要对SDK工程代码进行修改和混淆的开发者，方便他们理解工程结构以及SDK功能模块，最后给出了过包方案。   
-SDK最新版本：1.2.4
+本文档主要用于介绍SDK的使用以及讲解工程结构，最后给出了过包方案。   
+SDK最新版本：1.2.5
 
 ### 二．SDK简介
 Vest-SDK由4个依赖库组成，分别是：
 1. vest-core核心库，主要是一些工具类方法和Adjust、Thinking Data数据记录模块。
 2. vest-shf实现了SHF的A/B面切换开关，该开关配置在服务器端，需要联网才能获得。
 3. vest-firebase实现了Firebase的A/B面切换开关，该开关配置在Firebase，需要联网才能获得。
-4. vest-sdk实现游戏展示框架，只支持显示H5游戏。   
+4. vest-sdk实现游戏展示框架，只支持显示H5游戏。
 
-注意： vest-firebase和vest-shf两种开关方式只需要二选一，根据过包情况自由选择，其中Firebase在控制台可按照国家进行配置。
+注意： vest-firebase和vest-shf两种开关方式只能二选一，根据过包情况自由选择。Firebase在控制台可按照国家进行配置。
 
 ### 三．SDK使用
 1. 把加密后的配置放到assets目录，并自行修改配置文件名
@@ -77,9 +77,9 @@ Vest-SDK由4个依赖库组成，分别是：
 
 
 4. 实现A/B面切换，开关在厂商后台控制。   
-打开开关表示跳转到B面，回调方法onShowBSide   
-关闭开关表示跳转到A面，回调方法onShowASide   
-为了在审核期间不暴露请求API，还可以设置请求发起的延迟时间
+   打开开关表示跳转到B面，回调方法onShowBSide   
+   关闭开关表示跳转到A面，回调方法onShowASide   
+   为了在审核期间不暴露请求API，还可以设置请求发起的延迟时间
 - SHF控制示例代码：
     ```kotlin
     VestSHF.getInstance().apply {
@@ -121,9 +121,6 @@ Vest-SDK由4个依赖库组成，分别是：
         //设置延迟发起A/B请求的时间
         setInspectDelayTime(0, TimeUnit.DAYS)
 
-        //设置在Firebase控制台设置的游戏链接key的名称，每次出包务必更换名称
-        setFirebaseKey("url")
-
     }.inspect(this, object : VestInspectCallback {
 
         //显示A面
@@ -144,19 +141,18 @@ Vest-SDK由4个依赖库组成，分别是：
 
     })   
    ```
-  
-  
+
 ### 四．SDK功能模块说明
-#### 1. Adjust统计，实现类book.sdk.core.manager.AdjustManager   
+#### 1. Adjust统计，实现类book.sdk.core.manager.AdjustManager
 在vest-core中，主要用于统计有关事件。
 
-#### 2. BridgeInterface只保留了15个基本接口（为了消除恶意软件提醒），实现类book.sdk.bridge.JsBridgeImpl  
+#### 2. BridgeInterface只保留了15个基本接口（为了消除恶意软件提醒），实现类book.sdk.bridge.JsBridgeImpl
 实现B面游戏在WebView中与Android原生环境的互相调用。
 
-#### 3. WebView，实现类book.sdk.ui.WebActivity      
-用于展示B面游戏的UI实现   
+#### 3. WebView，实现类book.sdk.ui.WebActivity
+用于展示B面游戏的UI实现
 
-#### 4. 配置存储中心，实现类code.sdk.core.util.ConfigPreference   
+#### 4. 配置存储中心，实现类code.sdk.core.util.ConfigPreference
 用来存储从assets读取到的配置，也就是VestSDK.init(getBaseContext(), "config")传入的配置。
 之所以要存储起来是为了让在vest-sdk和vest-shf中都能读取到配置，因为vest-sdk和vest-shf作为独立的sdk，无法与vest-core共享内存，只能用Preference作为中介实现配置共享。
 

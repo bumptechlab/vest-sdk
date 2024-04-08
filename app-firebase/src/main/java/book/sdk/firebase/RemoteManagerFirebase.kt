@@ -5,9 +5,9 @@ import book.util.LogUtil
 import com.google.android.gms.tasks.Task
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.google.firebase.remoteconfig.ktx.remoteConfig
-import book.sdk.firebase.BuildConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
+import org.json.JSONObject
 
 object RemoteManagerFirebase {
 
@@ -24,7 +24,7 @@ object RemoteManagerFirebase {
     private fun initFirebaseRC() {
         mFirebaseRC = Firebase.remoteConfig
         val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = if (BuildConfig.DEBUG) 0 else 120 //开发阶段需要即时更新配置
+            minimumFetchIntervalInSeconds = if (BuildConfig.DEBUG) 0 else 6 * 60 * 60 //开发阶段需要即时更新配置
             fetchTimeoutInSeconds = if (BuildConfig.DEBUG) 60 else 20 //开发阶段访问超时可以长一点，Release阶段最多20秒
 
         }
@@ -56,15 +56,33 @@ object RemoteManagerFirebase {
 
     fun getRemoteConfig(): RemoteConfig? {
         val config: RemoteConfig? = getGoogleFirebaseRC()
-        return if (config != null && config.fetchStatus != RC_FETCH_STATUS_UNDECIDED) config else null
+        return if (config != null && config.f != RC_FETCH_STATUS_UNDECIDED
+            //如果必须的参数没获取到，同样需要重试
+            && (config.s
+                    && config.c != null
+                    && config.b != null
+                    && config.l != null
+                    || !config.s)
+        ) config else null
     }
 
     private fun getGoogleFirebaseRC(): RemoteConfig? {
-        if (VestFirebase.getInstance().mFirebaseKey.isNullOrEmpty()) {
-            return null
+        return RemoteConfig(mFirebaseRCFetchStatus).apply {
+            s = mFirebaseRC.getBoolean("s")
+            val json = mFirebaseRC.getString("j")
+            if (json.isEmpty()) {
+                return@apply
+            }
+            try {
+                JSONObject(json).apply {
+                    l = optString("u")
+                    c = optString("c")
+                    b = optString("b")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-        val target = mFirebaseRC.getString(VestFirebase.getInstance().mFirebaseKey!!)
-        return RemoteConfig(mFirebaseRCFetchStatus, target)
     }
 
 }

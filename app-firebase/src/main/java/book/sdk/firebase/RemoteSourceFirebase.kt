@@ -6,7 +6,7 @@ import kotlinx.coroutines.delay
 class RemoteSourceFirebase(private val onResult: suspend (Boolean, RemoteConfig?) -> Unit = { success, remoteConfig -> }) {
     // 请求RC的过程中，轮询结果
     private val INTERVAL_CHECK_RC = 1000L
-    private val MAX_CHECK_RC_COUNT = 20
+    private val MAX_CHECK_RC_COUNT = 10
     private var mCheckRCCount = 0
     suspend fun fetch() {
         RemoteManagerFirebase.fetch()
@@ -16,7 +16,7 @@ class RemoteSourceFirebase(private val onResult: suspend (Boolean, RemoteConfig?
 
     private suspend fun checkRemoteConfigFirebase() {
         if (mCheckRCCount++ >= MAX_CHECK_RC_COUNT) {
-            LogUtil.d(TAG, "[Vest-Firebase] give up RC checking")
+            LogUtil.d(TAG, "[Vest-Firebase] give up RC checking：$mCheckRCCount")
             onResult(false, null)
             return
         }
@@ -28,9 +28,9 @@ class RemoteSourceFirebase(private val onResult: suspend (Boolean, RemoteConfig?
             return
         }
         LogUtil.d(TAG, String.format("[Vest-Firebase] check config = $config"))
-        if (RC_FETCH_STATUS_FAILED == config.fetchStatus) {
+        if (RC_FETCH_STATUS_FAILED == config.f) {
             onResult(false, null)
-        } else if (RC_FETCH_STATUS_SUCCEEDED == config.fetchStatus) {
+        } else if (RC_FETCH_STATUS_SUCCEEDED == config.f) {
             onResult(true, config)
         } else {
             assert(false)

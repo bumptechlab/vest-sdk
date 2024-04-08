@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "838044731216",
-    "project_id": "vest-sdk",
-    "storage_bucket": "vest-sdk.appspot.com"
+    "project_number": "577435313545",
+    "project_id": "vestsdk",
+    "storage_bucket": "vestsdk.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:838044731216:android:34c67c71d34ff9f3168e55",
+        "mobilesdk_app_id": "1:577435313545:android:470ed17c6c4569c7ae2d58",
         "android_client_info": {
           "package_name": "com.example.vest.sdk.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD43cggiYkSsNvX6tXs2bMvciddFsxBE1Q"
+          "current_key": "AIzaSyAXTp5tnj5WdPtZKZRa_qmDQ_4J-SFsiO8"
         }
       ],
       "services": {
