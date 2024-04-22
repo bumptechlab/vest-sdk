@@ -1,7 +1,9 @@
 package book.sdk.firebase
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.text.TextUtils
+import android.util.Base64
 import android.webkit.URLUtil
 import book.sdk.core.VestCore
 import book.sdk.core.VestInspectCallback
@@ -10,6 +12,8 @@ import book.sdk.core.event.SDKEvent
 import book.sdk.core.manager.AdjustManager
 import book.sdk.core.manager.InitInspector
 import book.sdk.core.manager.InstallReferrerManager
+import book.sdk.core.util.ConfigPreference
+import book.sdk.core.util.DeviceUtil
 import book.sdk.core.util.GoogleAdIdInitializer
 import book.sdk.core.util.PackageUtil
 import book.sdk.core.util.PreferenceUtil
@@ -28,6 +32,7 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import java.net.URLDecoder
 import java.util.concurrent.TimeUnit
 
 class VestFirebase private constructor() {
@@ -65,6 +70,17 @@ class VestFirebase private constructor() {
         val timeMills = timeUnit.toMillis(time)
         PreferenceUtil.saveInspectDelay(timeMills)
         return this
+    }
+
+    /**
+     * set up a device whitelist for Firebase, where devices in the whitelist can bypass the interception of Install Referrer in the Release environment
+     *
+     * @param deviceList Obtain the device ID of your current device by filtering "getDeviceId: DeviceId:" in Logcat
+     */
+    fun setFirebaseDeviceWhiteList(deviceList: List<String>) {
+        if (deviceList.isEmpty()) return
+        val whiteFirebaseDeviceListInCache = ConfigPreference.readFirebaseWhiteDevice() + deviceList
+        ConfigPreference.saveFirebaseWhiteDevice(whiteFirebaseDeviceListInCache)
     }
 
     /**
@@ -109,35 +125,29 @@ class VestFirebase private constructor() {
                     return@flow
                 }
                 fetchRemoteFirebase(this)
-            }.flowOn(Dispatchers.IO)
-                .catch {
-                    LogUtil.e(TAG, it, "[Vest-Firebase] onInspect error")
-                    if (mVestInspectCallback != null) {
-                        mVestInspectCallback?.onShowASide(VestInspectResult.REASON_FIREBASE_ERROR)
+            }.flowOn(Dispatchers.IO).catch {
+                LogUtil.e(TAG, it, "[Vest-Firebase] onInspect error")
+                if (mVestInspectCallback != null) {
+                    mVestInspectCallback?.onShowASide(VestInspectResult.REASON_FIREBASE_ERROR)
+                }
+            }.onStart {
+                LogUtil.d(TAG, "[Vest-Firebase] onInspect start")
+            }.onCompletion {
+                LogUtil.d(TAG, "[Vest-Firebase] onInspect finish")
+            }.collect {
+                LogUtil.d(TAG, "[Vest-Firebase] onInspectTarget: $it")
+                val url = it
+                if (mVestInspectCallback != null) {
+                    if (url.isEmpty()) {
+                        mVestInspectCallback?.onShowASide(VestInspectResult.REASON_OFF_ON_SERVER)
+                    } else {
+                        val launchBSuccess = VestCore.toWebViewActivity(
+                            mContext, url, VestCore.WEBVIEW_TYPE_INNER
+                        )
+                        mVestInspectCallback?.onShowBSide(url, launchBSuccess)
                     }
                 }
-                .onStart {
-                    LogUtil.d(TAG, "[Vest-Firebase] onInspect start")
-                }
-                .onCompletion {
-                    LogUtil.d(TAG, "[Vest-Firebase] onInspect finish")
-                }
-                .collect {
-                    LogUtil.d(TAG, "[Vest-Firebase] onInspectTarget: $it")
-                    val url = it
-                    if (mVestInspectCallback != null) {
-                        if (url.isEmpty()) {
-                            mVestInspectCallback?.onShowASide(VestInspectResult.REASON_OFF_ON_SERVER)
-                        } else {
-                            val launchBSuccess = VestCore.toWebViewActivity(
-                                mContext,
-                                url,
-                                VestCore.WEBVIEW_TYPE_INNER
-                            )
-                            mVestInspectCallback?.onShowBSide(url, launchBSuccess)
-                        }
-                    }
-                }
+            }
         }
     }
 
@@ -149,8 +159,7 @@ class VestFirebase private constructor() {
             var url = ""
             if (success) {
                 LogUtil.d(
-                    TAG,
-                    "[Vest-Firebase] fetch remote config success: " + remoteConfig.toString()
+                    TAG, "[Vest-Firebase] fetch remote config success: " + remoteConfig.toString()
                 )
                 url = remoteConfig?.l ?: ""
             } else {
@@ -182,6 +191,7 @@ class VestFirebase private constructor() {
         remoteSourceFirebase.fetch()
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun canInspect(): Boolean {
         //模拟器，直接跳A
         if (ImitateChecker.isImitate()) {
@@ -193,21 +203,53 @@ class VestFirebase private constructor() {
         val inspectStartTime = PreferenceUtil.getReleaseTime()
         val inspectDelay = PreferenceUtil.getInspectDelay()
         if (inspectStartTime > 0 && inspectDelay > 0) {
-            val inspectTimeMills = inspectStartTime + inspectDelay
-            LogUtil.d(TAG, "[Vest-Firebase] inspect cancel, it's not the time")
-            return System.currentTimeMillis() > inspectTimeMills
+            //获取最终静默截止时间
+            val inspectTimeMills =
+                inspectStartTime + inspectDelay
+            LogUtil.d(
+                TAG,
+                "[Vest-Firebase] inspect time result:${System.currentTimeMillis() >= inspectTimeMills}"
+            )
+            return System.currentTimeMillis() >= inspectTimeMills
         }
 
-        val installReferrer = InstallReferrerManager.getInstallReferrer()
+        var installReferrer = InstallReferrerManager.getInstallReferrer()
         if (TextUtils.isEmpty(installReferrer) || InstallReferrerManager.INSTALL_REFERRER_UNKNOWN == installReferrer) {
             InstallReferrerManager.initInstallReferrer()
         }
         GoogleAdIdInitializer.init()
         //非自然安装量，跳A
         val inspected = InitInspector().inspect();
+
+        val whiteDeviceList = ConfigPreference.readFirebaseWhiteDevice()
+        val isInWhiteList = whiteDeviceList.find { it == DeviceUtil.getDeviceID() } != null
+        println("[Vest-Firebase] current device is in white list:${isInWhiteList}")
+        //白名单中设备跳过归因检测
+        if (!isInWhiteList) {
+            //本地判断自然量
+            installReferrer = InstallReferrerManager.getInstallReferrer()
+            val organicIR = arrayOf(
+                "dW5rbm93bg==",
+                "VU5LTk9XTg==",
+                "dXRtX3NvdXJjZSUzRCUyOG5vdDIwJTI1c2V0JTI5JTI2dXRtX21lZGl1bSUzRCUyOG5vdDIwJTI1c2V0JTI5",
+                "dXRtX21lZGl1bSUzRG9yZ2FuaWM="
+            )
+            val isOrganic = organicIR.find {
+                installReferrer!!.contains(it.run {
+                    val decodedB64String = String(Base64.decode(this, Base64.DEFAULT))
+                    //转换被encode的符号
+                    val decodedString = URLDecoder.decode(decodedB64String, "UTF-8")
+                    println("[Vest-Firebase] decoded ir for match:${decodedString}")
+                    decodedString
+                })
+            } != null
+            if (isOrganic) {
+                LogUtil.d(TAG, "[Vest-Firebase] install referrer is organic!")
+                return false
+            }
+        }
         return inspected
     }
-
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onReceiveEvent(sdkEvent: SDKEvent) {

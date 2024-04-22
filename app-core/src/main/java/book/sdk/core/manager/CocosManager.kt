@@ -8,7 +8,7 @@ import book.util.parseInt
 
 object CocosManager {
     private val TAG = CocosManager::class.java.simpleName
-    private val FILTER_COUNTRY_CODES = arrayOf("IN", "ID", "BR", "GW", "VN")
+    private val FILTER_COUNTRY_CODES = arrayOf("IN", "ID", "BR", "GW", "VN", "PBR", "PID")
 
     fun getUserId(): String? {
         var userID = CocosPreferenceUtil.getString(CocosPreferenceUtil.KEY_USER_ID)
@@ -30,7 +30,8 @@ object CocosManager {
     }
 
     fun getCocosFrameVersion(): String {
-        var cocosFrameVersion = CocosPreferenceUtil.getString(CocosPreferenceUtil.KEY_COCOS_FRAME_VERSION)
+        var cocosFrameVersion =
+            CocosPreferenceUtil.getString(CocosPreferenceUtil.KEY_COCOS_FRAME_VERSION)
         if (cocosFrameVersion.isNullOrEmpty()) {
             val targetCountry = VestCore.getTargetCountry()
             cocosFrameVersion = if (is1d0CountryCode(targetCountry)) {

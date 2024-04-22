@@ -9,6 +9,6 @@ class AppApplication : MultiDexApplication() {
         super.onCreate()
         VestSDK.setLoggable(true)
         VestSDK.setReleaseMode(VestReleaseMode.MODE_VEST)
-        VestSDK.init(baseContext, "config")
+        VestSDK.init(baseContext, "config-firebase")
     }
 }

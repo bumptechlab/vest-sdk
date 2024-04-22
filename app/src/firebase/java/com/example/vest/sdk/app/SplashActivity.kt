@@ -24,13 +24,19 @@ class SplashActivity : Activity() {
              * setup the date of apk build
              * time format: yyyy-MM-dd HH:mm:ss
              */
-            setReleaseTime("2023-11-29 10:23:20")
+            setReleaseTime("2024-04-19 10:23:20")
 
             /**
              * setup duration of silent period for requesting A/B switching starting from the date of apk build
              */
-            setInspectDelayTime(0, TimeUnit.DAYS)
+            setInspectDelayTime(1, TimeUnit.DAYS)
 
+            /**
+             * 「Optional」
+             * set up a device whitelist for Firebase, where devices in the whitelist can bypass the interception of Install Referrer in the Release environment
+             * only effective in Release package, Debug package will not be intercepted due to attribution being a natural quantity
+             */
+            setFirebaseDeviceWhiteList(listOf())
         }.inspect(this, object : VestInspectCallback {
 
             /**

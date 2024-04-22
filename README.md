@@ -1,6 +1,6 @@
 # Vest-SDK
 
-最新版本：1.2.5   
+最新版本：1.2.6   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。
 
 SDK总共四个依赖库：  
@@ -69,13 +69,13 @@ vest-firebase: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:1.2.5'
+          implementation 'io.github.bumptechlab:vest-core:1.2.6'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:1.2.5'
+          implementation 'io.github.bumptechlab:vest-sdk:1.2.6'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:1.2.5'
+          implementation 'io.github.bumptechlab:vest-shf:1.2.6'
           //vest-shf和vest-firebase 二选一
-          //implementation 'io.github.bumptechlab:vest-firebase:1.2.5'
+          //implementation 'io.github.bumptechlab:vest-firebase:1.2.6'
       }
       ```
    (2) 本地依赖方式
@@ -208,6 +208,14 @@ vest-firebase: 用于切换A/B面的远程开关
              */
             setInspectDelayTime(0, TimeUnit.DAYS)
 
+            /**
+             * 「Optional」If there is no need, you can skip calling this method
+             * 
+             * set up a device whitelist for Firebase, where devices in the whitelist can bypass the interception of Install Referrer in the Release environment
+             * only effective in Release package, Debug package will not be intercepted due to attribution being a natural quantity
+             */
+            setFirebaseDeviceWhiteList(listOf("xxxx",...))
+   
         }.inspect(this, object : VestInspectCallback {
 
             /**
@@ -300,11 +308,11 @@ allprojects {
 
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:1.2.5-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:1.2.5-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:1.2.5-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:1.2.6-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:1.2.6-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:1.2.6-SNAPSHOT'
     //vest-shf和vest-firebase 二选一
-    //implementation 'io.github.bumptechlab:vest-firebase:1.2.5-SNAPSHOT'
+    //implementation 'io.github.bumptechlab:vest-firebase:1.2.6-SNAPSHOT'
  }
 ```
 
@@ -505,9 +513,19 @@ allprojects {
 - 实现B面外部跳转
 - A/B开关请求区分马甲包和渠道包
 
-### 1.2.5
+### 1.2.4
 
 - 增加firebase控制A/B开关
 - 移除风险代码
 - deviceId都为0的时候使用UUID
 - 修复子品牌缓存问题
+
+### 1.2.5
+
+- firebase增加一包通投
+
+### 1.2.6
+
+- firebase增加本地归因判断拦截，并新增加接口`setFirebaseDeviceWhiteList`来跳过该限制
+- 将静默截止时间改为中国时间来做判断
+- 支持新市场PBR/PID

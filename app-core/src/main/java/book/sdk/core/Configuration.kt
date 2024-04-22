@@ -1,5 +1,6 @@
 package book.sdk.core
 
+import android.text.TextUtils
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -10,6 +11,7 @@ class Configuration {
     var shfSpareHosts: Array<String>? = null
     var shfBaseHost: String? = null
     var shfDispatcher: String? = null
+    var firebaseIRWhiteDeviceList: List<String>? = null
 
     /* adjust start */
     var adjustAppId: String? = null
@@ -30,6 +32,11 @@ fun String.toConfiguration(): Configuration? {
             brand = jsonObject.optString("brand")
             country = jsonObject.optString("country")
             shfBaseHost = jsonObject.optString("shf_base_domain")
+            val whiteDeviceStringForIR = jsonObject.optString("white_device_for_ir_limit")
+            if (!TextUtils.isEmpty(whiteDeviceStringForIR)) {
+                firebaseIRWhiteDeviceList = whiteDeviceStringForIR.split(",")
+            }
+
             val shfSpareHostArray = jsonObject.optJSONArray("shf_spare_domains")
             val shfSpareHostList = mutableListOf<String>()
             if (shfSpareHostArray != null) {

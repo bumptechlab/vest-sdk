@@ -4,6 +4,7 @@ import book.sdk.core.VestCore
 import book.util.AbstractPreference
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
 object PreferenceUtil : AbstractPreference("pref_vest") {
@@ -241,6 +242,7 @@ object PreferenceUtil : AbstractPreference("pref_vest") {
     fun saveReleaseTime(delayTime: String?): Boolean {
         val formatter =
             SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault(Locale.Category.FORMAT))
+        formatter.timeZone = TimeZone.getTimeZone("GMT+8")
         try {
             val date = formatter.parse(delayTime!!)
             return putLong(KEY_BUILD_TIME, date!!.time)

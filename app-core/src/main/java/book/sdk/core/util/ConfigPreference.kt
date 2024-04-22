@@ -23,6 +23,7 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
     private const val CONFIG_ADJUST_EVENT_ACCESS = "CONFIG_BEAN_ADJUST_EVENT_ACCESS"
     private const val CONFIG_ADJUST_EVENT_UPDATED = "CONFIG_BEAN_ADJUST_EVENT_UPDATED"
     private const val CONFIG_RELEASE_MODE = "CONFIG_BEAN_RELEASE_MODE"
+    private const val CONFIG_FIREBASE_WHITE_DEVICE = "CONFIG_FIREBASE_WHITE_DEVICE"
 
     fun saveChannel(chn: String?): Boolean {
         return putString(CONFIG_CHN, chn)
@@ -141,6 +142,37 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
 
     fun readReleaseMode(): Int {
         return getInt(CONFIG_RELEASE_MODE, VestReleaseMode.MODE_VEST.mode)
+    }
+
+    fun saveFirebaseWhiteDevice(value: List<String>?): Boolean {
+        var v = value
+        if (v == null) {
+            v = emptyList()
+        }
+        val shfHostArray = JSONArray()
+        for (i in v.indices) {
+            shfHostArray.put(v[i])
+        }
+        val valueJson = shfHostArray.toString()
+        return putString(CONFIG_FIREBASE_WHITE_DEVICE, valueJson)
+    }
+
+    fun readFirebaseWhiteDevice(): List<String> {
+        val valueJson = getString(CONFIG_FIREBASE_WHITE_DEVICE)
+        var hosts = listOf<String>()
+        if (!TextUtils.isEmpty(valueJson)) {
+            try {
+                val shfHostArray = JSONArray(valueJson)
+                val shfHostList = ArrayList<String>()
+                for (i in 0 until shfHostArray.length()) {
+                    shfHostList.add(shfHostArray.optString(i))
+                }
+                hosts = shfHostList
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
+        return hosts
     }
 
 }

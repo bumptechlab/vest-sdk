@@ -60,6 +60,7 @@ class ConfigurationManager private constructor() {
                 saveAdjustEventGreeting(configuration.adjustEventGreeting)
                 saveAdjustEventAccess(configuration.adjustEventAccess)
                 saveAdjustEventUpdated(configuration.adjustEventUpdated)
+                saveFirebaseWhiteDevice(configuration.firebaseIRWhiteDeviceList)
             }
         }
 
