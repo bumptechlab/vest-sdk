@@ -4,9 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import book.sdk.core.VestInspectCallback
-import book.sdk.core.VestSDK
-import book.sdk.shf.VestSHF
+import poetry.sdk.core.VestInspectCallback
+import poetry.sdk.core.VestSDK
+import poetry.sdk.shf.VestSHF
 import java.util.concurrent.TimeUnit
 
 class SplashActivity : Activity() {

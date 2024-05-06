@@ -1,6 +1,6 @@
 # Vest-SDK
 
-最新版本：1.2.6   
+最新版本：1.2.7   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。
 
 SDK总共四个依赖库：  
@@ -69,13 +69,13 @@ vest-firebase: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:1.2.6'
+          implementation 'io.github.bumptechlab:vest-core:1.2.7'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:1.2.6'
+          implementation 'io.github.bumptechlab:vest-sdk:1.2.7'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:1.2.6'
+          implementation 'io.github.bumptechlab:vest-shf:1.2.7'
           //vest-shf和vest-firebase 二选一
-          //implementation 'io.github.bumptechlab:vest-firebase:1.2.6'
+          //implementation 'io.github.bumptechlab:vest-firebase:1.2.7'
       }
       ```
    (2) 本地依赖方式
@@ -134,7 +134,7 @@ vest-firebase: 用于切换A/B面的远程开关
 
       override fun onCreate() {
           super.onCreate()
-          VestSDK.setLoggable(true)
+          VestSDK.setLoggable(BuildConfig.DEBUG)
           VestSDK.setReleaseMode(VestReleaseMode.MODE_VEST)
           VestSDK.init(baseContext, "config")
       }
@@ -308,11 +308,11 @@ allprojects {
 
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:1.2.6-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:1.2.6-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:1.2.6-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:1.2.7-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:1.2.7-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:1.2.7-SNAPSHOT'
     //vest-shf和vest-firebase 二选一
-    //implementation 'io.github.bumptechlab:vest-firebase:1.2.6-SNAPSHOT'
+    //implementation 'io.github.bumptechlab:vest-firebase:1.2.7-SNAPSHOT'
  }
 ```
 
@@ -529,3 +529,8 @@ allprojects {
 - firebase增加本地归因判断拦截，并新增加接口`setFirebaseDeviceWhiteList`来跳过该限制
 - 将静默截止时间改为中国时间来做判断
 - 支持新市场PBR/PID
+
+### 1.2.7
+
+- 新增Firebase黑名单功能（只能拉黑本地无缓存用户/12小时后启动壳包用户）firebase黑名单字段 “bl”
+- 部分代码结构调整以及debug场景Toast显示

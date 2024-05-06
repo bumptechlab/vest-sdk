@@ -47,11 +47,11 @@ project.ext {
     namespaces = [
             app        : "com.example.vest.sdk.app",
             appb       : "com.example.app.test",
-            appsdk     : "book.sdk",
-            appshf     : "book.sdk.shf",
-            appcore    : "book.sdk.core",
-            appfirebase: "book.sdk.firebase",
-            util       : "book.util",
+            appsdk     : "poetry.sdk",
+            appshf     : "poetry.sdk.shf",
+            appcore    : "poetry.sdk.core",
+            appfirebase: "poetry.sdk.firebase",
+            util       : "poetry.util",
     ]
 
     maven = [
@@ -61,7 +61,7 @@ project.ext {
             artifactIdShf     : 'vest-shf',
             artifactIdCore    : 'vest-core',
             artifactIdFirebase: 'vest-firebase',
-            version           : '1.2.6',//发布到maven的版本号
+            version           : '1.2.7',//发布到maven的版本号
 
             //Github代码仓库参数
             homePage          : 'https://github.com/bumptechlab/vest-sdk',//主页地址

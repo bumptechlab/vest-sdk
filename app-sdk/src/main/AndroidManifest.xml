@@ -18,7 +18,7 @@
             android:value="2.4" />
 
         <activity
-            android:name="book.sdk.ui.WebActivity"
+            android:name="poetry.sdk.ui.WebActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
             android:launchMode="standard"

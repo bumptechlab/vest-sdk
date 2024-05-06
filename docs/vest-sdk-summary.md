@@ -1,7 +1,7 @@
 # Vest-SDK
 ### 一. 前言
 本文档主要用于介绍SDK的使用以及讲解工程结构，最后给出了过包方案。   
-SDK最新版本：1.2.6
+SDK最新版本：1.2.7
 
 ### 二．SDK简介
 Vest-SDK由4个依赖库组成，分别是：
@@ -143,13 +143,13 @@ Vest-SDK由4个依赖库组成，分别是：
    ```
 
 ### 四．SDK功能模块说明
-#### 1. Adjust统计，实现类book.sdk.core.manager.AdjustManager
+#### 1. Adjust统计，实现类poetry.sdk.core.manager.AdjustManager
 在vest-core中，主要用于统计有关事件。
 
-#### 2. BridgeInterface只保留了15个基本接口（为了消除恶意软件提醒），实现类book.sdk.bridge.JsBridgeImpl
+#### 2. BridgeInterface只保留了15个基本接口（为了消除恶意软件提醒），实现类poetry.sdk.bridge.JsBridgeImpl
 实现B面游戏在WebView中与Android原生环境的互相调用。
 
-#### 3. WebView，实现类book.sdk.ui.WebActivity
+#### 3. WebView，实现类poetry.sdk.ui.WebActivity
 用于展示B面游戏的UI实现
 
 #### 4. 配置存储中心，实现类code.sdk.core.util.ConfigPreference
