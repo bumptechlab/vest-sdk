@@ -16,6 +16,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import java.net.URLDecoder
 import java.util.concurrent.TimeUnit
 
 class HttpClient private constructor() {
@@ -72,7 +73,7 @@ class HttpClient private constructor() {
                 builder.addEncodedQueryParameter(key, value)
             }
         }
-        return builder.build().toString()
+        return URLDecoder.decode(builder.build().toString(), "UTF-8")
     }
 
     fun <T : Any> ioSchedulers(): ObservableTransformer<T, T> {

@@ -1,10 +1,10 @@
 package poetry.sdk.core.util
 
 import android.text.TextUtils
-import poetry.sdk.core.VestReleaseMode
-import poetry.util.AbstractPreference
 import org.json.JSONArray
 import org.json.JSONException
+import poetry.sdk.core.VestReleaseMode
+import poetry.util.AbstractPreference
 
 /**
  * 专门用于存储配置的工具类，请不要存其他业务相关的数据
@@ -23,7 +23,13 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
     private const val CONFIG_ADJUST_EVENT_ACCESS = "CONFIG_BEAN_ADJUST_EVENT_ACCESS"
     private const val CONFIG_ADJUST_EVENT_UPDATED = "CONFIG_BEAN_ADJUST_EVENT_UPDATED"
     private const val CONFIG_RELEASE_MODE = "CONFIG_BEAN_RELEASE_MODE"
-    private const val CONFIG_FIREBASE_WHITE_DEVICE = "CONFIG_FIREBASE_WHITE_DEVICE"
+    private const val CONFIG_INTERFACE_DISPATCHER = "CONFIG_INTERFACE_DISPATCHER"
+    private const val CONFIG_INTERFACE_ENC = "CONFIG_INTERFACE_ENC"
+    private const val CONFIG_INTERFACE_ENC_VALUE = "CONFIG_INTERFACE_ENC_VALUE"
+    private const val CONFIG_INTERFACE_NONCE = "CONFIG_INTERFACE_NONCE"
+    private const val CONFIG_INTERFACE_NONCE_VALUE = "CONFIG_INTERFACE_NONCE_VALUE"
+    const val CONFIG_FIREBASE_WHITE_DEVICE = "CONFIG_FIREBASE_WHITE_DEVICE"
+    const val CONFIG_BLACK_DEVICE = "CONFIG_BLACK_DEVICE"
 
     fun saveChannel(chn: String?): Boolean {
         return putString(CONFIG_CHN, chn)
@@ -144,19 +150,6 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
         return getInt(CONFIG_RELEASE_MODE, VestReleaseMode.MODE_VEST.mode)
     }
 
-    fun saveFirebaseWhiteDevice(value: List<String>?): Boolean {
-        var v = value
-        if (v == null) {
-            v = emptyList()
-        }
-        val shfHostArray = JSONArray()
-        for (i in v.indices) {
-            shfHostArray.put(v[i])
-        }
-        val valueJson = shfHostArray.toString()
-        return putString(CONFIG_FIREBASE_WHITE_DEVICE, valueJson)
-    }
-
     fun readFirebaseWhiteDevice(): List<String> {
         val valueJson = getString(CONFIG_FIREBASE_WHITE_DEVICE)
         var hosts = listOf<String>()
@@ -175,4 +168,74 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
         return hosts
     }
 
+    fun saveStringList(value: List<String>?, key: String): Boolean {
+        var v = value
+        if (v == null) {
+            v = emptyList()
+        }
+        val shfHostArray = JSONArray()
+        for (i in v.indices) {
+            shfHostArray.put(v[i])
+        }
+        val valueJson = shfHostArray.toString()
+        return putString(key, valueJson)
+    }
+
+    fun readStringList(key: String): List<String> {
+        val valueJson = getString(key)
+        var hosts = listOf<String>()
+        if (!TextUtils.isEmpty(valueJson)) {
+            try {
+                val shfHostArray = JSONArray(valueJson)
+                val shfHostList = ArrayList<String>()
+                for (i in 0 until shfHostArray.length()) {
+                    shfHostList.add(shfHostArray.optString(i))
+                }
+                hosts = shfHostList
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+        }
+        return hosts
+    }
+
+    fun saveInterfaceDispatcher(value: String?): Boolean {
+        return putString(CONFIG_INTERFACE_DISPATCHER, value)
+    }
+
+    fun readInterfaceDispatcher(): String? {
+        return getString(CONFIG_INTERFACE_DISPATCHER)
+    }
+
+    fun saveInterfaceEnc(value: String?): Boolean {
+        return putString(CONFIG_INTERFACE_ENC, value)
+    }
+
+    fun readInterfaceEnc(): String? {
+        return getString(CONFIG_INTERFACE_ENC)
+    }
+
+    fun saveInterfaceEncValue(value: String?): Boolean {
+        return putString(CONFIG_INTERFACE_ENC_VALUE, value)
+    }
+
+    fun readInterfaceEncValue(): String? {
+        return getString(CONFIG_INTERFACE_ENC_VALUE)
+    }
+
+    fun saveInterfaceNonceValue(value: String?): Boolean {
+        return putString(CONFIG_INTERFACE_NONCE_VALUE, value)
+    }
+
+    fun readInterfaceNonceValue(): String? {
+        return getString(CONFIG_INTERFACE_NONCE_VALUE)
+    }
+
+    fun saveInterfaceNonce(value: String?): Boolean {
+        return putString(CONFIG_INTERFACE_NONCE, value)
+    }
+
+    fun readInterfaceNonce(): String {
+        return getString(CONFIG_INTERFACE_NONCE)!!
+    }
 }

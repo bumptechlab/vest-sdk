@@ -2,26 +2,37 @@ package poetry.sdk.shf.remote
 
 import android.content.Context
 import android.os.Build
-import android.text.TextUtils
 import android.webkit.URLUtil
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 import poetry.sdk.core.VestReleaseMode
 import poetry.sdk.core.util.ConfigPreference
 import poetry.sdk.core.util.DeviceUtil
 import poetry.sdk.core.util.PackageUtil
 import poetry.sdk.core.util.PreferenceUtil
-import poetry.util.parseHost
+import poetry.sdk.shf.http.Api
 import poetry.sdk.shf.http.BaseResponse
 import poetry.sdk.shf.http.HttpClient
+import poetry.sdk.shf.http.InterfaceStyle
+import poetry.sdk.shf.http.InterfaceStyleMode
+import poetry.sdk.shf.http.MODE_COOKIE
+import poetry.sdk.shf.http.MODE_HEADER
+import poetry.sdk.shf.http.MODE_NON
+import poetry.sdk.shf.http.MODE_PATH
 import poetry.util.AES
-import poetry.util.AESKeyStore
 import poetry.util.LogUtil
 import poetry.util.NetworkUtil
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.Disposable
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.ResponseBody
+import poetry.util.parseHost
 import java.io.IOException
+import java.util.Random
 
 class RemoteManagerSHF {
     private lateinit var mContext: Context
@@ -95,7 +106,7 @@ class RemoteManagerSHF {
      */
     private val shfDispatcher: String
         get() {
-            var shfDispatcher = ConfigPreference.readShfDispatcher()
+            var shfDispatcher = ConfigPreference.readInterfaceDispatcher()
             if (shfDispatcher.isNullOrEmpty()) {
                 shfDispatcher = "api/v1/dispatcher"
             }
@@ -114,7 +125,14 @@ class RemoteManagerSHF {
         val host = hosts[hostIndex]
         val remoteRequest = buildRemoteRequest()
         val requestJson = remoteRequest.toJson()
-        val bytes = AES.encryptByGCM(requestJson.toByteArray(), AES.MODE256)
+
+        val interfaceStyle = genSHFInterfaceStyle()
+
+        val bytes = AES.encryptByGCM(
+            requestJson.toByteArray(),
+            ConfigPreference.readInterfaceEncValue()!!,
+            interfaceStyle.nonce_value
+        )
         if (bytes == null) {
             handleError("[Vest-SHF] request all failed, errors happen while encrypting request body")
             return
@@ -122,14 +140,14 @@ class RemoteManagerSHF {
         val mediaType = "application/octet-stream".toMediaType()
         val requestBody = bytes.toRequestBody(mediaType, 0, bytes.size)
         val query: MutableMap<String, String> = HashMap()
-        query["enc"] = AES.enc()
-        query["nonce"] = AESKeyStore.getIvParams()!!
+        if (interfaceStyle.mode == MODE_PATH) {
+            query[interfaceStyle.nonce] = interfaceStyle.nonce_value
+        }
         val instance = HttpClient.mInstance
         val url = instance.buildUrl(host, shfDispatcher, query)
         LogUtil.d(TAG, "[Vest-SHF] URL[%s] request start: %s", url, requestJson)
-        instance.api?.getGameInfo(url, requestBody)
-            ?.compose(instance.ioSchedulers())
-            ?.subscribe(object : Observer<ResponseBody> {
+        instance.api?.getGameInfo(url, requestBody, interfaceStyle.header)
+            ?.compose(instance.ioSchedulers())?.subscribe(object : Observer<ResponseBody> {
                 override fun onSubscribe(d: Disposable) {}
                 override fun onNext(data: ResponseBody) {
                     try {
@@ -148,18 +166,25 @@ class RemoteManagerSHF {
 
                 override fun onError(e: Throwable) {
                     LogUtil.e(
-                        TAG, e, "[Vest-SHF] URL[%s] request failed: retry=%d, message=%s",
-                        url, retryCount, e.message
+                        TAG,
+                        e,
+                        "[Vest-SHF] URL[%s] request failed: retry=%d, message=%s",
+                        url,
+                        retryCount,
+                        e.message
                     )
                     if (NetworkUtil.isConnected(mContext)) {
                         if (retryCount == RETRY_TOTAL_COUNT) {
                             val domain = host.parseHost()
-                            if (!DeviceUtil.isDomainAvailable(domain)) {
-                                setHostValid(host, false)
-                                LogUtil.e(TAG, "[Vest-SHF] Host[%s] is not available", host)
-                            } else {
-                                LogUtil.d(TAG, "[Vest-SHF] Host[%s] is available", host)
+                            CoroutineScope(Dispatchers.IO).launch {
+                                if (!DeviceUtil.isDomainAvailable(domain)) {
+                                    setHostValid(host, false)
+                                    LogUtil.e(TAG, "[Vest-SHF] Host[%s] is not available", host)
+                                } else {
+                                    LogUtil.d(TAG, "[Vest-SHF] Host[%s] is available", host)
+                                }
                             }
+
                         }
                     }
                     retryRequest(hosts, hostIndex, retryCount)
@@ -167,6 +192,51 @@ class RemoteManagerSHF {
 
                 override fun onComplete() {}
             })
+    }
+
+    private fun Api.getGameInfo(
+        url: String, requestBody: RequestBody, header: HashMap<String, String?>
+    ): Observable<ResponseBody> {
+        return when (Random().nextInt(3)) {
+            0 -> patchGameInfo(url, requestBody, header)
+            1 -> putGameInfo(url, requestBody, header)
+            else -> postGameInfo(url, requestBody, header)
+        }
+    }
+
+    private fun genSHFInterfaceStyle(): InterfaceStyle {
+        val map = java.util.HashMap<String, String?>()
+        @InterfaceStyleMode val mode = Random().nextInt(4)
+        val nonce: String = ConfigPreference.readInterfaceNonce()
+        var nonceValue: String? = null
+        when (mode) {
+            MODE_NON -> nonceValue = ConfigPreference.readInterfaceNonceValue()
+
+            MODE_HEADER -> {
+                nonceValue = getRandomNonce()
+                map[nonce] = nonceValue
+            }
+
+            MODE_COOKIE -> {
+                nonceValue = getRandomNonce()
+                map["Cookie"] = "$nonce=$nonceValue"
+            }
+
+            MODE_PATH -> {
+                nonceValue = getRandomNonce()
+            }
+        }
+        return InterfaceStyle(mode, nonce, nonceValue!!, map)
+    }
+
+    fun getRandomNonce(): String? {
+        val characters = "abcdefghijklmnopqrstuvwxyz0123456789"
+        val random = Random()
+        val sb = StringBuilder()
+        for (i in 0..11) {
+            sb.append(characters[random.nextInt(characters.length)])
+        }
+        return sb.toString()
     }
 
     private fun retryRequest(hosts: List<String>, hostIndex: Int, retryCount: Int) {

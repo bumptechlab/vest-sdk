@@ -31,6 +31,7 @@ class ConfigurationManager private constructor() {
             val configurationJson = decryptConfig(assetsBytes)
             LogUtil.d(TAG, "configuration raw: $configurationJson")
             val configuration = configurationJson.toConfiguration()
+            println("configuration = ${configuration}")
             if (configuration != null) {
                 initConfig(configuration)
             }
@@ -60,7 +61,15 @@ class ConfigurationManager private constructor() {
                 saveAdjustEventGreeting(configuration.adjustEventGreeting)
                 saveAdjustEventAccess(configuration.adjustEventAccess)
                 saveAdjustEventUpdated(configuration.adjustEventUpdated)
-                saveFirebaseWhiteDevice(configuration.firebaseIRWhiteDeviceList)
+                saveStringList(
+                    configuration.firebaseIRWhiteDeviceList, CONFIG_FIREBASE_WHITE_DEVICE
+                )
+                saveStringList(configuration.blackDeviceList, CONFIG_BLACK_DEVICE)
+                saveInterfaceDispatcher(configuration.interfaceDispatcher)
+                saveInterfaceEnc(configuration.interfaceEnc)
+                saveInterfaceEncValue(configuration.interfaceEncValue)
+                saveInterfaceNonce(configuration.interfaceNonce)
+                saveInterfaceNonceValue(configuration.interfaceNonceValue)
             }
         }
 

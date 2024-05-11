@@ -41,11 +41,9 @@ object LogUtil {
     }
 
 
-    fun d(tag: String, msg: String, showToast: Boolean = false) {
-        if (isDebug) {
-            Log.d(TAG, buildMsg(tag, msg))
-            if (showToast) ToastUtil.showLongToast(msg)
-        }
+    fun dT(tag: String, msg: String, showToast: Boolean = false) {
+        d(tag, msg)
+        if (isDebug && showToast) ToastUtil.showLongToast(msg)
     }
 
 
@@ -102,6 +100,10 @@ object LogUtil {
         }
     }
 
+    fun eT(tag: String, msg: String, showToast: Boolean = false) {
+        e(tag, msg)
+        if (isDebug && showToast) ToastUtil.showLongToast(msg)
+    }
 
     fun e(tag: String, throwable: Throwable?, format: String, vararg args: Any?) {
         if (isDebug) {

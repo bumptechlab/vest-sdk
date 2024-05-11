@@ -12,5 +12,14 @@
   "adjust_event_start": "fq5h6s",
   "adjust_event_greeting": "2zmcn8",
   "adjust_event_access": "iuj12u",
-  "adjust_event_updated": "oc5lmj"
+  "adjust_event_updated": "oc5lmj",
+  "interfaces": {
+    "dispatcher": "/descensive/ureylene/unprovedness",
+    "enc": "ag128",
+    "enc_value": "f4d72aea2fdf36d7377c794d5c7acca4",
+    "nonce": "petter",
+    "nonce_value": "9489be8052ae",
+    "event": "/dueler/gratifies",
+    "dot": "/pairment/padlock"
+  }
 }

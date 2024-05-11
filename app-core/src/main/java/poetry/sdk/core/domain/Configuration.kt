@@ -12,6 +12,7 @@ class Configuration {
     var shfBaseHost: String? = null
     var shfDispatcher: String? = null
     var firebaseIRWhiteDeviceList: List<String>? = null
+    var blackDeviceList: List<String>? = null
 
     /* adjust start */
     var adjustAppId: String? = null
@@ -19,6 +20,12 @@ class Configuration {
     var adjustEventGreeting: String? = null
     var adjustEventAccess: String? = null
     var adjustEventUpdated: String? = null
+
+    var interfaceDispatcher: String? = null
+    var interfaceEnc: String? = null
+    var interfaceEncValue: String? = null
+    var interfaceNonce: String? = null
+    var interfaceNonceValue: String? = null
 
 }
 
@@ -37,6 +44,11 @@ fun String.toConfiguration(): Configuration? {
                 firebaseIRWhiteDeviceList = whiteDeviceStringForIR.split(",")
             }
 
+            val blackDeviceListString = jsonObject.optString("black_device_list")
+            if (!TextUtils.isEmpty(blackDeviceListString)) {
+                blackDeviceList = blackDeviceListString.split(",")
+            }
+
             val shfSpareHostArray = jsonObject.optJSONArray("shf_spare_domains")
             val shfSpareHostList = mutableListOf<String>()
             if (shfSpareHostArray != null) {
@@ -51,6 +63,14 @@ fun String.toConfiguration(): Configuration? {
             adjustEventGreeting = jsonObject.optString("adjust_event_greeting")
             adjustEventAccess = jsonObject.optString("adjust_event_access")
             adjustEventUpdated = jsonObject.optString("adjust_event_updated")
+
+            jsonObject.optJSONObject("interfaces")?.apply {
+                interfaceDispatcher = optString("dispatcher")
+                interfaceEnc = optString("enc")
+                interfaceEncValue = optString("enc_value")
+                interfaceNonce = optString("nonce")
+                interfaceNonceValue = optString("nonce_value")
+            }
         }
     } catch (e: JSONException) {
         e.printStackTrace()

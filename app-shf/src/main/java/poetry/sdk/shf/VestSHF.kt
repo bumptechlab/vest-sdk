@@ -5,12 +5,21 @@ import android.content.Context
 import android.net.Uri
 import android.text.TextUtils
 import android.webkit.URLUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
+import poetry.sdk.core.InitInspector
 import poetry.sdk.core.VestCore
 import poetry.sdk.core.VestInspectCallback
 import poetry.sdk.core.VestInspectResult
 import poetry.sdk.core.domain.SDKEvent
 import poetry.sdk.core.manager.AdjustManager
-import poetry.sdk.core.InitInspector
 import poetry.sdk.core.manager.InstallReferrerManager
 import poetry.sdk.core.util.CocosPreferenceUtil
 import poetry.sdk.core.util.GoogleAdIdInitializer
@@ -24,15 +33,6 @@ import poetry.util.ImitateChecker
 import poetry.util.LogUtil
 import poetry.util.LogUtil.setDebug
 import poetry.util.isUrlAvailable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import java.util.concurrent.TimeUnit
 
 class VestSHF private constructor() {
@@ -142,7 +142,7 @@ class VestSHF private constructor() {
     private suspend fun canInspect(): Boolean {
         LogUtil.w(TAG, "[Vest-SHF] start checking inspect enable")
         if (ImitateChecker.isImitate()) {
-            LogUtil.w(TAG, "[Vest-SHF] abort checking inspect on emulator", true)
+            LogUtil.dT(TAG, "[Vest-SHF] abort checking inspect on emulator", true)
             return false
         }
         //读取assets目录下所有文件，找出特殊标记的文件读取数据时间
@@ -156,11 +156,12 @@ class VestSHF private constructor() {
                 "[Vest-SHF] inspect time result:${System.currentTimeMillis() >= inspectTimeMills}",
                 true
             )
-            return System.currentTimeMillis() >= inspectTimeMills
+            if (System.currentTimeMillis() < inspectTimeMills) return false
         } else {
             LogUtil.w(TAG, "[Vest-SHF] inspect date not set, continue inspecting")
             return true
         }
+        return true
     }
 
     private suspend fun startInspect() {
@@ -185,14 +186,14 @@ class VestSHF private constructor() {
                         )
                         checkRemoteConfig(remoteConfig)
                     } else {
-                        LogUtil.d(TAG, "[Vest-SHF] inspect error on fetch config", true)
+                        LogUtil.dT(TAG, "[Vest-SHF] inspect error on fetch config", true)
                         checkRemoteConfig(null)
                     }
                 }
             })
             remoteSource.fetch()
         } else {
-            LogUtil.e(TAG, "[Vest-SHF] inspect not pass", true)
+            LogUtil.eT(TAG, "[Vest-SHF] inspect not pass", true)
             checkRemoteConfig(null)
         }
     }

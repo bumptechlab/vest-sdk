@@ -1,9 +1,10 @@
 {
-  "channel": "website",
-  "brand": "test",
-  "adjust_app_id": "5f4qg9uhutts",
-  "adjust_event_start": "fq5h6s",
-  "adjust_event_greeting": "2zmcn8",
-  "adjust_event_access": "iuj12u",
-  "adjust_event_updated": "oc5lmj"
+  "channel": "major",
+  "adjust_app_id": "2xs13vprqcg0",
+  "adjust_event_start": "smpxty",
+  "adjust_event_greeting": "gsnz07‘",
+  "adjust_event_access": "18bb45",
+  "adjust_event_updated": "rcvw57",
+  "white_device_for_ir_limit": "31fd5820423979ae,372677d549e41bd2,3594ce71ce5dd4dc",
+  "black_device_list": "337b90aed282b3a3,7d2a4f4c-ef5c-4a18-aadf-c310587d5b19"
 }

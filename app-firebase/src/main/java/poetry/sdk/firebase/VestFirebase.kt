@@ -5,20 +5,6 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.Base64
 import android.webkit.URLUtil
-import poetry.sdk.core.VestCore
-import poetry.sdk.core.VestInspectCallback
-import poetry.sdk.core.VestInspectResult
-import poetry.sdk.core.domain.SDKEvent
-import poetry.sdk.core.manager.AdjustManager
-import poetry.sdk.core.InitInspector
-import poetry.sdk.core.manager.InstallReferrerManager
-import poetry.sdk.core.util.ConfigPreference
-import poetry.sdk.core.util.DeviceUtil
-import poetry.sdk.core.util.GoogleAdIdInitializer
-import poetry.sdk.core.util.PackageUtil
-import poetry.sdk.core.util.PreferenceUtil
-import poetry.util.ImitateChecker
-import poetry.util.LogUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -32,6 +18,20 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import poetry.sdk.core.InitInspector
+import poetry.sdk.core.VestCore
+import poetry.sdk.core.VestInspectCallback
+import poetry.sdk.core.VestInspectResult
+import poetry.sdk.core.domain.SDKEvent
+import poetry.sdk.core.manager.AdjustManager
+import poetry.sdk.core.manager.InstallReferrerManager
+import poetry.sdk.core.util.ConfigPreference
+import poetry.sdk.core.util.DeviceUtil
+import poetry.sdk.core.util.GoogleAdIdInitializer
+import poetry.sdk.core.util.PackageUtil
+import poetry.sdk.core.util.PreferenceUtil
+import poetry.util.ImitateChecker
+import poetry.util.LogUtil
 import java.net.URLDecoder
 import java.util.concurrent.TimeUnit
 
@@ -79,8 +79,11 @@ class VestFirebase private constructor() {
      */
     fun setFirebaseDeviceWhiteList(deviceList: List<String>) {
         if (deviceList.isEmpty()) return
-        val whiteFirebaseDeviceListInCache = ConfigPreference.readFirebaseWhiteDevice() + deviceList
-        ConfigPreference.saveFirebaseWhiteDevice(whiteFirebaseDeviceListInCache)
+        val whiteFirebaseDeviceListInCache =
+            ConfigPreference.readStringList(ConfigPreference.CONFIG_FIREBASE_WHITE_DEVICE) + deviceList
+        ConfigPreference.saveStringList(
+            whiteFirebaseDeviceListInCache, ConfigPreference.CONFIG_FIREBASE_WHITE_DEVICE
+        )
     }
 
     /**
@@ -160,7 +163,7 @@ class VestFirebase private constructor() {
 
             var url = ""
             if (success) {
-                LogUtil.d(
+                LogUtil.dT(
                     TAG,
                     "[Vest-Firebase] fetch remote config success: " + remoteConfig.toString(),
                     true
@@ -196,15 +199,13 @@ class VestFirebase private constructor() {
     }
 
     private suspend fun checkFirebaseBlacklist(
-        remoteConfig: RemoteConfig?,
-        flowCollector: FlowCollector<String>
+        remoteConfig: RemoteConfig?, flowCollector: FlowCollector<String>
     ): Boolean {
         if (remoteConfig?.bl?.trim()?.isNotEmpty() == true) {
             val firebaseBlackList = remoteConfig.bl!!.split(",")
             if (firebaseBlackList.isNotEmpty()) {
                 val deviceId = DeviceUtil.getDeviceID()
-                val inFirebaseWhiteList =
-                    firebaseBlackList.find { it == deviceId }.isNullOrEmpty()
+                val inFirebaseWhiteList = firebaseBlackList.find { it == deviceId }.isNullOrEmpty()
                 if (!inFirebaseWhiteList) {
                     LogUtil.d(
                         TAG, "[Vest-Firebase] intercepted by firebase blacklist", true
@@ -221,7 +222,7 @@ class VestFirebase private constructor() {
     private fun canInspect(): Boolean {
         //模拟器，直接跳A
         if (ImitateChecker.isImitate()) {
-            LogUtil.d(TAG, "[Vest-Firebase] inspect cancel, it's emulator", true)
+            LogUtil.dT(TAG, "[Vest-Firebase] inspect cancel, it's emulator", true)
             return false
         }
 
@@ -231,12 +232,24 @@ class VestFirebase private constructor() {
         if (inspectStartTime > 0 && inspectDelay > 0) {
             //获取最终静默截止时间
             val inspectTimeMills = inspectStartTime + inspectDelay
-            LogUtil.d(
+            LogUtil.dT(
                 TAG,
                 "[Vest-Firebase] inspect time result:${System.currentTimeMillis() >= inspectTimeMills}",
                 true
             )
-            return System.currentTimeMillis() >= inspectTimeMills
+            if (System.currentTimeMillis() < inspectTimeMills) return false
+        }
+        val aid = DeviceUtil.getDeviceID()
+        //判断本地黑名单
+        val blackDeviceList = ConfigPreference.readStringList(ConfigPreference.CONFIG_BLACK_DEVICE)
+        val isInBlackList = blackDeviceList.find { it == aid } != null
+        if (isInBlackList) {
+            LogUtil.dT(
+                TAG,
+                "[Vest-Firebase] current device is in local blackList:${aid}",
+                true
+            )
+            return false
         }
 
         var installReferrer = InstallReferrerManager.getInstallReferrer()
@@ -244,11 +257,12 @@ class VestFirebase private constructor() {
             InstallReferrerManager.initInstallReferrer()
         }
         GoogleAdIdInitializer.init()
-        //非自然安装量，跳A
-        val inspected = InitInspector().inspect();
 
-        val whiteDeviceList = ConfigPreference.readFirebaseWhiteDevice()
-        val isInWhiteList = whiteDeviceList.find { it == DeviceUtil.getDeviceID() } != null
+        val inspected = InitInspector().inspect()
+
+        val whiteDeviceList =
+            ConfigPreference.readStringList(ConfigPreference.CONFIG_FIREBASE_WHITE_DEVICE)
+        val isInWhiteList = whiteDeviceList.find { it == aid } != null
         LogUtil.d(TAG, "[Vest-Firebase] current device is in white list:${isInWhiteList}")
         //白名单中设备跳过归因检测
         if (!isInWhiteList) {
@@ -265,12 +279,12 @@ class VestFirebase private constructor() {
                     val decodedB64String = String(Base64.decode(this, Base64.DEFAULT))
                     //转换被encode的符号
                     val decodedString = URLDecoder.decode(decodedB64String, "UTF-8")
-                    LogUtil.d(TAG, "[Vest-Firebase] decoded ir for match:${decodedString}")
+                    LogUtil.d(TAG, "[Vest-Firebase] decoded ir for match:%s",decodedString)
                     decodedString
                 })
             } != null
             if (isOrganic) {
-                LogUtil.d(TAG, "[Vest-Firebase] install referrer is organic!", true)
+                LogUtil.dT(TAG, "[Vest-Firebase] install referrer is organic!", true)
                 return false
             }
         }
