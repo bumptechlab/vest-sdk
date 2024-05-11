@@ -16,7 +16,6 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
     private const val CONFIG_TARGET_COUNTRY = "CONFIG_BEAN_TARGET_COUNTRY" //目标国家sim卡/目标国家网络
     private const val CONFIG_SHF_BASE_HOST = "CONFIG_BEAN_SHF_BASE_HOST"
     private const val CONFIG_SHF_SPARE_HOSTS = "CONFIG_BEAN_SHF_SPARE_HOSTS"
-    private const val CONFIG_SHF_DISPATCHER = "CONFIG_BEAN_SHF_DISPATCHER"
     private const val CONFIG_ADJUST_APP_ID = "CONFIG_BEAN_ADJUST_APP_ID"
     private const val CONFIG_ADJUST_EVENT_START = "CONFIG_BEAN_ADJUST_EVENT_START"
     private const val CONFIG_ADJUST_EVENT_GREETING = "CONFIG_BEAN_ADJUST_EVENT_GREETING"
@@ -132,14 +131,6 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
 
     fun readAdjustEventUpdated(): String? {
         return getString(CONFIG_ADJUST_EVENT_UPDATED)
-    }
-
-    fun saveShfDispatcher(value: String?): Boolean {
-        return putString(CONFIG_SHF_DISPATCHER, value)
-    }
-
-    fun readShfDispatcher(): String? {
-        return getString(CONFIG_SHF_DISPATCHER)
     }
 
     fun saveReleaseMode(value: Int): Boolean {

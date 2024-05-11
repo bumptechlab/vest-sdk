@@ -10,7 +10,6 @@ class Configuration {
     var country: String? = null
     var shfSpareHosts: Array<String>? = null
     var shfBaseHost: String? = null
-    var shfDispatcher: String? = null
     var firebaseIRWhiteDeviceList: List<String>? = null
     var blackDeviceList: List<String>? = null
 
@@ -56,7 +55,6 @@ fun String.toConfiguration(): Configuration? {
                     shfSpareHostList.add(shfSpareHostArray.optString(i))
                 }
             }
-            shfDispatcher = jsonObject.optString("shf_dispatcher")
             shfSpareHosts = shfSpareHostList.toTypedArray()
             adjustAppId = jsonObject.optString("adjust_app_id")
             adjustEventStart = jsonObject.optString("adjust_event_start")

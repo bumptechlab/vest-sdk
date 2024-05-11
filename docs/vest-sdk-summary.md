@@ -22,37 +22,46 @@ Vest-SDK由4个依赖库组成，分别是：
    VestSDK.setReleaseMode(VestReleaseMode.MODE_VEST)
    ```
 3. 其中config文件的原始内容在使用Firebase控制和SHF控制的时候各有不同：
-- Firebase控制：
-   ``` json
-    {
-        "channel": "website",
-        "brand": "test",
-        "adjust_app_id": "5f4qg9uhutts",
-        "adjust_event_start": "fq5h6s",
-        "adjust_event_greeting": "2zmcn8",
-        "adjust_event_access": "iuj12u",
-        "adjust_event_updated": "oc5lmj"
-    }
-   ```
-- SHF控制：
-   ``` json
-    {
-        "channel": "website",
-        "brand": "test",
-        "shf_base_domain": "https://shf.test.baowengame.com",
-        "shf_spare_domains": [
-            "https://www.ozt4axm9.com",
-            "https://www.6r4hx6e2.com",
-            "https://www.cictnjac.com"
-        ],
-        "shf_dispatcher": "/4dbcdda313/e74a32918b/df14abf6ce87",
-        "adjust_app_id": "5f4qg9uhutts",
-        "adjust_event_start": "fq5h6s",
-        "adjust_event_greeting": "2zmcn8",
-        "adjust_event_access": "iuj12u",
-        "adjust_event_updated": "oc5lmj"
-    }
-   ```
+   - Firebase控制：
+      ``` json
+       {
+           "channel": "major",
+           "adjust_app_id": "2xs13vprqcg0",
+           "adjust_event_start": "smpxty",
+           "adjust_event_greeting": "gsnz07‘",
+           "adjust_event_access": "18bb45",
+           "adjust_event_updated": "rcvw57",
+           "white_device_for_ir_limit": "31fd5820423979ae,372677d549e41bd2,3594ce71ce5dd4dc",
+           "black_device_list": "337b90aed282b3a3,7d2a4f4c-ef5c-4a18-aadf-c310587d5b19"
+       }
+      ```
+     - SHF控制：
+        ``` json
+         {
+           "channel": "website",
+           "brand": "test",
+           "shf_base_domain": "https://shf.test.baowengame.com",
+           "shf_spare_domains": [
+             "https://www.ozt4axm9.com",
+             "https://www.6r4hx6e2.com",
+             "https://www.cictnjac.com"
+           ],
+           "adjust_app_id": "5f4qg9uhutts",
+           "adjust_event_start": "fq5h6s",
+           "adjust_event_greeting": "2zmcn8",
+           "adjust_event_access": "iuj12u",
+           "adjust_event_updated": "oc5lmj",
+           "interfaces": {
+             "dispatcher": "/descensive/ureylene/unprovedness",
+             "enc": "ag128",
+             "enc_value": "f4d72aea2fdf36d7377c794d5c7acca4",
+             "nonce": "petter",
+             "nonce_value": "9489be8052ae",
+             "event": "/dueler/gratifies",
+             "dot": "/pairment/padlock"
+           }
+       }
+      ```
 数据分为三大块   
 （1）A/B面开关参数，每个品牌需要更换
 

@@ -55,7 +55,6 @@ class ConfigurationManager private constructor() {
                 saveTargetCountry(configuration.country)
                 saveSHFBaseHost(configuration.shfBaseHost)
                 saveSHFSpareHosts(configuration.shfSpareHosts)
-                saveShfDispatcher(configuration.shfDispatcher)
                 saveAdjustAppId(configuration.adjustAppId)
                 saveAdjustEventStart(configuration.adjustEventStart)
                 saveAdjustEventGreeting(configuration.adjustEventGreeting)
