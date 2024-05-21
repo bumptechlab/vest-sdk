@@ -1,6 +1,6 @@
 # Vest-SDK
 
-最新版本：1.2.8   
+最新版本：1.2.9   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。
 
 SDK总共四个依赖库：  
@@ -69,13 +69,13 @@ vest-firebase: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:1.2.8'
+          implementation 'io.github.bumptechlab:vest-core:1.2.9'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:1.2.8'
+          implementation 'io.github.bumptechlab:vest-sdk:1.2.9'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:1.2.8'
+          implementation 'io.github.bumptechlab:vest-shf:1.2.9'
           //vest-shf和vest-firebase 二选一
-          //implementation 'io.github.bumptechlab:vest-firebase:1.2.8'
+          //implementation 'io.github.bumptechlab:vest-firebase:1.2.9'
       }
       ```
    (2) 本地依赖方式
@@ -92,7 +92,7 @@ vest-firebase: 用于切换A/B面的远程开关
         implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
         implementation "com.squareup.okhttp3:okhttp:4.10.0"
         implementation "com.squareup.okhttp3:logging-interceptor:4.10.0"
-        implementation "com.adjust.sdk:adjust-android:4.33.0"
+        implementation "com.adjust.sdk:adjust-android:4.36.0"
         implementation "io.reactivex.rxjava3:rxjava:3.0.0"
         implementation "io.reactivex.rxjava3:rxandroid:3.0.2"
         implementation "com.squareup.retrofit2:retrofit:2.9.0"
@@ -308,11 +308,11 @@ allprojects {
 
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:1.2.8-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:1.2.8-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:1.2.8-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:1.2.9-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:1.2.9-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:1.2.9-SNAPSHOT'
     //vest-shf和vest-firebase 二选一
-    //implementation 'io.github.bumptechlab:vest-firebase:1.2.8-SNAPSHOT'
+    //implementation 'io.github.bumptechlab:vest-firebase:1.2.9-SNAPSHOT'
  }
 ```
 
@@ -539,3 +539,7 @@ allprojects {
 
 - shf完成接口特征改善
 - firebase增加本地黑名单
+
+### 1.2.9
+
+- 支持MIR，在配置中新增mir相关字段

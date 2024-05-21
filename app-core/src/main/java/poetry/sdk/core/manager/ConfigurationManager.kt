@@ -56,6 +56,7 @@ class ConfigurationManager private constructor() {
                 saveSHFBaseHost(configuration.shfBaseHost)
                 saveSHFSpareHosts(configuration.shfSpareHosts)
                 saveAdjustAppId(configuration.adjustAppId)
+                saveAdjustMetaAppId(configuration.adjustMetaAppId)
                 saveAdjustEventStart(configuration.adjustEventStart)
                 saveAdjustEventGreeting(configuration.adjustEventGreeting)
                 saveAdjustEventAccess(configuration.adjustEventAccess)

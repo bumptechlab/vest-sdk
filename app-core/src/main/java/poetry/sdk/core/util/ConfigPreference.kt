@@ -17,6 +17,7 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
     private const val CONFIG_SHF_BASE_HOST = "CONFIG_BEAN_SHF_BASE_HOST"
     private const val CONFIG_SHF_SPARE_HOSTS = "CONFIG_BEAN_SHF_SPARE_HOSTS"
     private const val CONFIG_ADJUST_APP_ID = "CONFIG_BEAN_ADJUST_APP_ID"
+    private const val CONFIG_ADJUST_META_APP_ID = "CONFIG_BEAN_ADJUST_META_APP_ID"
     private const val CONFIG_ADJUST_EVENT_START = "CONFIG_BEAN_ADJUST_EVENT_START"
     private const val CONFIG_ADJUST_EVENT_GREETING = "CONFIG_BEAN_ADJUST_EVENT_GREETING"
     private const val CONFIG_ADJUST_EVENT_ACCESS = "CONFIG_BEAN_ADJUST_EVENT_ACCESS"
@@ -99,6 +100,14 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
 
     fun readAdjustAppId(): String? {
         return getString(CONFIG_ADJUST_APP_ID)
+    }
+
+    fun saveAdjustMetaAppId(value: String?): Boolean {
+        return putString(CONFIG_ADJUST_META_APP_ID, value)
+    }
+
+    fun readAdjustMetaAppId(): String? {
+        return getString(CONFIG_ADJUST_META_APP_ID)
     }
 
     fun saveAdjustEventStart(value: String?): Boolean {

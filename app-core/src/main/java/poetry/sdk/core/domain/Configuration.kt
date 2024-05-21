@@ -15,6 +15,7 @@ class Configuration {
 
     /* adjust start */
     var adjustAppId: String? = null
+    var adjustMetaAppId: String? = null
     var adjustEventStart: String? = null
     var adjustEventGreeting: String? = null
     var adjustEventAccess: String? = null
@@ -57,6 +58,7 @@ fun String.toConfiguration(): Configuration? {
             }
             shfSpareHosts = shfSpareHostList.toTypedArray()
             adjustAppId = jsonObject.optString("adjust_app_id")
+            adjustMetaAppId = jsonObject.optString("adjust_meta_app_id")
             adjustEventStart = jsonObject.optString("adjust_event_start")
             adjustEventGreeting = jsonObject.optString("adjust_event_greeting")
             adjustEventAccess = jsonObject.optString("adjust_event_access")

@@ -3,7 +3,10 @@ package poetry.sdk.core.manager
 import android.app.Application
 import android.content.Context
 import android.text.TextUtils
-import poetry.sdk.core.BuildConfig
+import com.adjust.sdk.Adjust
+import com.adjust.sdk.AdjustConfig
+import com.adjust.sdk.AdjustEvent
+import com.adjust.sdk.LogLevel
 import poetry.sdk.core.VestCore
 import poetry.sdk.core.util.ConfigPreference
 import poetry.sdk.core.util.DeviceUtil
@@ -11,16 +14,12 @@ import poetry.sdk.core.util.PackageUtil
 import poetry.sdk.core.util.PreferenceUtil
 import poetry.sdk.core.util.Tester
 import poetry.util.LogUtil
-import com.adjust.sdk.Adjust
-import com.adjust.sdk.AdjustConfig
-import com.adjust.sdk.AdjustEvent
-import com.adjust.sdk.LogLevel
 import java.util.Locale
 
 object AdjustManager {
-   private val TAG = AdjustManager::class.java.simpleName
+    private val TAG = AdjustManager::class.java.simpleName
 
-    
+
     fun init(application: Application) {
         var adjustAppID = PreferenceUtil.readAdjustAppID()
         if (TextUtils.isEmpty(adjustAppID)) {
@@ -36,7 +35,7 @@ object AdjustManager {
         initParams()
     }
 
-    
+
     fun initParams() {
         //内置的数据可以马上初始化
         val deviceID = DeviceUtil.getDeviceID()
@@ -87,6 +86,10 @@ object AdjustManager {
         config.setOnEventTrackingFailedListener { }
         config.setOnAttributionChangedListener { }
         config.setSendInBackground(true)
+        val fbAppId: String? = ConfigPreference.readAdjustMetaAppId()
+        if (!TextUtils.isEmpty(fbAppId)) {
+            config.fbAppId = fbAppId
+        }
 
         Adjust.onCreate(config)
     }
