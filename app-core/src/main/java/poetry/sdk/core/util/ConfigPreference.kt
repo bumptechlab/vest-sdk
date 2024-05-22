@@ -28,7 +28,7 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
     private const val CONFIG_INTERFACE_ENC_VALUE = "CONFIG_INTERFACE_ENC_VALUE"
     private const val CONFIG_INTERFACE_NONCE = "CONFIG_INTERFACE_NONCE"
     private const val CONFIG_INTERFACE_NONCE_VALUE = "CONFIG_INTERFACE_NONCE_VALUE"
-    const val CONFIG_FIREBASE_WHITE_DEVICE = "CONFIG_FIREBASE_WHITE_DEVICE"
+    const val CONFIG_WHITE_DEVICE = "CONFIG_WHITE_DEVICE"
     const val CONFIG_BLACK_DEVICE = "CONFIG_BLACK_DEVICE"
 
     fun saveChannel(chn: String?): Boolean {
@@ -151,7 +151,7 @@ object ConfigPreference : AbstractPreference("pref_vest_config") {
     }
 
     fun readFirebaseWhiteDevice(): List<String> {
-        val valueJson = getString(CONFIG_FIREBASE_WHITE_DEVICE)
+        val valueJson = getString(CONFIG_WHITE_DEVICE)
         var hosts = listOf<String>()
         if (!TextUtils.isEmpty(valueJson)) {
             try {

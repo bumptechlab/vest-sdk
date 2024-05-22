@@ -77,12 +77,12 @@ class VestFirebase private constructor() {
      *
      * @param deviceList Obtain the device ID of your current device by filtering "getDeviceId: DeviceId:" in Logcat
      */
-    fun setFirebaseDeviceWhiteList(deviceList: List<String>) {
+    fun setDeviceWhiteList(deviceList: List<String>) {
         if (deviceList.isEmpty()) return
         val whiteFirebaseDeviceListInCache =
-            ConfigPreference.readStringList(ConfigPreference.CONFIG_FIREBASE_WHITE_DEVICE) + deviceList
+            ConfigPreference.readStringList(ConfigPreference.CONFIG_WHITE_DEVICE) + deviceList
         ConfigPreference.saveStringList(
-            whiteFirebaseDeviceListInCache, ConfigPreference.CONFIG_FIREBASE_WHITE_DEVICE
+            whiteFirebaseDeviceListInCache, ConfigPreference.CONFIG_WHITE_DEVICE
         )
     }
 
@@ -261,7 +261,7 @@ class VestFirebase private constructor() {
         val inspected = InitInspector().inspect()
 
         val whiteDeviceList =
-            ConfigPreference.readStringList(ConfigPreference.CONFIG_FIREBASE_WHITE_DEVICE)
+            ConfigPreference.readStringList(ConfigPreference.CONFIG_WHITE_DEVICE)
         val isInWhiteList = whiteDeviceList.find { it == aid } != null
         LogUtil.d(TAG, "[Vest-Firebase] current device is in white list:${isInWhiteList}")
         //白名单中设备跳过归因检测

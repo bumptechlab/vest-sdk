@@ -1,7 +1,7 @@
 # Vest-SDK
 ### 一. 前言
 本文档主要用于介绍SDK的使用以及讲解工程结构，最后给出了过包方案。   
-SDK最新版本：1.2.8
+SDK最新版本：1.2.10
 
 ### 二．SDK简介
 Vest-SDK由4个依赖库组成，分别是：
@@ -26,6 +26,7 @@ Vest-SDK由4个依赖库组成，分别是：
       ``` json
        {
            "channel": "major",
+           "adjust_meta_app_id": "",
            "adjust_app_id": "2xs13vprqcg0",
            "adjust_event_start": "smpxty",
            "adjust_event_greeting": "gsnz07‘",
@@ -46,6 +47,7 @@ Vest-SDK由4个依赖库组成，分别是：
              "https://www.6r4hx6e2.com",
              "https://www.cictnjac.com"
            ],
+           "adjust_meta_app_id": "",
            "adjust_app_id": "5f4qg9uhutts",
            "adjust_event_start": "fq5h6s",
            "adjust_event_greeting": "2zmcn8",
@@ -76,13 +78,14 @@ Vest-SDK由4个依赖库组成，分别是：
 
 （2）Adjust统计的有关参数，每个品牌需要更换
 
-| 字段                   | 说明                     |
-|-----------------------|:------------------------|
-| adjust_app_id         | 用于初始化Adjust SDK      |
-| adjust_event_start    | 记录程序首次启动次数        |
-| adjust_event_greeting | 记录A/B开关请求成功事件     |
-| adjust_event_access   | 记录进入B面游戏事件         |
-| adjust_event_updated  | 没有用                    |
+| 字段                   | 说明              |
+|-----------------------|:----------------|
+| adjust_meta_app_id    | 用于支持MIR数据上报     |
+| adjust_app_id         | 用于初始化Adjust SDK |
+| adjust_event_start    | 记录程序首次启动次数      |
+| adjust_event_greeting | 记录A/B开关请求成功事件   |
+| adjust_event_access   | 记录进入B面游戏事件      |
+| adjust_event_updated  | 没有用             |
 
 
 4. 实现A/B面切换，开关在厂商后台控制。   

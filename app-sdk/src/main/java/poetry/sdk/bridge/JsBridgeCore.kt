@@ -3,11 +3,13 @@ package poetry.sdk.bridge
 import android.net.Uri
 import android.text.TextUtils
 import android.webkit.JavascriptInterface
-import poetry.sdk.core.util.PackageUtil
-import poetry.util.LogUtil
-import poetry.util.MD5.encrypt
 import org.json.JSONException
 import org.json.JSONObject
+import poetry.sdk.core.util.PackageUtil
+import poetry.sdk.core.util.PreferenceUtil
+import poetry.util.LogUtil
+import poetry.util.MD5.encrypt
+import poetry.util.urlAddParams
 import kotlin.random.Random
 import kotlin.random.nextInt
 
@@ -43,8 +45,7 @@ open class JsBridgeCore(callback: BridgeCallback) : Bridge(JsBridgeImpl(callback
             result = dispatchRequest(method, params)
             LogUtil.d(
                 TAG, "[JsBridge] %s(%s) --> %s", method, java.lang.String.join(
-                    ", ",
-                    *params
+                    ", ", *params
                 ), if (TextUtils.isEmpty(result)) "void" else result
             )
         } catch (e: JSONException) {
@@ -84,18 +85,30 @@ open class JsBridgeCore(callback: BridgeCallback) : Bridge(JsBridgeImpl(callback
                 if (annotation != null) {
                     javascriptInterface = method.name
                     LogUtil.d(
-                        TAG, "[JsBridge] JavascriptInterface found in method: %s",
+                        TAG,
+                        "[JsBridge] JavascriptInterface found in method: %s",
                         jsBridgeClass.name + "." + method.name
                     )
                     break
                 } else {
                     LogUtil.d(
-                        TAG, "[JsBridge] JavascriptInterface not found in method: %s",
+                        TAG,
+                        "[JsBridge] JavascriptInterface not found in method: %s",
                         jsBridgeClass.name + "." + method.name
                     )
                 }
             }
             return javascriptInterface
+        }
+
+        fun formatUrl(url: String): String {
+            return if (PreferenceUtil.readTargetCountry() == "GVN") {
+                val childBrd = PreferenceUtil.readChildBrand()
+                //这里的chn商定结论是直接写死a-vn2-brd-major,a代表Android,vn2表示商户，major为默认渠道
+                formatUrlWithJsb(url.urlAddParams(Pair("chn", "a-vn2-${childBrd}-major")))
+            } else {
+                formatUrlWithJsb(url)
+            }
         }
 
         /**
@@ -104,8 +117,7 @@ open class JsBridgeCore(callback: BridgeCallback) : Bridge(JsBridgeImpl(callback
          * @param url
          * @return
          */
-
-        fun formatUrlWithJsb(url: String): String {
+        private fun formatUrlWithJsb(url: String): String {
             var newUrl = url
             try {
                 val uri = Uri.parse(url)

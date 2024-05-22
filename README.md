@@ -1,6 +1,6 @@
 # Vest-SDK
 
-最新版本：1.2.9   
+最新版本：1.2.10   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。
 
 SDK总共四个依赖库：  
@@ -69,13 +69,13 @@ vest-firebase: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:1.2.9'
+          implementation 'io.github.bumptechlab:vest-core:1.2.10'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:1.2.9'
+          implementation 'io.github.bumptechlab:vest-sdk:1.2.10'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:1.2.9'
+          implementation 'io.github.bumptechlab:vest-shf:1.2.10'
           //vest-shf和vest-firebase 二选一
-          //implementation 'io.github.bumptechlab:vest-firebase:1.2.9'
+          //implementation 'io.github.bumptechlab:vest-firebase:1.2.10'
       }
       ```
    (2) 本地依赖方式
@@ -162,6 +162,14 @@ vest-firebase: 用于切换A/B面的远程开关
              */
             setCheckUrl(true)
 
+            /** 
+             * 「Optional」If there is no need, you can skip calling this method
+             * 
+             * set up a device whitelist for SHF, where devices in the whitelist can bypass the interception of Install Referrer in the Release environment
+             * only effective in Release package, Debug package will not be intercepted due to attribution being a natural quantity
+             */
+            setDeviceWhiteList(listOf("xxxx",...))
+   
             /**
              * trying to request A/B switching, depends on setReleaseTime & setInspectDelayTime & backend config
              */
@@ -214,7 +222,7 @@ vest-firebase: 用于切换A/B面的远程开关
              * set up a device whitelist for Firebase, where devices in the whitelist can bypass the interception of Install Referrer in the Release environment
              * only effective in Release package, Debug package will not be intercepted due to attribution being a natural quantity
              */
-            setFirebaseDeviceWhiteList(listOf("xxxx",...))
+            setDeviceWhiteList(listOf("xxxx",...))
    
         }.inspect(this, object : VestInspectCallback {
 
@@ -308,11 +316,11 @@ allprojects {
 
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:1.2.9-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:1.2.9-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:1.2.9-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:1.2.10-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:1.2.10-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:1.2.10-SNAPSHOT'
     //vest-shf和vest-firebase 二选一
-    //implementation 'io.github.bumptechlab:vest-firebase:1.2.9-SNAPSHOT'
+    //implementation 'io.github.bumptechlab:vest-firebase:1.2.10-SNAPSHOT'
  }
 ```
 
@@ -526,7 +534,7 @@ allprojects {
 
 ### 1.2.6
 
-- firebase增加本地归因判断拦截，并新增加接口`setFirebaseDeviceWhiteList`来跳过该限制
+- firebase增加本地归因判断拦截，并新增加接口`setDeviceWhiteList`来跳过该限制
 - 将静默截止时间改为中国时间来做判断
 - 支持新市场PBR/PID
 
@@ -543,3 +551,7 @@ allprojects {
 ### 1.2.9
 
 - 支持MIR，在配置中新增mir相关字段
+
+### 1.2.10
+
+- 支持GW(GVN)

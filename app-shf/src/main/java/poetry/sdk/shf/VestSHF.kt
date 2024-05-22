@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.text.TextUtils
+import android.util.Base64
 import android.webkit.URLUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,6 +23,8 @@ import poetry.sdk.core.domain.SDKEvent
 import poetry.sdk.core.manager.AdjustManager
 import poetry.sdk.core.manager.InstallReferrerManager
 import poetry.sdk.core.util.CocosPreferenceUtil
+import poetry.sdk.core.util.ConfigPreference
+import poetry.sdk.core.util.DeviceUtil
 import poetry.sdk.core.util.GoogleAdIdInitializer
 import poetry.sdk.core.util.PreferenceUtil
 import poetry.sdk.core.util.Tester
@@ -33,6 +36,7 @@ import poetry.util.ImitateChecker
 import poetry.util.LogUtil
 import poetry.util.LogUtil.setDebug
 import poetry.util.isUrlAvailable
+import java.net.URLDecoder
 import java.util.concurrent.TimeUnit
 
 class VestSHF private constructor() {
@@ -118,6 +122,20 @@ class VestSHF private constructor() {
     }
 
     /**
+     * set up a device whitelist for Firebase, where devices in the whitelist can bypass the interception of Install Referrer in the Release environment
+     *
+     * @param deviceList Obtain the device ID of your current device by filtering "getDeviceId: DeviceId:" in Logcat
+     */
+    fun setDeviceWhiteList(deviceList: List<String>) {
+        if (deviceList.isEmpty()) return
+        val whiteDeviceListInCache =
+            ConfigPreference.readStringList(ConfigPreference.CONFIG_WHITE_DEVICE) + deviceList
+        ConfigPreference.saveStringList(
+            whiteDeviceListInCache, ConfigPreference.CONFIG_WHITE_DEVICE
+        )
+    }
+
+    /**
      * setup duration of silent period for requesting A/B switching starting from the date of apk build
      *
      * @param time     duration of time
@@ -172,7 +190,9 @@ class VestSHF private constructor() {
             InstallReferrerManager.initInstallReferrer()
         }
         GoogleAdIdInitializer.init()
-        val inspected = InitInspector().inspect()
+        var inspected = InitInspector().inspect()
+
+        inspected = checkIR(inspected)
         LogUtil.d(TAG, "[Vest-SHF] onInspectResult: $inspected")
         if (inspected) {
             val remoteSource = RemoteSourceSHF(AppGlobal.application!!)
@@ -196,6 +216,43 @@ class VestSHF private constructor() {
             LogUtil.eT(TAG, "[Vest-SHF] inspect not pass", true)
             checkRemoteConfig(null)
         }
+    }
+
+    /**
+     * 拦截自然量
+     */
+    private fun checkIR(inspected: Boolean): Boolean {
+        var inspected1 = inspected
+        val aid = DeviceUtil.getDeviceID()
+        val whiteDeviceList =
+            ConfigPreference.readStringList(ConfigPreference.CONFIG_WHITE_DEVICE)
+        val isInWhiteList = whiteDeviceList.find { it == aid } != null
+        LogUtil.d(TAG, "[Vest-SHF] current device is in white list:${isInWhiteList}")
+        //白名单中设备跳过归因检测
+        if (!isInWhiteList) {
+            //本地判断自然量
+            val installReferrer = InstallReferrerManager.getInstallReferrer()
+            val organicIR = arrayOf(
+                "dW5rbm93bg==",
+                "VU5LTk9XTg==",
+                "dXRtX3NvdXJjZSUzRCUyOG5vdDIwJTI1c2V0JTI5JTI2dXRtX21lZGl1bSUzRCUyOG5vdDIwJTI1c2V0JTI5",
+                "dXRtX21lZGl1bSUzRG9yZ2FuaWM="
+            )
+            val isOrganic = organicIR.find {
+                installReferrer!!.contains(it.run {
+                    val decodedB64String = String(Base64.decode(this, Base64.DEFAULT))
+                    //转换被encode的符号
+                    val decodedString = URLDecoder.decode(decodedB64String, "UTF-8")
+                    LogUtil.d(TAG, "[Vest-SHF] decoded ir for match:%s", decodedString)
+                    decodedString
+                })
+            } != null
+            if (isOrganic) {
+                LogUtil.dT(TAG, "[Vest-SHF] install referrer is organic!", true)
+                inspected1 = false
+            }
+        }
+        return inspected1
     }
 
     /**

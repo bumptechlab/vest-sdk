@@ -1,6 +1,8 @@
 package poetry.sdk.bridge
 
 interface BridgeInterface {
+    fun close()
+    fun refresh()
     fun copyText(text: String?)
     fun trackAdjustEvent(eventToken: String?, jsonData: String?)
     fun getDeviceID(): String?

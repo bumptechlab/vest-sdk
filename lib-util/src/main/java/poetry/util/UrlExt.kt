@@ -1,5 +1,6 @@
 package poetry.util
 
+import android.net.Uri
 import android.webkit.URLUtil
 import java.net.HttpURLConnection
 import java.net.URL
@@ -32,4 +33,18 @@ fun String?.isUrlAvailable(): Boolean {
     } catch (e: Exception) {
         false
     }
+}
+
+fun String?.urlAddParams(vararg params: Pair<String, String>): String {
+    this ?: return ""
+    var uri: Uri = Uri.parse(this)
+    var buildUpon = uri.buildUpon()
+    params.forEach { (key, value) ->
+        if (uri.getQueryParameters(key).size == 0 && value.isNotEmpty()) {
+            buildUpon.appendQueryParameter(key, value)
+            uri = Uri.parse(buildUpon.build().toString())
+            buildUpon = uri.buildUpon()
+        }
+    }
+    return buildUpon.build().toString()
 }

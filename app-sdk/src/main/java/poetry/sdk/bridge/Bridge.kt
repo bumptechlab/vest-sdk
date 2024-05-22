@@ -23,6 +23,14 @@ abstract class Bridge(private val mBridgeInterface: BridgeInterface) {
                 }
             }
 
+            "close"->{
+                mBridgeInterface.close()
+            }
+
+            "refresh"->{
+                mBridgeInterface.refresh()
+            }
+
             "trackAdjustEvent" -> {
                 if (params.size >= 2) {
                     mBridgeInterface.trackAdjustEvent(params[0], params[1])

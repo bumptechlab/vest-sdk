@@ -8,7 +8,7 @@ import poetry.util.parseInt
 
 object CocosManager {
     private val TAG = CocosManager::class.java.simpleName
-    private val FILTER_COUNTRY_CODES = arrayOf("IN", "ID", "BR", "GW", "VN", "PBR", "PID")
+    private val FILTER_COUNTRY_CODES = arrayOf("IN", "ID", "BR", "GW", "VN", "PBR", "PID", "GVN")
 
     fun getUserId(): String? {
         var userID = CocosPreferenceUtil.getString(CocosPreferenceUtil.KEY_USER_ID)

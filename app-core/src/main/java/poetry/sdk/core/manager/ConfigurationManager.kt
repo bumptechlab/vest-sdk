@@ -62,7 +62,7 @@ class ConfigurationManager private constructor() {
                 saveAdjustEventAccess(configuration.adjustEventAccess)
                 saveAdjustEventUpdated(configuration.adjustEventUpdated)
                 saveStringList(
-                    configuration.firebaseIRWhiteDeviceList, CONFIG_FIREBASE_WHITE_DEVICE
+                    configuration.firebaseIRWhiteDeviceList, CONFIG_WHITE_DEVICE
                 )
                 saveStringList(configuration.blackDeviceList, CONFIG_BLACK_DEVICE)
                 saveInterfaceDispatcher(configuration.interfaceDispatcher)

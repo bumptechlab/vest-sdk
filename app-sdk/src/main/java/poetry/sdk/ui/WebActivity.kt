@@ -237,7 +237,7 @@ class WebActivity : BaseWebActivity() {
         if (type == Constant.SELF) {
             mLobbyUrl = Uri.parse(url).getQueryParameter("lobbyUrl") ?: ""
             //加载自己的url
-            mUrl = JsBridgeCore.formatUrlWithJsb(url)
+            mUrl = JsBridgeCore.formatUrl(url)
             mWebPresenter!!.init(isGame, mUrl)
             mWebView.loadUrl(mUrl)
         } else {

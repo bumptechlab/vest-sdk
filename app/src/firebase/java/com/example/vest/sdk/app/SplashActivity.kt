@@ -36,7 +36,7 @@ class SplashActivity : Activity() {
              * set up a device whitelist for Firebase, where devices in the whitelist can bypass the interception of Install Referrer in the Release environment
              * only effective in Release package, Debug package will not be intercepted due to attribution being a natural quantity
              */
-            setFirebaseDeviceWhiteList(listOf())
+            setDeviceWhiteList(listOf())
         }.inspect(this, object : VestInspectCallback {
 
             /**

@@ -19,7 +19,6 @@ import java.util.Locale
 object AdjustManager {
     private val TAG = AdjustManager::class.java.simpleName
 
-
     fun init(application: Application) {
         var adjustAppID = PreferenceUtil.readAdjustAppID()
         if (TextUtils.isEmpty(adjustAppID)) {

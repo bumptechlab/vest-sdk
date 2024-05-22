@@ -7,7 +7,7 @@ import android.webkit.JavascriptInterface
  */
 class JsBridge(callback: BridgeCallback) : JsBridgeCore(callback) {
 
-   private val TAG = JsBridge::class.java.simpleName
+    private val TAG = JsBridge::class.java.simpleName
 
     @JavascriptInterface
     fun info(request: String?): String? {

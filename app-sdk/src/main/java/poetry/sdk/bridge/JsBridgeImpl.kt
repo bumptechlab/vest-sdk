@@ -4,19 +4,27 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.text.TextUtils
+import org.json.JSONObject
 import poetry.sdk.core.VestCore
 import poetry.sdk.core.manager.AdjustManager
 import poetry.sdk.core.util.CocosPreferenceUtil
 import poetry.sdk.core.util.DeviceUtil
 import poetry.sdk.core.util.PackageUtil
 import poetry.util.AppGlobal
-import org.json.JSONObject
 import java.util.Locale
 
-class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
+open class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
     companion object {
         private val TAG = JsBridgeImpl::class.java.simpleName
         private const val BRIDGE_VERSION = 7
+    }
+
+    override fun close() {
+        mCallback?.finish()
+    }
+
+    override fun refresh() {
+        mCallback?.refresh()
     }
 
     /* interface -> non-callback */
@@ -108,6 +116,7 @@ class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterface {
     override fun openUrlByWebView(url: String?) {
         mCallback?.openUrlByWebView(url)
     }
+
     override fun onWebViewLoadChanged(json: String?) {
         try {
             val jsonObject = JSONObject(json!!)
