@@ -11,4 +11,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:src="@drawable/splash_logo" />
+
+    <EditText
+        android:id="@+id/device_id"
+        android:layout_margin="20dp"
+        android:layout_gravity="right|bottom"
+        android:textColor="@color/black"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </FrameLayout>

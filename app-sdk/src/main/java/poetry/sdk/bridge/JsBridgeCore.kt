@@ -103,9 +103,8 @@ open class JsBridgeCore(callback: BridgeCallback) : Bridge(JsBridgeImpl(callback
 
         fun formatUrl(url: String): String {
             return if (PreferenceUtil.readTargetCountry() == "GVN") {
-                val childBrd = PreferenceUtil.readChildBrand()
                 //这里的chn商定结论是直接写死a-vn2-brd-major,a代表Android,vn2表示商户，major为默认渠道
-                formatUrlWithJsb(url.urlAddParams(Pair("chn", "a-vn2-${childBrd}-major")))
+                formatUrlWithJsb(url.urlAddParams(Pair("chn", PackageUtil.getChannelByCountry())))
             } else {
                 formatUrlWithJsb(url)
             }

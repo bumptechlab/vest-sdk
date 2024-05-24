@@ -39,7 +39,8 @@ object AdjustManager {
         //内置的数据可以马上初始化
         val deviceID = DeviceUtil.getDeviceID()
         Adjust.addSessionCallbackParameter("aid", deviceID)
-        Adjust.addSessionCallbackParameter("app_chn", PackageUtil.getChannel())
+        Adjust.addSessionCallbackParameter("app_chn", PackageUtil.getChannelByCountry())
+
         //以下数据需要服务器返回
         Adjust.addSessionCallbackParameter("app_brd", PackageUtil.getChildBrand())
         Adjust.addSessionCallbackParameter("app_country", VestCore.getTargetCountry())

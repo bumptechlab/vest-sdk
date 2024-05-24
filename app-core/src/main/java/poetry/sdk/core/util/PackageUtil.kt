@@ -5,13 +5,12 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.text.TextUtils
 import android.util.Base64
-import poetry.sdk.core.BuildConfig
 import poetry.util.AppGlobal
 import poetry.util.LogUtil
 import java.security.MessageDigest
 
 object PackageUtil {
-   private val TAG = PackageUtil::class.java.simpleName
+    private val TAG = PackageUtil::class.java.simpleName
     fun getLaunchIntentForPackage(packageName: String): Intent? {
         val context: Context = AppGlobal.application!!
         val pm = context.packageManager
@@ -52,6 +51,23 @@ object PackageUtil {
         channel = ConfigPreference.readChannel()
         PreferenceUtil.saveChannel(channel)
         return channel
+    }
+
+    fun getChannelByCountry(): String {
+        if (PreferenceUtil.readTargetCountry() == "GVN") {
+            return getVNChannel()
+        } else {
+            return getChannel()?:"major"
+        }
+    }
+
+    private fun getVNChannel(): String {
+        val chn = PreferenceUtil.readChannel()
+        val childBrd = PreferenceUtil.readChildBrand()
+        if (TextUtils.isEmpty(childBrd) || TextUtils.isEmpty(chn)) {
+            return ""
+        }
+        return "a-vn2-${childBrd}-${chn}"
     }
 
     fun getParentBrand(): String? {
@@ -119,8 +135,7 @@ object PackageUtil {
         val hashList: MutableList<String> = ArrayList()
         try {
             val info = context.packageManager.getPackageInfo(
-                context.packageName,
-                PackageManager.GET_SIGNATURES
+                context.packageName, PackageManager.GET_SIGNATURES
             )
             for (signature in info.signatures) {
                 val md = MessageDigest.getInstance("SHA")

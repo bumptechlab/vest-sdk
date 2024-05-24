@@ -61,7 +61,7 @@ open class JsBridgeImpl(private val mCallback: BridgeCallback?) : BridgeInterfac
     }
 
     override fun getChannel(): String? {
-        return PackageUtil.getChannel()
+        return PackageUtil.getChannelByCountry()
     }
 
     override fun getBrand(): String? {
