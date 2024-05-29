@@ -107,28 +107,28 @@ vest-firebase: 用于切换A/B面的远程开关
         //implementation "com.google.firebase:firebase-config-ktx:21.4.1"
     }
     ```
-   - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)
+    - b.添加混淆配置[proguard-rules.md](./docs/proguard-rules.md)
 
    (3) 源码依赖方式（适用于使用开源工程的开发者）
-   - a.把模块app-core, app-sdk, app-shf, app-firebase导入到你的工程中（注意还有其他依赖模块，统一以lib-开头）
-   - b.在app模块build.gradle中添加如下依赖：
-     ```
-     dependencies {
-         implementation project(":app-core")
-         implementation project(":app-sdk")
-         //vest-shf和vest-firebase 二选一
-         implementation project(":app-shf")
-         implementation project(":app-firebase")
-     }
-     ```
+    - a.把模块app-core, app-sdk, app-shf, app-firebase导入到你的工程中（注意还有其他依赖模块，统一以lib-开头）
+    - b.在app模块build.gradle中添加如下依赖：
+      ```
+      dependencies {
+          implementation project(":app-core")
+          implementation project(":app-sdk")
+          //vest-shf和vest-firebase 二选一
+          implementation project(":app-shf")
+          implementation project(":app-firebase")
+      }
+      ```
 
 3. 在Application中初始化VestSDK   
    (1) `VestSDK.init()`
    方法中传入配置文件名称，请把该配置文件放在assets根目录，配置文件来源将在第4点说明。   
    (2) `VestSDK.setReleaseMode()`
    方法设置发布模式，发布模式跟出包的用途有关，会影响到`VestSHF.getInstance().inspect()`方法的返回值。
-   - `MODE_VEST`表示当前发布的是马甲包，也就是用于上架的包，该模式是默认值
-   - `MODE_CHANNEL`表示当前发布的是渠道包，放在落地页用于推广的包
+    - `MODE_VEST`表示当前发布的是马甲包，也就是用于上架的包，该模式是默认值
+    - `MODE_CHANNEL`表示当前发布的是渠道包，放在落地页用于推广的包
    ```
    class AppApplication : MussltiDexApplication()  {
 
@@ -510,9 +510,9 @@ allprojects {
 - 重构代码
 - VestSHF接口优化，支持流式调用
 - DeviceId获取规则去掉了Android ID，按以下顺序获取
-   * Google Service Framework ID
-   * Google Ad ID
-   * UUID
+    * Google Service Framework ID
+    * Google Ad ID
+    * UUID
 - 支持三方游戏通过isThirdGame参数退出游戏
 
 ### 1.1.0
@@ -552,7 +552,19 @@ allprojects {
 
 - 支持MIR，在配置中新增mir相关字段
 
+### 1.2.10
+
+- 支持GW(GVN)
+- SHF增加本地自然量归因限制
+
+### 1.2.11（弃用）
+
+- 修复GW的渠道不全问题（弃用）
 
 ### 1.2.12
 
-- 支持GW（GVN）
+- 修复GW的渠道不全问题
+
+### 1.2.13
+
+- 整合GW Js接口

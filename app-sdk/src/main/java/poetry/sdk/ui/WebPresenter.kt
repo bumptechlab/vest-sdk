@@ -2,7 +2,6 @@ package poetry.sdk.ui
 
 import android.content.Intent
 import android.net.Uri
-import poetry.sdk.bridge.JsiJsBridge
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -10,12 +9,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import poetry.sdk.bridge.BridgeCallback
-import poetry.sdk.bridge.GWJsBridge
 import poetry.sdk.bridge.JsBridge
 import poetry.sdk.core.manager.AdjustManager
 import poetry.sdk.core.util.Constant
 import poetry.sdk.core.util.DeviceUtil
-import poetry.sdk.core.util.PreferenceUtil
 import poetry.util.LogUtil
 
 class WebPresenter(private val mWebViewActivity: WebActivity) {
@@ -98,12 +95,6 @@ class WebPresenter(private val mWebViewActivity: WebActivity) {
             if (jsb?.contains(".")!!) jsb?.substring(0, jsb.indexOf(".")) else "jsBridge"
         LogUtil.d(TAG, "jsb: $jsb, namespace: $jsbNamespace")
         mWebViewActivity.mWebView.addJavascriptInterface(jsBridge, jsbNamespace!!)
-
-        if (PreferenceUtil.readTargetCountry() == "GVN") {
-            //GW兼容接口
-            mWebViewActivity.mWebView.addJavascriptInterface(GWJsBridge(mJsBridge), "jsBridge")
-            mWebViewActivity.mWebView.addJavascriptInterface(JsiJsBridge(mJsBridge), "jsi")
-        }
 
         // hover menu
         mWebViewActivity.setShowHoverMenu(

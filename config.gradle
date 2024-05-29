@@ -61,7 +61,7 @@ project.ext {
             artifactIdShf     : 'vest-shf',
             artifactIdCore    : 'vest-core',
             artifactIdFirebase: 'vest-firebase',
-            version           : '1.2.12',//发布到maven的版本号
+            version           : '1.2.13',//发布到maven的版本号
 
             //Github代码仓库参数
             homePage          : 'https://github.com/bumptechlab/vest-sdk',//主页地址
