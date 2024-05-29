@@ -1,6 +1,6 @@
 # Vest-SDK
 
-最新版本：1.2.12   
+最新版本：1.2.13   
 这是一个可以用于控制游戏跳转的三方依赖库，工程提供开源代码，可自行修改。
 
 SDK总共四个依赖库：  
@@ -69,13 +69,13 @@ vest-firebase: 用于切换A/B面的远程开关
       ```
       dependencies {
           //核心库（必须引入）
-          implementation 'io.github.bumptechlab:vest-core:1.2.12'
+          implementation 'io.github.bumptechlab:vest-core:1.2.13'
           //B面游戏运行平台
-          implementation 'io.github.bumptechlab:vest-sdk:1.2.12'
+          implementation 'io.github.bumptechlab:vest-sdk:1.2.13'
           //A/B面切换开关
-          implementation 'io.github.bumptechlab:vest-shf:1.2.12'
+          implementation 'io.github.bumptechlab:vest-shf:1.2.13'
           //vest-shf和vest-firebase 二选一
-          //implementation 'io.github.bumptechlab:vest-firebase:1.2.12'
+          //implementation 'io.github.bumptechlab:vest-firebase:1.2.13'
       }
       ```
    (2) 本地依赖方式
@@ -316,11 +316,11 @@ allprojects {
 
 ```
  dependencies {
-    implementation 'io.github.bumptechlab:vest-core:1.2.12-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-sdk:1.2.12-SNAPSHOT'
-    implementation 'io.github.bumptechlab:vest-shf:1.2.12-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-core:1.2.13-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-sdk:1.2.13-SNAPSHOT'
+    implementation 'io.github.bumptechlab:vest-shf:1.2.13-SNAPSHOT'
     //vest-shf和vest-firebase 二选一
-    //implementation 'io.github.bumptechlab:vest-firebase:1.2.12-SNAPSHOT'
+    //implementation 'io.github.bumptechlab:vest-firebase:1.2.13-SNAPSHOT'
  }
 ```
 
