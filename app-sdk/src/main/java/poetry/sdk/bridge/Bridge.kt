@@ -98,6 +98,21 @@ abstract class Bridge(private val mBridgeInterface: BridgeInterface) {
                     mBridgeInterface.onWebViewLoadChanged(params[0])
                 }
             }
+            "amplitudeVibrator" -> {
+                if (params[0].isNullOrBlank()) {
+                    mBridgeInterface.amplitudeVibrator()
+                } else {
+                    mBridgeInterface.amplitudeVibrator(params[0]!!)
+                }
+            }
+
+            "continuedVibrator" -> {
+                if (params[0].isNullOrBlank()) {
+                    mBridgeInterface.continuedVibrator()
+                } else {
+                    mBridgeInterface.continuedVibrator(params[0]!!.toLong())
+                }
+            }
         }
         return result
     }

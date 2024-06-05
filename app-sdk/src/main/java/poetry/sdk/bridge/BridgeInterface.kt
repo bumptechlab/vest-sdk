@@ -18,4 +18,8 @@ interface BridgeInterface {
     fun openUrlByBrowser(url: String?)
     fun openUrlByWebView(url: String?)
     fun onWebViewLoadChanged(json: String?)
+
+    fun amplitudeVibrator(patterns: String = "20,180,80,120")
+
+    fun continuedVibrator(milliseconds: Long = 1001L)
 }

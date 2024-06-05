@@ -79,10 +79,10 @@ android.applicationVariants.all { variant ->
 
 dependencies {
     // 方式一：引入Maven依赖
-    def vestSdkVersion = "1.2.10"
+    def vestSdkVersion = "1.2.13"
     implementation "io.github.bumptechlab:vest-core:$vestSdkVersion"
     implementation "io.github.bumptechlab:vest-sdk:$vestSdkVersion"
-    //vest-shf和vest-firebase 二选一
+//    vest-shf和vest-firebase 二选一
     if (taskName.containsIgnoreCase("vest")) {
         implementation "io.github.bumptechlab:vest-shf:$vestSdkVersion"
     } else if (taskName.containsIgnoreCase("firebase")) {
@@ -97,9 +97,8 @@ dependencies {
 //    implementation project(":app-shf")
 //    implementation project(":app-firebase")
 //    implementation "androidx.multidex:multidex:$dependenciesConfig.androidxMultidexVersion"
-//    implementation "androidx.annotation:annotation:$dependenciesConfig.androidxAnnotation"
+//    implementation "androidx.annotation:annotation:$dependenciesConfig.androidxAnnotation"// 方式三：引入本地Libs依赖（同时要引入以下三方依赖）
 
-    // 方式三：引入本地Libs依赖（同时要引入以下三方依赖）
 //    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
 //    implementation "androidx.appcompat:appcompat:$dependenciesConfig.androidxAppcompatVersion"
 //    implementation "androidx.multidex:multidex:$dependenciesConfig.androidxMultidexVersion"
